@@ -8,7 +8,7 @@
       "discord": "Guecko"
     }
   ],
-  "url": "https://github.com/Guecko14/Tirduin.git",
+  "url": "https://github.com/Guecko14/tirduin.git",
   "license": "LICENSE.txt",
   "readme": "README.md",
   "bugs": "Replace this with a link to file issues or tickets",
@@ -20,18 +20,18 @@
       "thumbnail": "systems/tirduin/assets/anvil-impact.png"
     }
   ],
-  "version": "2.0.0",
+  "version": "0.1.0",
   "compatibility": {
-    "minimum": 11,
-    "verified": "11.315"
+    "minimum": 13,
+    "verified": "13.351"
   },
   "esmodules": ["module/tirduin.mjs"],
   "styles": ["css/tirduin.css"],
   "languages": [
     {
-      "lang": "en",
-      "name": "English",
-      "path": "lang/en.json"
+      "lang": "esp",
+      "name": "Spanish",
+      "path": "lang/esp.json"
     }
   ],
   "packs": [],
@@ -42,6 +42,6 @@
   "background": "systems/tirduin/assets/anvil-impact.png",
   "gridDistance": 5,
   "gridUnits": "ft",
-  "primaryTokenAttribute": "health",
-  "secondaryTokenAttribute": "power"
+  "primaryTokenAttribute": "pv",
+  "secondaryTokenAttribute": "energia"
 }
