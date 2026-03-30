@@ -14,7 +14,7 @@ export default class TirduinRPSItem extends TirduinRPSItemBase {
     schema.roll = new fields.SchemaField({
       diceNum: new fields.NumberField({ ...requiredInteger, initial: 1, min: 1 }),
       diceSize: new fields.StringField({ initial: "d20" }),
-      diceBonus: new fields.StringField({ initial: "+@vig.mod+ceil(@lvl / 2)" })
+      diceBonus: new fields.StringField({ initial: "+@vig.mod" })
     })
 
     schema.formula = new fields.StringField({ blank: true });
