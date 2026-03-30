@@ -7,6 +7,7 @@
       title='{{item.name}}'
     />
     <div class='header-fields'>
+      <label class='resource-label'>Nombre</label>
       <h1 class='charname'><input
           name='name'
           type='text'
@@ -15,7 +16,7 @@
         /></h1>
       <div class='grid grid-2col'>
         <div class='resource'>
-          <label class='resource-label'>Quantity</label>
+          <label class='resource-label'>Cantidad</label>
           <input
             type='text'
             name='system.quantity'
@@ -24,7 +25,7 @@
           />
         </div>
         <div class='resource'>
-          <label class='resource-label'>Weight</label>
+          <label class='resource-label'>Peso</label>
           <input
             type='text'
             name='system.weight'
@@ -38,8 +39,8 @@
 
   {{! Sheet Tab Navigation }}
   <nav class='sheet-tabs tabs' data-group='primary'>
-    <a class='item' data-tab='description'>Description</a>
-    <a class='item' data-tab='attributes'>Attributes</a>
+    <a class='item' data-tab='description'>Descripción</a>
+    <a class='item' data-tab='attributes'>Atributos</a>
   </nav>
 
   {{! Sheet Body }}

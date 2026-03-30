@@ -8,11 +8,11 @@ export default class TirduinRPSActorBase extends TirduinRPSDataModel {
     const schema = {};
 
     schema.health = new fields.SchemaField({
-      value: new fields.NumberField({ ...requiredInteger, initial: 10, min: 0 }),
-      max: new fields.NumberField({ ...requiredInteger, initial: 10 })
+      value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+      max: new fields.NumberField({ ...requiredInteger, initial: 0 })
     });
     schema.power = new fields.SchemaField({
-      value: new fields.NumberField({ ...requiredInteger, initial: 5, min: 0 }),
+      value: new fields.NumberField({ ...requiredInteger, initial: 2, min: 0 }),
       max: new fields.NumberField({ ...requiredInteger, initial: 5 })
     });
     schema.biography = new fields.StringField({ required: true, blank: true }); // equivalent to passing ({initial: ""}) for StringFields

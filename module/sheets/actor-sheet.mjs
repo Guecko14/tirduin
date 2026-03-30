@@ -106,7 +106,6 @@ export class TirduinRPSActorSheet extends ActorSheet {
     const gear = [];
     const features = [];
     const spells = {
-      0: [],
       1: [],
       2: [],
       3: [],
