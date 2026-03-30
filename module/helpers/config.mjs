@@ -5,19 +5,17 @@ export const TIRDUIN_RPS = {};
  * @type {Object}
  */
 TIRDUIN_RPS.abilities = {
-  str: 'TIRDUIN_RPS.Ability.Str.long',
-  dex: 'TIRDUIN_RPS.Ability.Dex.long',
-  con: 'TIRDUIN_RPS.Ability.Con.long',
-  int: 'TIRDUIN_RPS.Ability.Int.long',
-  wis: 'TIRDUIN_RPS.Ability.Wis.long',
-  cha: 'TIRDUIN_RPS.Ability.Cha.long',
+  vig: 'TIRDUIN_RPS.Ability.Vig.long',
+  agil: 'TIRDUIN_RPS.Ability.Agil.long',
+  ment: 'TIRDUIN_RPS.Ability.Ment.long',
+  inst: 'TIRDUIN_RPS.Ability.Inst.long',
+  pre: 'TIRDUIN_RPS.Ability.Pre.long',
 };
 
 TIRDUIN_RPS.abilityAbbreviations = {
-  str: 'TIRDUIN_RPS.Ability.Str.abbr',
-  dex: 'TIRDUIN_RPS.Ability.Dex.abbr',
-  con: 'TIRDUIN_RPS.Ability.Con.abbr',
-  int: 'TIRDUIN_RPS.Ability.Int.abbr',
-  wis: 'TIRDUIN_RPS.Ability.Wis.abbr',
-  cha: 'TIRDUIN_RPS.Ability.Cha.abbr',
+  vig: 'TIRDUIN_RPS.Ability.Vig.abbr',
+  agil: 'TIRDUIN_RPS.Ability.Agil.abbr',
+  ment: 'TIRDUIN_RPS.Ability.Ment.abbr',
+  inst: 'TIRDUIN_RPS.Ability.Inst.abbr',
+  pre: 'TIRDUIN_RPS.Ability.Pre.abbr',
 };
