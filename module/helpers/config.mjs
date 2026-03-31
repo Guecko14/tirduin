@@ -19,3 +19,10 @@ TIRDUIN_RPS.abilityAbbreviations = {
   inst: 'TIRDUIN_RPS.Ability.Inst.abbr',
   pre: 'TIRDUIN_RPS.Ability.Pre.abbr',
 };
+
+TIRDUIN_RPS.attributes = {
+  level: 'TIRDUIN_RPS.attributes.level.long',
+  armorClass: 'TIRDUIN_RPS.attributes.armorClass.long',
+  speed: 'TIRDUIN_RPS.attributes.speed.long',
+  exp: 'TIRDUIN_RPS.attributes.exp.long'
+};
