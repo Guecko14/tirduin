@@ -5,7 +5,7 @@
 }
 
 .rollable:hover, .rollable:focus {
-  color: #000;
+  color: #ffffff;
   text-shadow: 0 0 10px red;
   cursor: pointer;
 }
@@ -363,4 +363,279 @@
 }
 .tirduin .effects .item .effect-controls {
   border: none;
+}
+
+/* =========================
+   NPC SHEET BASE
+========================= */
+
+.npc-sheet {
+  padding: 10px;
+  font-family: "Signika", sans-serif;
+  color: #e6e6e6;
+}
+
+/* =========================
+   BLOQUE PRINCIPAL
+========================= */
+
+.npc-main {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.npc-stat {
+  flex: 1;
+  background: #1e1e1e;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 6px;
+  text-align: center;
+}
+
+.npc-stat label {
+  display: block;
+  font-size: 12px;
+  color: #aaa;
+  margin-bottom: 2px;
+}
+
+.npc-stat input {
+  width: 100%;
+  background: #111;
+  border: 1px solid #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.hp-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  margin-top: 3px;
+}
+
+/* =========================
+   ATRIBUTOS
+========================= */
+
+.npc-attributes {
+  margin-bottom: 10px;
+  padding: 6px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+}
+
+.attr-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #151515;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 4px;
+  width: 100%;
+}
+
+/* Input valor */
+.attr-box input {
+  width: 40px;
+  text-align: center;
+  background: #111;
+  border: 1px solid #555;
+  color: #fff;
+  border-radius: 4px;
+  margin-bottom: 2px;
+}
+
+.attr-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.attr-row span {
+  font-size: 11px;
+  color: #aaa;
+}
+
+.attr-row input {
+  width: 40px;
+  text-align: center;
+  background: #111;
+  border: 1px solid #555;
+  color: #fff;
+  border-radius: 4px;
+}
+
+/* Nombre atributo */
+.attr-name {
+  font-size: 10px;
+  color: #aaa;
+  margin-bottom: 2px;
+}
+
+
+
+/* =========================
+   BLOQUES DE TEXTO
+========================= */
+
+.npc-skills,
+.npc-special,
+.npc-abilities,
+.npc-fear {
+  margin-bottom: 8px;
+  padding: 6px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+}
+
+.npc-skills label,
+.npc-special label,
+.npc-abilities label,
+.npc-fear label {
+  display: block;
+  font-size: 12px;
+  color: #bbb;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 2px;
+}
+
+/* =========================
+   TEXTAREA
+========================= */
+
+textarea {
+  width: 100%;
+  min-height: 50px;
+  resize: vertical;
+  background: #111;
+  border: 1px solid #555;
+  color: #ddd;
+  font-size: 12px;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+/* =========================
+   ACCIONES DESTACADAS
+========================= */
+
+.npc-abilities textarea {
+  min-height: 70px;
+}
+
+.npc-fear textarea {
+  min-height: 60px;
+  border: 1px solid #6b1f1f;
+}
+
+/* =========================
+   HOVER / UX
+========================= */
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border: 1px solid #888;
+  box-shadow: 0 0 4px #000;
+}
+
+/* =========================
+   PEQUEÑOS DETALLES
+========================= */
+
+small {
+  font-size: 10px;
+  color: #777;
+}
+
+/* =========================
+   OPCIONAL: ESTILO MÁS "MUERTE"
+========================= */
+
+.npc-sheet {
+  background: linear-gradient(180deg, #1a1a1a 0%, #121212 100%);
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+}
+
+/* =========================
+   HEADER NPC
+========================= */
+
+.npc-header {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* =========================
+   IMAGEN
+========================= */
+
+.npc-portrait {
+  flex: 0 0 100px;
+}
+
+.profile-img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border: 2px solid #444;
+  border-radius: 6px;
+  background: #111;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile-img:hover {
+  border-color: #888;
+  box-shadow: 0 0 6px #000;
+}
+
+/* =========================
+   BLOQUE DERECHO
+========================= */
+
+.npc-header-stats {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* =========================
+   NOMBRE
+========================= */
+
+.npc-name input {
+  width: 100%;
+  font-size: 18px;
+  font-weight: bold;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #444;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.npc-name input:focus {
+  outline: none;
+  border-bottom: 1px solid #888;
+}
+
+/* =========================
+   AJUSTE STATS EN HEADER
+========================= */
+
+.npc-header .npc-main {
+  margin: 0;
 }
