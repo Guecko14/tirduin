@@ -20,7 +20,7 @@
       "thumbnail": "systems/tirduin/assets/anvil-impact.png"
     }
   ],
-  "version": "0.1.0",
+  "version": "0.1.2",
   "compatibility": {
     "minimum": 13,
     "verified": "13.351"
