@@ -256,11 +256,13 @@
   gap: 12px;
   margin-top: 8px;
   width: 100%;
+  container-type: inline-size;
+  container-name: skills-list;
 }
 .tirduin .skills-sheet .skill-row,
 .tirduin .npc-skills .skill-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(0, 90px) minmax(0, 80px);
+  grid-template-columns: minmax(0, 1fr) max-content minmax(0, 60px);
   align-items: center;
   gap: 8px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -300,10 +302,8 @@
   color: #9ad;
   min-width: 0;
 }
-.tirduin .skills-sheet select,
 .tirduin .skills-sheet .skill-extra,
 .tirduin .skills-sheet input[type=number],
-.tirduin .npc-skills select,
 .tirduin .npc-skills .skill-extra,
 .tirduin .npc-skills input[type=number] {
   width: 100%;
@@ -316,9 +316,16 @@
   font-size: 0.75rem;
   box-sizing: border-box;
 }
-
 .tirduin .skills-sheet select,
 .tirduin .npc-skills select {
+  width: auto;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  color: #fff;
+  padding: 0 24px 0 6px;
+  font-size: 0.75rem;
+  box-sizing: border-box;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -328,7 +335,6 @@
   background-position: calc(100% - 14px) calc(50% - 3px), calc(100% - 8px) calc(50% - 3px);
   background-size: 6px 6px, 6px 6px;
   background-repeat: no-repeat;
-  padding-right: 24px;
 }
 
 .tirduin .skills-sheet select:focus,
@@ -355,29 +361,22 @@
   width: 56px;
   padding: 0 6px;
 }
-@media (max-width: 950px) {
-  .tirduin .skills-sheet .skills-list,
-  .tirduin .npc-skills .skills-list {
+/* Bonus desaparece primero cuando el espacio se reduce */
+@container skills-list (max-width: 560px) {
+  .skill-extra-wrap {
+    display: none;
+  }
+  .skill-row {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 90px);
+  }
+}
+/* Una sola columna cuando el espacio es muy reducido */
+@container skills-list (max-width: 320px) {
+  .skills-list {
     grid-template-columns: 1fr;
   }
-  .tirduin .skills-sheet .skill-row,
-  .tirduin .npc-skills .skill-row {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto auto;
-  }
-  .tirduin .skills-sheet .skill-name,
-  .tirduin .skills-sheet .skill-total,
-  .tirduin .skills-sheet select,
-  .tirduin .skills-sheet .skill-extra,
-  .tirduin .npc-skills .skill-name,
-  .tirduin .npc-skills .skill-total,
-  .tirduin .npc-skills select,
-  .tirduin .npc-skills .skill-extra {
-    width: 100%;
-  }
-  .tirduin .skills-sheet .skill-name,
-  .tirduin .npc-skills .skill-name {
-    grid-column: 1/-1;
+  .skill-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 90px);
   }
 }
 
@@ -580,35 +579,51 @@
 }
 
 /* =========================
-   TABS NAVIGATION & CONTENT
+   TABS LAYOUT SIDEBAR
 ========================= */
+
+.tirduin .tabs-layout {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  align-items: flex-start;
+  margin-top: 10px;
+  position: relative;
+}
 
 .tirduin .sheet-tabs {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 10px 0;
-  padding: 8px 10px;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 4px;
+  flex: 0 0 auto;
+  width: 120px;
+  min-width: 90px;
+  padding: 8px 6px;
   list-style: none;
-  background: #252525;
-  border-radius: 6px;
+  background: #1c1c1c;
+  border-radius: 6px 0 0 6px;
   border: 1px solid #333;
+  border-right: none;
+  align-self: flex-start;
+  position: sticky;
+  top: 0;
 }
 
 .tirduin .sheet-tabs .item {
-  flex: 1 1 120px;
+  flex: 0 0 auto;
+  width: 100%;
   min-width: 0;
-  padding: 8px 16px;
-  background: #1a1a1a;
-  border: 1px solid #333;
+  padding: 9px 10px;
+  background: #141414;
+  border: 1px solid #2a2a2a;
   color: #bbb;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  transition: all 0.2s ease;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
   border-radius: 4px;
-  margin-right: 0;
-  text-align: center;
+  text-align: left;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -620,38 +635,25 @@
 }
 
 .tirduin .sheet-tabs .item.active {
-  background: #2a2a2a;
+  background: #1e2b3a;
   color: #9ad;
   border-color: #9ad;
-}
-
-@media (max-width: 700px) {
-  .tirduin .sheet-tabs {
-    padding: 6px;
-    gap: 4px;
-  }
-
-  .tirduin .sheet-tabs .item {
-    flex: 1 1 calc(50% - 4px);
-    padding: 7px 10px;
-    font-size: 0.82rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .tirduin .sheet-tabs .item {
-    flex-basis: 100%;
-    font-size: 0.78rem;
-  }
+  border-left: 3px solid #9ad;
+  padding-left: 7px;
 }
 
 .tirduin .tabs-content {
+  flex: 1 1 0;
+  min-width: 0;
   min-height: 200px;
+  padding: 10px 12px;
+  background: #181818;
+  border: 1px solid #333;
+  border-radius: 0 6px 6px 6px;
 }
 
 .tirduin .tab {
   display: none;
-  padding: 10px 0;
   animation: fadeIn 0.2s ease;
 }
 
@@ -926,12 +928,14 @@
   gap: 12px;
   margin-top: 8px;
   width: 100%;
+  container-type: inline-size;
+  container-name: skills-list;
 }
 
 .tirduin .character .character-skills .skill-row,
 .tirduin .character .npc-skills .skill-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(0, 90px) minmax(0, 80px);
+  grid-template-columns: minmax(0, 1fr) max-content minmax(0, 60px);
   align-items: center;
   gap: 8px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -1000,77 +1004,7 @@
   padding: 0 6px;
 }
 
-@media (max-width: 950px) {
-  .tirduin .character .character-skills .skills-list,
-  .tirduin .character .npc-skills .skills-list {
-    grid-template-columns: 1fr;
-  }
-
-  .tirduin .character .character-skills .skill-row,
-  .tirduin .character .npc-skills .skill-row {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-  }
-}
-
-.tirduin .character .sheet-tabs {
-  display: flex;
-  gap: 0;
-  margin: 10px 0;
-  padding: 8px 10px;
-  list-style: none;
-  background: #252525;
-  border-radius: 6px;
-  border: 1px solid #333;
-}
-
-.tirduin .character .sheet-tabs .item {
-  padding: 8px 16px;
-  background: #1a1a1a;
-  border: 1px solid #333;
-  color: #bbb;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  border-radius: 4px;
-  margin-right: 6px;
-}
-
-.tirduin .character .sheet-tabs .item:hover {
-  background: #222;
-  color: #fff;
-}
-
-.tirduin .character .sheet-tabs .item.active {
-  background: #2a2a2a;
-  color: #9ad;
-  border-color: #9ad;
-}
-
-.tirduin .character .tabs-content {
-  min-height: 200px;
-}
-
-.tirduin .character .tab {
-  display: none;
-  padding: 10px 0;
-  animation: tirduin-character-fade-in 0.2s ease;
-}
-
-.tirduin .character .tab.active {
-  display: block;
-}
-
-@keyframes tirduin-character-fade-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
+/* Container queries para character skills — heredadas del bloque compartido arriba */
 
 .tirduin .character .resource-label {
   font-weight: bold;
