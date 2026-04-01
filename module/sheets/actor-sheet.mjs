@@ -203,6 +203,21 @@ export class TirduinRPSActorSheet extends ActorSheet {
   activateListeners(html) {
     super.activateListeners(html);
 
+    // Handle NPC tabs
+    html.on('click', '.sheet-tabs .item', (ev) => {
+      ev.preventDefault();
+      const tabName = $(ev.currentTarget).data('tab');
+      const tabContent = $(ev.currentTarget).closest('.sheet-tabs').siblings('.tabs-content');
+      
+      // Deactivate all tabs and contents
+      $(ev.currentTarget).closest('.sheet-tabs').find('.item').removeClass('active');
+      tabContent.find('.tab').removeClass('active');
+      
+      // Activate selected tab
+      $(ev.currentTarget).addClass('active');
+      tabContent.find(`.tab[data-tab="${tabName}"]`).addClass('active');
+    });
+
     // Render the item sheet for viewing/editing prior to the editable check.
     html.on('click', '.item-edit', (ev) => {
       const li = $(ev.currentTarget).parents('.item');
