@@ -90,10 +90,10 @@
       </div>
     </div>
 
-    {{!-- TABS LAYOUT --}}
+    {{!-- TABS LAYOUT: sidebar lateral + panel principal del contenido --}}
     <div class="tabs-layout">
 
-    {{!-- Sheet Tab Navigation --}}
+    {{!-- Sheet Tab Navigation: orden principal de secciones visibles del personaje --}}
     <nav class="sheet-tabs tabs" data-group="primary">
       {{!-- Default tab is specified in actor-sheet.mjs --}}
       <a class="item active" data-tab="skills">Habilidades</a>
@@ -104,6 +104,7 @@
       <a class="item" data-tab="effects">Efectos</a>
     </nav>
 
+    {{!-- Contenido de tabs: cada bloque conserva su partial o editor propio --}}
     <div class="tabs-content">
 
       {{!-- Skills Tab --}}

@@ -1,0 +1,25 @@
+<form class="{{cssClass}} fear-item-sheet" autocomplete="off">
+
+  {{!-- Panel principal de edicion: nombre, coste y descripcion en una sola vista --}}
+  <section class="fear-sheet-panel">
+    {{!-- Fila superior con los datos cortos que se consultan mas a menudo --}}
+    <div class="fear-sheet-grid">
+      <div class="fear-field fear-field-name">
+        <label for="name">Nombre</label>
+        <input name="name" type="text" value="{{item.name}}" placeholder="Nombre de la acción" />
+      </div>
+
+      <div class="fear-field fear-field-cost">
+        <label for="system.cost">Coste de Miedo</label>
+        <input name="system.cost" type="number" value="{{system.cost}}" min="0" />
+      </div>
+    </div>
+
+    {{!-- Campo largo para describir el efecto o la regla de la accion de miedo --}}
+    <div class="fear-field fear-field-description">
+      <label for="system.description">Descripción</label>
+      <textarea name="system.description" placeholder="Describe qué hace esta acción de miedo">{{system.description}}</textarea>
+    </div>
+  </section>
+
+</form>

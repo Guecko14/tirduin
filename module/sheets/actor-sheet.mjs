@@ -33,10 +33,7 @@ export class TirduinRPSActorSheet extends ActorSheet {
 
   /** @override */
   async getData() {
-    // Retrieve the data structure from the base sheet. You can inspect or log
-    // the context variable to see the structure, but some key properties for
-    // sheets are the actor object, the data object, whether or not it's
-    // editable, the items array, and the effects array.
+    // Construye el contexto comun que consumen las plantillas de actor.
     const context = super.getData();
 
     // Use a safe clone of the actor data for further operations.
@@ -60,7 +57,7 @@ export class TirduinRPSActorSheet extends ActorSheet {
       this._prepareItems(context);
     }
 
-    // Ensure skills are represented as a normalized list for templates.
+    // Normaliza las skills para que NPC y Character puedan usar el mismo partial.
     const skills = context.system?.skills || {};
     const npcSkillKeys = [
       'atletismo', 'sigilo', 'juegoManos', 'acrobacias',
@@ -116,9 +113,8 @@ export class TirduinRPSActorSheet extends ActorSheet {
         };
     });
 
-    // Enrich biography info for display
-    // Enrichment turns text like `[[/r 1d20]]` into buttons
-    context.enrichedBiography = await TextEditor.enrichHTML(
+    // Enriquecer la biografia permite reutilizar el editor rico en la sheet.
+    context.enrichedBiography = await foundry.applications.ux.TextEditor.implementation.enrichHTML(
       this.actor.system.biography,
       {
         // Whether to show secret blocks in the finished html
@@ -158,9 +154,11 @@ export class TirduinRPSActorSheet extends ActorSheet {
    * @param {object} context The context object to mutate
    */
   _prepareItems(context) {
-    // Initialize containers.
+    // Separa los items por seccion visible de la ficha para simplificar las plantillas.
     const gear = [];
     const features = [];
+    const fearActions = [];
+    const specialActions = [];
     const spells = {
       1: [],
       2: [],
@@ -177,15 +175,23 @@ export class TirduinRPSActorSheet extends ActorSheet {
     // Iterate through items, allocating to containers
     for (let i of context.items) {
       i.img = i.img || Item.DEFAULT_ICON;
-      // Append to gear.
+      // Objetos normales del inventario.
       if (i.type === 'item') {
         gear.push(i);
       }
-      // Append to features.
+      // Las acciones de miedo son features marcadas con category=fear.
+      else if (i.type === 'feature' && i.system.category === 'fear') {
+        fearActions.push(i);
+      }
+      // Las entradas especiales del NPC usan feature con category=special.
+      else if (i.type === 'feature' && i.system.category === 'special') {
+        specialActions.push(i);
+      }
+      // El resto de features siguen apareciendo en la seccion de dotes.
       else if (i.type === 'feature') {
         features.push(i);
       }
-      // Append to spells.
+      // Conjuros agrupados por nivel para el partial de spells.
       else if (i.type === 'spell') {
         if (i.system.spellLevel != undefined) {
           spells[i.system.spellLevel].push(i);
@@ -196,6 +202,8 @@ export class TirduinRPSActorSheet extends ActorSheet {
     // Assign and return
     context.gear = gear;
     context.features = features;
+    context.fearActions = fearActions;
+    context.specialActions = specialActions;
     context.spells = spells;
   }
 
@@ -205,7 +213,7 @@ export class TirduinRPSActorSheet extends ActorSheet {
   activateListeners(html) {
     super.activateListeners(html);
 
-    // Handle NPC tabs
+    // Navegacion custom de tabs para ambas sheets de actor.
     html.on('click', '.sheet-tabs .item', (ev) => {
       ev.preventDefault();
       const tabName = $(ev.currentTarget).data('tab');
@@ -220,10 +228,11 @@ export class TirduinRPSActorSheet extends ActorSheet {
       tabContent.find(`.tab[data-tab="${tabName}"]`).addClass('active');
     });
 
-    // Render the item sheet for viewing/editing prior to the editable check.
+    // Abre cualquier item embebido usando el data-item-id del bloque pulsado.
     html.on('click', '.item-edit', (ev) => {
-      const li = $(ev.currentTarget).parents('.item');
-      const item = this.actor.items.get(li.data('itemId'));
+      const row = $(ev.currentTarget).closest('[data-item-id]');
+      const item = this.actor.items.get(row.data('itemId'));
+      if (!item) return;
       item.sheet.render(true);
     });
 
@@ -231,7 +240,7 @@ export class TirduinRPSActorSheet extends ActorSheet {
     // Everything below here is only needed if the sheet is editable
     if (!this.isEditable) return;
 
-    // Auto-save changes on input
+    // Persistencia inmediata de campos simples sin esperar al submit del formulario.
     html.on('change', 'input[type="number"], input[type="text"], select, textarea', (ev) => {
       const field = $(ev.currentTarget);
       const name = field.attr('name');
@@ -247,15 +256,16 @@ export class TirduinRPSActorSheet extends ActorSheet {
       this.actor.update(updateData);
     });
 
-    // Add Inventory Item
+    // Creacion generica de items desde botones con data-type y data-* adicionales.
     html.on('click', '.item-create', this._onItemCreate.bind(this));
 
-    // Delete Inventory Item
+    // Borrado generico de items para listas normales y para acciones de miedo.
     html.on('click', '.item-delete', (ev) => {
-      const li = $(ev.currentTarget).parents('.item');
-      const item = this.actor.items.get(li.data('itemId'));
+      const row = $(ev.currentTarget).closest('[data-item-id]');
+      const item = this.actor.items.get(row.data('itemId'));
+      if (!item) return;
       item.delete();
-      li.slideUp(200, () => this.render(false));
+      row.slideUp(200, () => this.render(false));
     });
 
     // Active Effect management
@@ -290,19 +300,23 @@ export class TirduinRPSActorSheet extends ActorSheet {
   async _onItemCreate(event) {
     event.preventDefault();
     const header = event.currentTarget;
-    // Get the type of item to create.
+    // Lee el tipo y los valores iniciales definidos en el boton pulsado.
     const type = header.dataset.type;
     // Grab any data associated with this control.
-    const data = duplicate(header.dataset);
-    // Initialize a default name.
-    const name = `New ${type.capitalize()}`;
+    const data = foundry.utils.duplicate(header.dataset);
+    // Da nombres utiles por defecto segun la categoria del item creado.
+    const name = data.category === 'fear'
+      ? 'Nueva accion de miedo'
+      : data.category === 'special'
+        ? 'Nueva entrada especial'
+      : `New ${type.capitalize()}`;
     // Prepare the item object.
     const itemData = {
       name: name,
       type: type,
       system: data,
     };
-    // Remove the type from the dataset since it's in the itemData.type prop.
+    // El tipo ya viaja en itemData.type; se elimina del system inicial.
     delete itemData.system['type'];
 
     // Finally, create the item!

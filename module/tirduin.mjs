@@ -49,7 +49,8 @@ Hooks.once('init', function () {
   CONFIG.Item.dataModels = {
     item: models.TirduinRPSItem,
     feature: models.TirduinRPSFeature,
-    spell: models.TirduinRPSSpell
+    spell: models.TirduinRPSSpell,
+    fear: models.TirduinRPSFear
   }
 
   // Active Effects are never copied to the Actor,
