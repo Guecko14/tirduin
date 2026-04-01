@@ -46,6 +46,88 @@
       "interpretacion": "Interpretación",
       "intimidacion": "Intimidación"
     },
+    "Damage": {
+      "Rule": {
+        "vulnerability": "Vulnerability adds value x number of damage dice.",
+        "resistance": "Resistance subtracts value x number of damage dice."
+      },
+      "Group": {
+        "physical": "Físico",
+        "elemental": "Elemental",
+        "uncategorized": "Sin categoría"
+      },
+      "Type": {
+        "slashingPiercing": "Cortante/Perforante",
+        "bludgeoning": "Contundente",
+        "acid": "Ácido",
+        "cold": "Frío",
+        "fire": "Fuego",
+        "lightning": "Eléctrico",
+        "sonic": "Sónico",
+        "psychic": "Psíquico",
+        "necrotic": "Necrótico",
+        "poison": "Veneno",
+        "aetherMagic": "Aether"
+      }
+    },
+    "AlteredState": {
+      "blinded": {
+        "label": "Cegado",
+        "description": "No puede ver. Falla pruebas visuales automáticamente. Está Vulnerable."
+      },
+      "deafened": {
+        "label": "Ensordecido",
+        "description": "No puede oír y tiene desventaja en las tiradas de conjuros que requieran componentes verbales. Si la carta requiere una salvación del objetivo, el objetivo tira con ventaja. -10 Percepción para pruebas con componente auditivo."
+      },
+      "silenced": {
+        "label": "Enmudecido",
+        "description": "No puede hablar ni emitir ningún sonido. No puede utilizar cartas que requieran componente verbal."
+      },
+      "confused": {
+        "label": "Confundido",
+        "description": "No puede concentrarse en conjuros. Cada acción/movimiento requiere 1d6: 5-6 actúa con normalidad, 3-4 no hace nada, 1-2 sufre 1d6 daño."
+      },
+      "frightened": {
+        "label": "Asustado",
+        "description": "Tiene desventaja en todas las tiradas mientras tenga a la fuente de su miedo en su rango de visión. No se puede acercar voluntariamente a la fuente de su miedo."
+      },
+      "paralyzed": {
+        "label": "Paralizado",
+        "description": "No se puede mover ni hacer acciones ni reacciones. Está Vulnerable. Los impactos a melee son críticos automáticamente."
+      },
+      "restrained": {
+        "label": "Apresado",
+        "description": "Velocidad 0. Desventaja en todo excepto liberarse."
+      },
+      "poisoned": {
+        "label": "Envenenado",
+        "description": "Depende del veneno."
+      },
+      "vulnerable": {
+        "label": "Vulnerable",
+        "description": "Los ataques contra una criatura vulnerable se hacen con ventaja."
+      },
+      "charmed": {
+        "label": "Encantado",
+        "description": "No puede atacar al encantador. El encantador tiene ventaja en tiradas de habilidad contra la criatura encantada."
+      },
+      "prone": {
+        "label": "Tumbado",
+        "description": "Los ataques a distancia contra ti tienen desventaja, pero los ataques a melee tienen ventaja. Levantarse cuesta 15ft de movimiento."
+      },
+      "stunned": {
+        "label": "Aturdido",
+        "description": "Moverse requiere una acción. -1 a todas las tiradas. No puedes hacer reacciones."
+      },
+      "bleeding": {
+        "label": "Sangrando",
+        "description": "Recibes Rdx de daño cada turno. Se pueden usar dos acciones para disminuir el dado un paso, pudiendo detener el efecto. El estado no implica tipo de daño."
+      },
+      "fatigue": {
+        "label": "Fatiga",
+        "description": "Al levantarte después de estar moribundo, ante esfuerzo épico, condiciones extremas o días sin comer/beber puedes sufrir niveles de Fatiga. Cada nivel resta velocidad y aplica penalizador a tiradas y CD."
+      }
+    },
     "SheetLabels": {
       "Actor": "TirduinRPS Actor Sheet",
       "Item": "TirduinRPS Item Sheet"

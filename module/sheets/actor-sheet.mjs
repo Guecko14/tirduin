@@ -2,6 +2,11 @@ import {
   onManageActiveEffect,
   prepareActiveEffectCategories,
 } from '../helpers/effects.mjs';
+import {
+  applyRollEdgeToFormula,
+  getRollEdgeFlavorSuffix,
+  promptRollConfirmation,
+} from '../helpers/roll-dialog.mjs';
 
 /**
  * Extend the basic ActorSheet with some very simple modifications
@@ -159,6 +164,10 @@ export class TirduinRPSActorSheet extends ActorSheet {
     const features = [];
     const fearActions = [];
     const specialActions = [];
+    // Objetos del NPC: genéricos, armas y armaduras separados para el tab de Objetos.
+    const npcGenericObjects = [];
+    const npcWeapons = [];
+    const npcArmors = [];
     const spells = {
       1: [],
       2: [],
@@ -178,6 +187,8 @@ export class TirduinRPSActorSheet extends ActorSheet {
       // Objetos normales del inventario.
       if (i.type === 'item') {
         gear.push(i);
+        // Los NPCs usan los items genéricos también en la sección de objetos.
+        npcGenericObjects.push(i);
       }
       // Las acciones de miedo son features marcadas con category=fear.
       else if (i.type === 'feature' && i.system.category === 'fear') {
@@ -190,6 +201,14 @@ export class TirduinRPSActorSheet extends ActorSheet {
       // El resto de features siguen apareciendo en la seccion de dotes.
       else if (i.type === 'feature') {
         features.push(i);
+      }
+      // Armas del NPC: van al listado de armas del tab de objetos.
+      else if (i.type === 'weapon') {
+        npcWeapons.push(i);
+      }
+      // Armaduras del NPC: van al listado de armaduras del tab de objetos.
+      else if (i.type === 'armor') {
+        npcArmors.push(i);
       }
       // Conjuros agrupados por nivel para el partial de spells.
       else if (i.type === 'spell') {
@@ -204,6 +223,10 @@ export class TirduinRPSActorSheet extends ActorSheet {
     context.features = features;
     context.fearActions = fearActions;
     context.specialActions = specialActions;
+    // Colecciones para el tab de Objetos del NPC.
+    context.npcGenericObjects = npcGenericObjects;
+    context.npcWeapons = npcWeapons;
+    context.npcArmors = npcArmors;
     context.spells = spells;
   }
 
@@ -328,7 +351,7 @@ export class TirduinRPSActorSheet extends ActorSheet {
    * @param {Event} event   The originating click event
    * @private
    */
-  _onRoll(event) {
+  async _onRoll(event) {
     event.preventDefault();
     const element = event.currentTarget;
     const dataset = element.dataset;
@@ -344,8 +367,18 @@ export class TirduinRPSActorSheet extends ActorSheet {
 
     // Handle rolls that supply the formula directly.
     if (dataset.roll) {
+      const actorRollData = this.actor.getRollData();
+      const edgeMode = await promptRollConfirmation({
+        formula: dataset.roll,
+        rollData: actorRollData,
+      });
+      if (edgeMode === null) return null;
+
+      const formula = applyRollEdgeToFormula(dataset.roll, edgeMode);
       let label = dataset.label ? `[ability] ${dataset.label}` : '';
-      let roll = new Roll(dataset.roll, this.actor.getRollData());
+      label += getRollEdgeFlavorSuffix(edgeMode);
+
+      let roll = new Roll(formula, actorRollData);
       roll.toMessage({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
         flavor: label,

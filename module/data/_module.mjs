@@ -9,3 +9,5 @@ export {default as TirduinRPSItem} from "./item-item.mjs";
 export {default as TirduinRPSFeature} from "./item-feature.mjs";
 export {default as TirduinRPSSpell} from "./item-spell.mjs";
 export {default as TirduinRPSFear} from "./item-fear.mjs";
+export {default as TirduinRPSWeapon} from "./item-weapon.mjs";
+export {default as TirduinRPSArmor} from "./item-armor.mjs";

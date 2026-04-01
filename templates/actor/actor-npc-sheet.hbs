@@ -83,43 +83,40 @@
     <!-- TABS LAYOUT: contenedor lateral para navegacion y contenido -->
     <div class="tabs-layout">
 
-    <!-- TABS NAVIGATION: accesos rapidos a los bloques editables del NPC -->
-    <nav class="sheet-tabs tabs" data-group="npc-sections">
-      <a class="item active" data-tab="skills">Habilidades</a>
-      <a class="item" data-tab="special">Especial</a>
-      <a class="item" data-tab="abilities">Abilities</a>
-      <a class="item" data-tab="fear">Miedo</a>
-    </nav>
+      <!-- TABS NAVIGATION: accesos rapidos a los bloques editables del NPC -->
+      <nav class="sheet-tabs tabs" data-group="npc-sections">
+        <a class="item active" data-tab="skills">Habilidades</a>
+        <a class="item" data-tab="special">Especial</a>
+        <a class="item" data-tab="fear">Miedo</a>
+        <a class="item" data-tab="objects">Objetos</a>
+      </nav>
 
-    <!-- TABS CONTENT: cada panel se muestra segun el tab activo -->
-    <div class="tabs-content">
+      <!-- TABS CONTENT: cada panel se muestra segun el tab activo -->
+      <div class="tabs-content">
 
-      <!-- HABILIDADES TAB -->
-      <div class="tab active" data-tab="skills">
-        <div class="npc-skills">
-          {{> "systems/tirduin/templates/actor/parts/actor-skills.hbs"}}
+        <!-- HABILIDADES TAB -->
+        <div class="tab active" data-tab="skills">
+          <div class="npc-skills">
+            {{> "systems/tirduin/templates/actor/parts/actor-skills.hbs"}}
+          </div>
         </div>
-      </div>
 
-      <!-- ESPECIALES TAB: lista y gestiona entradas especiales como items del NPC -->
-      <div class="tab" data-tab="special">
-        {{> "systems/tirduin/templates/actor/parts/actor-special.hbs"}}
-      </div>
-
-      <!-- ABILITIES TAB -->
-      <div class="tab" data-tab="abilities">
-        <div class="npc-abilities">
-          <label>Abilities</label>
-          <textarea name="system.abilities">{{system.abilities}}</textarea>
+        <!-- ESPECIALES TAB: lista y gestiona entradas especiales como items del NPC -->
+        <div class="tab" data-tab="special">
+          {{> "systems/tirduin/templates/actor/parts/actor-special.hbs"}}
         </div>
-      </div>
 
-      <!-- MIEDO TAB: lista y gestiona acciones de miedo como items del NPC -->
-      <div class="tab" data-tab="fear">
-        {{> "systems/tirduin/templates/actor/parts/actor-fear.hbs"}}
-      </div>
+        <!-- MIEDO TAB: lista y gestiona acciones de miedo como items del NPC -->
+        <div class="tab" data-tab="fear">
+          {{> "systems/tirduin/templates/actor/parts/actor-fear.hbs"}}
+        </div>
 
-    </div>
+        <!-- OBJETOS TAB: lista objetos genéricos, armas y armaduras del NPC -->
+        <div class="tab" data-tab="objects">
+          {{> "systems/tirduin/templates/actor/parts/actor-npc-objects.hbs"}}
+        </div>
+
+      </div>
 
     </div><!-- /.tabs-layout -->
 

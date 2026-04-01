@@ -26,7 +26,17 @@
     "verified": "13.351"
   },
   "esmodules": ["module/tirduin.mjs"],
-  "styles": ["css/tirduin.css"],
+  "styles": [
+    "css/utils.css",
+    "css/base.css",
+    "css/tabs.css",
+    "css/npc-sheet.css",
+    "css/character-sheet.css",
+    "css/item-fear.css",
+    "css/item-special.css",
+    "css/npc-objects.css",
+    "css/roll-dialog.css"
+  ],
   "languages": [
     {
       "lang": "en",
@@ -38,7 +48,12 @@
   "packFolders": [],
   "documentTypes": {
     "Item": {
-      "fear": {}
+      "item": {},
+      "feature": {},
+      "spell": {},
+      "fear": {},
+      "weapon": {},
+      "armor": {}
     }
   },
   "socket": false,

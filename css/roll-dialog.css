@@ -1,0 +1,68 @@
+/* ================================================================
+   ROLL CONFIRMATION DIALOG
+   Ventana modal de confirmación antes de ejecutar cualquier tirada.
+================================================================ */
+
+/* Fondo oscuro del popup para que encaje con el tema del sistema. */
+.window-app.dialog.tirduin-roll-dialog .window-content {
+  background: linear-gradient(180deg, #262626 0%, #1b1b1b 100%);
+  color: #e7e7e7;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.window-app.dialog.tirduin-roll-dialog .dialog-content {
+  padding: 10px 8px 2px;
+}
+
+/* Formulario interno del diálogo. */
+.tirduin-roll-confirmation {
+  display: grid;
+  gap: 10px;
+}
+
+/* Resumen centrado de la fórmula: se actualiza al cambiar ventaja/desventaja. */
+.tirduin-roll-confirmation .roll-summary {
+  margin: 0;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #f0f0f0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Fila de radios ventaja/desventaja en una sola línea centrada. */
+.tirduin-roll-confirmation .roll-edge-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: nowrap;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  margin-bottom: 8px;
+}
+
+/* Cada opción de ventaja/desventaja: radio + texto en línea. */
+.tirduin-roll-confirmation .roll-edge-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: #f1f1f1;
+  font-weight: 600;
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.65);
+}
+.tirduin-roll-confirmation .roll-edge-option input[type="radio"] {
+  margin: 0;
+}
+
+/* Espacio adicional antes de los botones de tirar/cancelar. */
+.window-app.dialog.tirduin-roll-dialog .dialog-buttons {
+  margin-top: 8px;
+  padding-top: 4px;
+}

@@ -1,0 +1,179 @@
+<div class="npc-objects">
+
+    {{!-- ================================================================
+    SECCIÓN: ARMAS
+    Items de tipo "weapon" con categoría, subcategoría, dado de daño y alcance.
+    ================================================================ --}}
+    <div class="npc-objects-section">
+
+        <div class="npc-objects-header">
+            <h2>Armas</h2>
+            {{!-- Botón de creación de arma --}}
+            <a class="item-create npc-object-add-btn" data-type="weapon"
+                title="Nueva arma">
+                <i class="fas fa-plus"></i> Nueva
+            </a>
+        </div>
+
+        {{#if npcWeapons.length}}
+        <ul class="npc-object-list npc-weapon-list">
+
+            {{!-- Cabecera de columnas de la tabla de armas --}}
+            <li class="npc-weapon-header npc-object-list-header">
+                <span class="npc-weapon-col-name">Nombre</span>
+                <span class="npc-weapon-col-cat">Cat.</span>
+                <span class="npc-weapon-col-sub">Subtipo</span>
+                <span class="npc-weapon-col-die">Daño</span>
+                <span class="npc-weapon-col-range">Alcance</span>
+                <span class="npc-weapon-col-grip">Grip</span>
+                <span class="npc-weapon-col-controls"></span>
+            </li>
+
+            {{#each npcWeapons as |weapon|}}
+            <li class="npc-object-item npc-weapon-item"
+                data-item-id="{{weapon._id}}">
+                <span class="npc-weapon-col-name">{{weapon.name}}</span>
+                <span
+                    class="npc-weapon-col-cat">{{weapon.system.category}}</span>
+                <span
+                    class="npc-weapon-col-sub">{{weapon.system.subcategory}}</span>
+                <span
+                    class="npc-weapon-col-die">{{weapon.system.damageDie}}</span>
+                <span class="npc-weapon-col-range">{{weapon.system.range}}
+                    ft</span>
+                <span class="npc-weapon-col-grip">{{weapon.system.grip}}M</span>
+                <div class="npc-object-controls npc-weapon-col-controls">
+                    <a class="item-edit" title="Editar"><i
+                            class="fas fa-edit"></i></a>
+                    <a class="item-delete" title="Eliminar"><i
+                            class="fas fa-trash"></i></a>
+                </div>
+            </li>
+            {{/each}}
+
+        </ul>
+        {{else}}
+        <p class="npc-objects-empty">No hay armas. Usa «Nueva» para añadir
+            una.</p>
+        {{/if}}
+
+    </div>
+
+    {{!-- ================================================================
+    SECCIÓN: ARMADURAS
+    Items de tipo "armor" con CA, VD, RA, Resistencia, Vigor y sigilo.
+    ================================================================ --}}
+    <div class="npc-objects-section">
+
+        <div class="npc-objects-header">
+            <h2>Armaduras</h2>
+            {{!-- Botón de creación de armadura --}}
+            <a class="item-create npc-object-add-btn" data-type="armor"
+                title="Nueva armadura">
+                <i class="fas fa-plus"></i> Nueva
+            </a>
+        </div>
+
+        {{#if npcArmors.length}}
+        <ul class="npc-object-list npc-armor-list">
+
+            {{!-- Cabecera de columnas de la tabla de armaduras --}}
+            <li class="npc-armor-header npc-object-list-header">
+                <span class="npc-armor-col-name">Nombre</span>
+                <span class="npc-armor-col-cat">Cat.</span>
+                <span class="npc-armor-col-ca">CA</span>
+                <span class="npc-armor-col-ca-broken">CA rota</span>
+                <span class="npc-armor-col-vd">VD</span>
+                <span class="npc-armor-col-ra">RA</span>
+                <span class="npc-armor-col-stealth">Sigilo</span>
+                <span class="npc-armor-col-controls"></span>
+            </li>
+
+            {{#each npcArmors as |armor|}}
+            <li class="npc-object-item npc-armor-item"
+                data-item-id="{{armor._id}}">
+                <span class="npc-armor-col-name">{{armor.name}}</span>
+                <span class="npc-armor-col-cat">{{armor.system.category}}</span>
+                <span class="npc-armor-col-ca">{{armor.system.ca}}</span>
+                <span
+                    class="npc-armor-col-ca-broken">{{armor.system.caBroken}}</span>
+                <span class="npc-armor-col-vd">{{armor.system.vd}}</span>
+                {{!-- Muestra RA actual / RA máxima para ver el desgaste de un
+                vistazo --}}
+                <span
+                    class="npc-armor-col-ra">{{armor.system.raCurrent}}/{{armor.system.ra}}</span>
+                {{!-- Icono de escudo tachado si la armadura penaliza el sigilo
+                --}}
+                <span class="npc-armor-col-stealth">
+                    {{#if armor.system.stealth}}
+                    <i class="fas fa-eye-slash" title="Penaliza sigilo"></i>
+                    {{else}}
+                    —
+                    {{/if}}
+                </span>
+                <div class="npc-object-controls npc-armor-col-controls">
+                    <a class="item-edit" title="Editar"><i
+                            class="fas fa-edit"></i></a>
+                    <a class="item-delete" title="Eliminar"><i
+                            class="fas fa-trash"></i></a>
+                </div>
+            </li>
+            {{/each}}
+
+        </ul>
+        {{else}}
+        <p class="npc-objects-empty">No hay armaduras. Usa «Nueva» para añadir
+            una.</p>
+        {{/if}}
+
+    </div>
+
+    {{!-- ================================================================
+    SECCIÓN: OBJETOS GENÉRICOS
+    Items de tipo "item" con sólo nombre y descripción visible en la ficha.
+    ================================================================ --}}
+    <div class="npc-objects-section">
+
+        <div class="npc-objects-header">
+            <h2>Objetos</h2>
+            {{!-- Botón de creación de objeto genérico --}}
+            <a class="item-create npc-object-add-btn" data-type="item"
+                title="Nuevo objeto">
+                <i class="fas fa-plus"></i> Nuevo
+            </a>
+        </div>
+
+        {{#if npcGenericObjects.length}}
+        <ul class="npc-object-list">
+            {{#each npcGenericObjects as |obj|}}
+            <li class="npc-object-item" data-item-id="{{obj._id}}">
+
+                {{!-- Fila principal: nombre del objeto y controles de
+                edición/borrado --}}
+                <div class="npc-object-main">
+                    <span class="npc-object-name">{{obj.name}}</span>
+                    <div class="npc-object-controls">
+                        <a class="item-edit" title="Editar"><i
+                                class="fas fa-edit"></i></a>
+                        <a class="item-delete" title="Eliminar"><i
+                                class="fas fa-trash"></i></a>
+                    </div>
+                </div>
+
+                {{!-- Descripción resumida para consulta rápida sin abrir la
+                sheet --}}
+                {{#if obj.system.description}}
+                <div class="npc-object-desc">{{obj.system.description}}</div>
+                {{/if}}
+
+            </li>
+            {{/each}}
+        </ul>
+        {{else}}
+        <p class="npc-objects-empty">No hay objetos. Usa «Nuevo» para añadir
+            uno.</p>
+        {{/if}}
+
+    </div>
+
+</div>

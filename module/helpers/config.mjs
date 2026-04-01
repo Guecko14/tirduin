@@ -48,3 +48,106 @@ TIRDUIN_RPS.skills = {
   interpretacion: 'TIRDUIN_RPS.Skills.interpretacion',
   intimidacion: 'TIRDUIN_RPS.Skills.intimidacion'
 };
+
+/**
+ * Generic grouped damage types for items, spells, effects and states.
+ * Keep this centralized so every screen references the same vocabulary.
+ * @type {Object<string, string>}
+ */
+TIRDUIN_RPS.damageTypeGroups = {
+  physical: 'TIRDUIN_RPS.Damage.Group.physical',
+  elemental: 'TIRDUIN_RPS.Damage.Group.elemental',
+  uncategorized: 'TIRDUIN_RPS.Damage.Group.uncategorized',
+};
+
+/**
+ * Flat map for generic selectors where only the final damage type matters.
+ * @type {Object<string, string>}
+ */
+TIRDUIN_RPS.damageTypes = {
+  slashingPiercing: 'TIRDUIN_RPS.Damage.Type.slashingPiercing',
+  bludgeoning: 'TIRDUIN_RPS.Damage.Type.bludgeoning',
+  acid: 'TIRDUIN_RPS.Damage.Type.acid',
+  cold: 'TIRDUIN_RPS.Damage.Type.cold',
+  fire: 'TIRDUIN_RPS.Damage.Type.fire',
+  lightning: 'TIRDUIN_RPS.Damage.Type.lightning',
+  sonic: 'TIRDUIN_RPS.Damage.Type.sonic',
+  psychic: 'TIRDUIN_RPS.Damage.Type.psychic',
+  necrotic: 'TIRDUIN_RPS.Damage.Type.necrotic',
+  poison: 'TIRDUIN_RPS.Damage.Type.poison',
+  aetherMagic: 'TIRDUIN_RPS.Damage.Type.aetherMagic',
+};
+
+/**
+ * Grouped definition to build categorized UIs without duplicating keys.
+ * @type {Object<string, string[]>}
+ */
+TIRDUIN_RPS.damageTypesByGroup = {
+  physical: ['slashingPiercing', 'bludgeoning'],
+  elemental: ['acid', 'cold', 'fire', 'lightning'],
+  uncategorized: ['sonic', 'psychic', 'necrotic', 'poison', 'aetherMagic'],
+};
+
+/**
+ * Generic altered states catalog.
+ * For now this only defines name/description and does not apply combat logic.
+ * @type {Object<string, {label: string, description: string}>}
+ */
+TIRDUIN_RPS.alteredStates = {
+  blinded: {
+    label: 'TIRDUIN_RPS.AlteredState.blinded.label',
+    description: 'TIRDUIN_RPS.AlteredState.blinded.description',
+  },
+  deafened: {
+    label: 'TIRDUIN_RPS.AlteredState.deafened.label',
+    description: 'TIRDUIN_RPS.AlteredState.deafened.description',
+  },
+  silenced: {
+    label: 'TIRDUIN_RPS.AlteredState.silenced.label',
+    description: 'TIRDUIN_RPS.AlteredState.silenced.description',
+  },
+  confused: {
+    label: 'TIRDUIN_RPS.AlteredState.confused.label',
+    description: 'TIRDUIN_RPS.AlteredState.confused.description',
+  },
+  frightened: {
+    label: 'TIRDUIN_RPS.AlteredState.frightened.label',
+    description: 'TIRDUIN_RPS.AlteredState.frightened.description',
+  },
+  paralyzed: {
+    label: 'TIRDUIN_RPS.AlteredState.paralyzed.label',
+    description: 'TIRDUIN_RPS.AlteredState.paralyzed.description',
+  },
+  restrained: {
+    label: 'TIRDUIN_RPS.AlteredState.restrained.label',
+    description: 'TIRDUIN_RPS.AlteredState.restrained.description',
+  },
+  poisoned: {
+    label: 'TIRDUIN_RPS.AlteredState.poisoned.label',
+    description: 'TIRDUIN_RPS.AlteredState.poisoned.description',
+  },
+  vulnerable: {
+    label: 'TIRDUIN_RPS.AlteredState.vulnerable.label',
+    description: 'TIRDUIN_RPS.AlteredState.vulnerable.description',
+  },
+  charmed: {
+    label: 'TIRDUIN_RPS.AlteredState.charmed.label',
+    description: 'TIRDUIN_RPS.AlteredState.charmed.description',
+  },
+  prone: {
+    label: 'TIRDUIN_RPS.AlteredState.prone.label',
+    description: 'TIRDUIN_RPS.AlteredState.prone.description',
+  },
+  stunned: {
+    label: 'TIRDUIN_RPS.AlteredState.stunned.label',
+    description: 'TIRDUIN_RPS.AlteredState.stunned.description',
+  },
+  bleeding: {
+    label: 'TIRDUIN_RPS.AlteredState.bleeding.label',
+    description: 'TIRDUIN_RPS.AlteredState.bleeding.description',
+  },
+  fatigue: {
+    label: 'TIRDUIN_RPS.AlteredState.fatigue.label',
+    description: 'TIRDUIN_RPS.AlteredState.fatigue.description',
+  },
+};

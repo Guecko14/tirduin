@@ -1,0 +1,93 @@
+/* ================================================================
+   TABS LAYOUT SIDEBAR
+   Contenedor de navegación lateral (nav + content) usado en NPC y Character.
+================================================================ */
+
+.tirduin .tabs-layout {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  align-items: flex-start;
+  margin-top: 10px;
+  position: relative;
+}
+
+/* Barra lateral de tabs: sticky para seguir el scroll del contenido. */
+.tirduin .sheet-tabs {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 4px;
+  flex: 0 0 auto;
+  width: 120px;
+  min-width: 90px;
+  padding: 8px 6px;
+  list-style: none;
+  background: #1c1c1c;
+  border-radius: 6px 0 0 6px;
+  border: 1px solid #333;
+  border-right: none;
+  align-self: flex-start;
+  position: sticky;
+  top: 0;
+}
+
+/* Cada tab de navegación lateral. */
+.tirduin .sheet-tabs .item {
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  color: #bbb;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  border-radius: 4px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tirduin .sheet-tabs .item:hover {
+  background: #222;
+  color: #fff;
+}
+
+/* Tab activo: resaltado con acento azul a la izquierda. */
+.tirduin .sheet-tabs .item.active {
+  background: #1e2b3a;
+  color: #9ad;
+  border-color: #9ad;
+  border-left: 3px solid #9ad;
+  padding-left: 7px;
+}
+
+/* Área de contenido de los tabs. */
+.tirduin .tabs-content {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 200px;
+  padding: 10px 12px;
+  background: #181818;
+  border: 1px solid #333;
+  border-radius: 0 6px 6px 6px;
+}
+
+/* Los paneles de tab se ocultan por defecto y se muestran con animación. */
+.tirduin .tab {
+  display: none;
+  animation: fadeIn 0.2s ease;
+}
+
+.tirduin .tab.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

@@ -1,0 +1,140 @@
+<form class="{{cssClass}} armor-item-sheet" autocomplete="off">
+
+    {{!-- Panel principal de edición de la armadura --}}
+    <section class="armor-sheet-panel">
+
+        {{!-- Nombre de la armadura --}}
+        <div class="armor-field armor-field-name">
+            <label for="name">Nombre</label>
+            <input name="name" type="text" value="{{item.name}}"
+                placeholder="Nombre de la armadura" />
+        </div>
+
+        {{!-- Categoría de la armadura --}}
+        <div class="armor-field">
+            <label for="system.category">Categoría</label>
+            <select name="system.category">
+                <option value="sinArmadura" {{#if (eq system.category
+                    'sinArmadura')}}selected{{/if}}>Sin armadura</option>
+                <option value="ligera" {{#if (eq system.category
+                    'ligera')}}selected{{/if}}>Ligera</option>
+                <option value="media" {{#if (eq system.category
+                    'media')}}selected{{/if}}>Media</option>
+                <option value="pesada" {{#if (eq system.category
+                    'pesada')}}selected{{/if}}>Pesada</option>
+                <option value="escudo" {{#if (eq system.category
+                    'escudo')}}selected{{/if}}>Escudo</option>
+            </select>
+        </div>
+
+        {{!-- Fila de valores de defensa: CA, CA rota, VD --}}
+        <div class="armor-row armor-row-defense">
+
+            <div class="armor-field">
+                <label for="system.ca">CA</label>
+                <input name="system.ca" type="number" value="{{system.ca}}"
+                    min="0" />
+            </div>
+
+            <div class="armor-field">
+                <label for="system.caBroken">CA rota</label>
+                <input name="system.caBroken" type="number"
+                    value="{{system.caBroken}}" min="0" />
+            </div>
+
+            <div class="armor-field">
+                <label for="system.vd"
+                    title="Valor Defensivo: tirada de dados">VD</label>
+                <input name="system.vd" type="text" value="{{system.vd}}"
+                    placeholder="1d6" />
+            </div>
+
+        </div>
+
+        {{!-- Fila de Resistencia de Armadura (RA): máxima + actual --}}
+        <div class="armor-row armor-row-ra">
+
+            <div class="armor-field">
+                <label for="system.ra" title="Resistencia de Armadura máxima">RA
+                    máx.</label>
+                <input name="system.ra" type="number" value="{{system.ra}}"
+                    min="0" />
+            </div>
+
+            <div class="armor-field">
+                <label for="system.raCurrent"
+                    title="Resistencia de Armadura actual">RA actual</label>
+                <input name="system.raCurrent" type="number"
+                    value="{{system.raCurrent}}" min="0" />
+            </div>
+
+        </div>
+
+        {{!-- Resistencia (R): valor numérico + tipo de daño --}}
+        <div class="armor-row armor-row-resistance">
+
+            <div class="armor-field">
+                <label for="system.resistance.value"
+                    title="Valor de resistencia">R (valor)</label>
+                <input name="system.resistance.value" type="number"
+                    value="{{system.resistance.value}}" min="0" />
+            </div>
+
+            <div class="armor-field">
+                <label for="system.resistance.damageType"
+                    title="Tipo de daño al que aplica la Resistencia">R (tipo
+                    daño)</label>
+                <select name="system.resistance.damageType">
+                    <option value>— Ninguno —</option>
+                    {{#each config.damageTypes as |label key|}}
+                    <option value="{{key}}"
+                        {{#if (eq ../system.resistance.damageType
+                        key)}}selected{{/if}}>
+                        {{localize label}}
+                    </option>
+                    {{/each}}
+                </select>
+            </div>
+
+        </div>
+
+        {{!-- Fila de datos de equipamiento: Vigor, marcador de sigilo y peso
+        --}}
+        <div class="armor-row armor-row-equip">
+
+            <div class="armor-field">
+                <label for="system.vigor"
+                    title="Valor mínimo de Vigor necesario para equipar">V
+                    (Vigor)</label>
+                <input name="system.vigor" type="number"
+                    value="{{system.vigor}}" min="0" />
+            </div>
+
+            {{!-- Sigilo: marcador booleano (checkbox) indicando penalización
+            --}}
+            <div class="armor-field armor-field-stealth">
+                <label for="system.stealth"
+                    title="Marca si la armadura penaliza el sigilo">Sigilo</label>
+                <input name="system.stealth" type="checkbox"
+                    {{#if system.stealth}}checked{{/if}} />
+            </div>
+
+            <div class="armor-field">
+                <label for="system.weight">Peso</label>
+                <input name="system.weight" type="number"
+                    value="{{system.weight}}"
+                    min="0" step="0.1" />
+            </div>
+
+        </div>
+
+        {{!-- Descripción de la armadura --}}
+        <div class="armor-field armor-field-description">
+            <label for="system.description">Descripción</label>
+            <textarea name="system.description"
+                placeholder="Describe la armadura">{{system.description}}</textarea>
+        </div>
+
+    </section>
+
+</form>

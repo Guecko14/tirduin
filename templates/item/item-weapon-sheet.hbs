@@ -1,0 +1,91 @@
+<form class="{{cssClass}} weapon-item-sheet" autocomplete="off">
+
+    {{!-- Panel principal de edición del arma --}}
+    <section class="weapon-sheet-panel">
+
+        {{!-- Nombre del arma --}}
+        <div class="weapon-field weapon-field-name">
+            <label for="name">Nombre</label>
+            <input name="name" type="text" value="{{item.name}}"
+                placeholder="Nombre del arma" />
+        </div>
+
+        {{!-- Fila de selectores: categoría y subcategoría --}}
+        <div class="weapon-row weapon-row-categories">
+
+            <div class="weapon-field">
+                <label for="system.category">Categoría</label>
+                <select name="system.category">
+                    <option value="simple" {{#if (eq system.category
+                        'simple')}}selected{{/if}}>Simple</option>
+                    <option value="marcial" {{#if (eq system.category
+                        'marcial')}}selected{{/if}}>Marcial</option>
+                    <option value="magica" {{#if (eq system.category
+                        'magica')}}selected{{/if}}>Mágica</option>
+                </select>
+            </div>
+
+            <div class="weapon-field">
+                <label for="system.subcategory">Subcategoría</label>
+                <select name="system.subcategory">
+                    <option value="melee" {{#if (eq system.subcategory
+                        'melee')}}selected{{/if}}>Melee</option>
+                    <option value="distancia" {{#if (eq system.subcategory
+                        'distancia')}}selected{{/if}}>A distancia</option>
+                </select>
+            </div>
+
+        </div>
+
+        {{!-- Fila de datos de combate: dado de daño, alcance, grip --}}
+        <div class="weapon-row weapon-row-combat">
+
+            <div class="weapon-field">
+                <label for="system.damageDie">Dado de daño</label>
+                <input name="system.damageDie" type="text"
+                    value="{{system.damageDie}}"
+                    placeholder="1d6" />
+            </div>
+
+            <div class="weapon-field">
+                <label for="system.range">Alcance (ft)</label>
+                <input name="system.range" type="number"
+                    value="{{system.range}}" min="0" />
+            </div>
+
+            <div class="weapon-field">
+                <label for="system.grip">Grip</label>
+                <select name="system.grip">
+                    <option value="1" {{#if (eq system.grip
+                        '1')}}selected{{/if}}>1 mano</option>
+                    <option value="2" {{#if (eq system.grip
+                        '2')}}selected{{/if}}>2 manos</option>
+                </select>
+            </div>
+
+            <div class="weapon-field">
+                <label for="system.weight">Peso</label>
+                <input name="system.weight" type="number"
+                    value="{{system.weight}}" min="0" step="0.1" />
+            </div>
+
+        </div>
+
+        {{!-- Propiedades especiales (texto libre, a expandir en el futuro) --}}
+        <div class="weapon-field weapon-field-properties">
+            <label for="system.properties">Propiedades</label>
+            <input name="system.properties" type="text"
+                value="{{system.properties}}"
+                placeholder="(próximamente)" />
+        </div>
+
+        {{!-- Descripción larga del arma --}}
+        <div class="weapon-field weapon-field-description">
+            <label for="system.description">Descripción</label>
+            <textarea name="system.description"
+                placeholder="Describe el arma">{{system.description}}</textarea>
+        </div>
+
+    </section>
+
+</form>

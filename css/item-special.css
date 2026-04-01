@@ -1,0 +1,182 @@
+/* ================================================================
+   SPECIAL / ESPECIAL TAB
+   Tab de habilidades especiales en la sheet del NPC.
+================================================================ */
+
+.tirduin .special-actions {
+  padding: 4px 0;
+}
+
+.tirduin .special-actions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #333;
+}
+.tirduin .special-actions-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  color: #d7c497;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.tirduin .special-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: #292116;
+  border: 1px solid #8a6a2b;
+  border-radius: 4px;
+  color: #e2c989;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  text-decoration: none;
+}
+.tirduin .special-add-btn:hover {
+  background: #3b2f1d;
+  color: #f0ddb0;
+  border-color: #ba9041;
+}
+
+.tirduin .special-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tirduin .special-item {
+  background: #1c1812;
+  border: 1px solid #4b3d22;
+  border-radius: 6px;
+  padding: 8px 10px;
+  transition: border-color 0.15s;
+}
+.tirduin .special-item:hover {
+  border-color: #9a7a33;
+}
+
+.tirduin .special-item-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tirduin .special-name {
+  flex: 1 1 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #f0dfb7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tirduin .special-controls {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 6px;
+}
+.tirduin .special-controls a {
+  color: #888;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: color 0.15s;
+  text-decoration: none;
+}
+.tirduin .special-controls .special-edit:hover   { color: #9ad; }
+.tirduin .special-controls .special-delete:hover { color: #e66; }
+
+.tirduin .special-desc {
+  margin-top: 5px;
+  font-size: 0.76rem;
+  color: #b7a57d;
+  line-height: 1.4;
+  overflow: hidden;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.tirduin .special-empty {
+  color: #666;
+  font-style: italic;
+  font-size: 0.82rem;
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* ================================================================
+   SPECIAL ITEM SHEET
+   Ventana de edición de una habilidad especial.
+================================================================ */
+
+.special-item-sheet {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  margin: 0;
+  background: linear-gradient(180deg, #191612 0%, #120f0d 100%);
+  color: #e6e6e6;
+}
+
+.special-item-sheet .special-sheet-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-height: 100%;
+  padding: 12px;
+}
+
+.special-item-sheet .special-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.special-item-sheet .special-field label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #cec09d;
+  letter-spacing: 0.03em;
+}
+
+.special-item-sheet input,
+.special-item-sheet textarea {
+  width: 100%;
+  background: #0f0d0a;
+  border: 1px solid #66502a;
+  border-radius: 6px;
+  color: #f0e4ca;
+  box-sizing: border-box;
+}
+
+.special-item-sheet input {
+  height: 34px;
+  padding: 6px 8px;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.special-item-sheet textarea {
+  min-height: 240px;
+  padding: 10px;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.special-item-sheet input:focus,
+.special-item-sheet textarea:focus {
+  outline: none;
+  border-color: #b08b43;
+  box-shadow: 0 0 0 1px rgba(176, 139, 67, 0.25);
+}

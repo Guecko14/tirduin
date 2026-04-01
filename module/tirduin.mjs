@@ -7,6 +7,8 @@ import { TirduinRPSItemSheet } from './sheets/item-sheet.mjs';
 // Import helper/utility classes and constants.
 import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
 import { TIRDUIN_RPS } from './helpers/config.mjs';
+import * as damageHelpers from './helpers/damage.mjs';
+import * as alteredStatesHelpers from './helpers/altered-states.mjs';
 // Import DataModel classes
 import * as models from './data/_module.mjs';
 
@@ -20,6 +22,8 @@ Hooks.once('init', function () {
   game.tirduin = {
     TirduinRPSActor,
     TirduinRPSItem,
+    damage: damageHelpers,
+    alteredStates: alteredStatesHelpers,
     rollItemMacro,
   };
 
@@ -50,8 +54,14 @@ Hooks.once('init', function () {
     item: models.TirduinRPSItem,
     feature: models.TirduinRPSFeature,
     spell: models.TirduinRPSSpell,
-    fear: models.TirduinRPSFear
+    fear: models.TirduinRPSFear,
+    // Objetos de equipo del NPC: armas y armaduras con sus propias hojas.
+    weapon: models.TirduinRPSWeapon,
+    armor: models.TirduinRPSArmor,
   }
+
+  // Explicitly set valid item types (must match system.json documentTypes.Item)
+  CONFIG.Item.types = Object.keys(CONFIG.Item.dataModels);
 
   // Active Effects are never copied to the Actor,
   // but will still apply to the Actor from within the Item

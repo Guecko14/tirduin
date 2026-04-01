@@ -2,7 +2,33 @@
  * Extend the basic Item with some very simple modifications.
  * @extends {Item}
  */
+import {
+  applyRollEdgeToFormula,
+  getRollEdgeFlavorSuffix,
+  promptRollConfirmation,
+} from '../helpers/roll-dialog.mjs';
+
 export class TirduinRPSItem extends Item {
+  // Declare all valid item types for this system
+  static TYPES = ['item', 'feature', 'spell', 'fear', 'weapon', 'armor'];
+
+  /**
+   * Override the schema to explicitly define valid item types
+   */
+  static defineSchema() {
+    const fields = foundry.data.fields;
+    const schema = super.defineSchema();
+
+    // Replace the type field with our own that accepts custom types
+    schema.type = new fields.StringField({
+      required: true,
+      choices: this.TYPES,
+      initial: 'item'
+    });
+
+    return schema;
+  }
+
   /**
    * Augment the basic Item data model with additional dynamic data.
    */
@@ -76,15 +102,22 @@ export class TirduinRPSItem extends Item {
     else {
       // Retrieve roll data.
       const rollData = this.getRollData();
+      const edgeMode = await promptRollConfirmation({
+        formula: rollData.formula,
+        rollData: rollData.actor,
+      });
+      if (edgeMode === null) return null;
+
+      const formula = applyRollEdgeToFormula(rollData.formula, edgeMode);
 
       // Invoke the roll and submit it to chat.
-      const roll = new Roll(rollData.formula, rollData.actor);
+      const roll = new Roll(formula, rollData.actor);
       // If you need to store the value first, uncomment the next line.
       // const result = await roll.evaluate();
       roll.toMessage({
         speaker: speaker,
         rollMode: rollMode,
-        flavor: label,
+        flavor: `${label}${getRollEdgeFlavorSuffix(edgeMode)}`,
       });
       return roll;
     }

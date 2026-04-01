@@ -1,0 +1,327 @@
+/* ================================================================
+   BASE SHEET STYLES
+   Estilos base compartidos por todas las sheets del sistema Tirduin.
+================================================================ */
+
+/* Fuente de los formularios de items. */
+.tirduin .item-form {
+  font-family: "Roboto", sans-serif;
+}
+
+/* Cabecera superior de las sheets de actor (contiene imagen y nombre). */
+.tirduin .sheet-header {
+  flex: 0 auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin-bottom: 10px;
+}
+.tirduin .sheet-header .profile-img {
+  flex: 0 0 100px;
+  height: 100px;
+  margin-right: 10px;
+}
+.tirduin .sheet-header .header-fields {
+  flex: 1;
+}
+.tirduin .sheet-header h1.charname {
+  height: 50px;
+  padding: 0px;
+  margin: 5px 0;
+  border-bottom: 0;
+}
+.tirduin .sheet-header h1.charname input {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+/* El cuerpo de la sheet ocupa el espacio restante verticalmente. */
+.tirduin .sheet-body,
+.tirduin .sheet-body .tab,
+.tirduin .sheet-body .tab .editor {
+  height: 100%;
+}
+
+/* Editor de texto enriquecido TinyMCE. */
+.tirduin .tox .tox-editor-container {
+  background: #fff;
+}
+.tirduin .tox .tox-edit-area {
+  padding: 0 8px;
+}
+
+/* ================================================================
+   SKILLS LIST SHARED
+   Estilos compartidos por la skill list de character y NPC sheet.
+================================================================ */
+
+.tirduin .skills-sheet .skills-list,
+.tirduin .npc-skills .skills-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+  width: 100%;
+  container-type: inline-size;
+  container-name: skills-list;
+}
+
+.tirduin .skills-sheet .skill-row,
+.tirduin .npc-skills .skill-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content minmax(0, 60px);
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 8px;
+  background: rgba(35, 35, 35, 0.6);
+  min-width: 0;
+}
+
+.tirduin .skills-sheet .skill-main,
+.tirduin .npc-skills .skill-main {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.tirduin .skills-sheet .skill-name,
+.tirduin .npc-skills .skill-name {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #fff;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.tirduin .skills-sheet .skill-ability,
+.tirduin .npc-skills .skill-ability {
+  font-size: 0.72rem;
+  color: #bbb;
+  font-style: normal;
+}
+
+.tirduin .skills-sheet .skill-total,
+.tirduin .npc-skills .skill-total {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #9ad;
+  min-width: 0;
+}
+
+.tirduin .skills-sheet .skill-extra,
+.tirduin .skills-sheet input[type=number],
+.tirduin .npc-skills .skill-extra,
+.tirduin .npc-skills input[type=number] {
+  width: 100%;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  background: #000;
+  color: #fff;
+  padding: 0 6px;
+  font-size: 0.75rem;
+  box-sizing: border-box;
+}
+
+/* Select compartido para skills (categoría/dado). */
+.tirduin .skills-sheet select,
+.tirduin .npc-skills select {
+  width: auto;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  color: #fff;
+  padding: 0 24px 0 6px;
+  font-size: 0.75rem;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  color-scheme: dark;
+  background-color: #050505;
+  background-image: linear-gradient(45deg, transparent 50%, #9ad 50%), linear-gradient(135deg, #9ad 50%, transparent 50%);
+  background-position: calc(100% - 14px) calc(50% - 3px), calc(100% - 8px) calc(50% - 3px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.tirduin .skills-sheet select:focus,
+.tirduin .npc-skills select:focus {
+  outline: none;
+  border-color: #9ad;
+  box-shadow: 0 0 0 1px rgba(153, 170, 221, 0.35), 0 0 6px rgba(0, 0, 0, 0.45);
+}
+
+.tirduin .skills-sheet select option,
+.tirduin .npc-skills select option {
+  background: #161616;
+  color: #f2f2f2;
+}
+
+.tirduin .skills-sheet select option:checked,
+.tirduin .npc-skills select option:checked {
+  background: #24405f;
+  color: #fff;
+}
+
+.tirduin .skills-sheet .skill-extra,
+.tirduin .npc-skills .skill-extra {
+  max-width: 50%;
+  width: 56px;
+  padding: 0 6px;
+}
+
+/* El bonus desaparece primero cuando el espacio se reduce. */
+@container skills-list (max-width: 560px) {
+  .skill-extra-wrap {
+    display: none;
+  }
+  .skill-row {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 90px);
+  }
+}
+
+/* Una sola columna cuando el espacio es muy reducido. */
+@container skills-list (max-width: 320px) {
+  .skills-list {
+    grid-template-columns: 1fr;
+  }
+  .skill-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 90px);
+  }
+}
+
+/* ================================================================
+   SHARED ITEMS LIST & EFFECTS
+   Usados en character sheet y otras vistas de inventario.
+================================================================ */
+
+.tirduin .resource-label {
+  font-weight: bold;
+}
+
+.tirduin .items-header {
+  height: 28px;
+  margin: 2px 0;
+  padding: 0;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.05);
+  border: 2px groove #eeede0;
+  font-weight: bold;
+}
+.tirduin .items-header > * {
+  font-size: 14px;
+  text-align: center;
+}
+.tirduin .items-header .item-name {
+  font-weight: bold;
+  padding-left: 5px;
+  text-align: left;
+  display: flex;
+}
+
+.tirduin .items-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  color: #444;
+}
+.tirduin .items-list .item-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tirduin .items-list .item-name {
+  flex: 2;
+  margin: 0;
+  overflow: hidden;
+  font-size: 13px;
+  text-align: left;
+  align-items: center;
+  display: flex;
+}
+.tirduin .items-list .item-name h3,
+.tirduin .items-list .item-name h4 {
+  margin: 0;
+  white-space: nowrap;
+  overflow-x: hidden;
+}
+.tirduin .items-list .item-controls {
+  display: flex;
+  flex: 0 0 100px;
+  justify-content: flex-end;
+}
+.tirduin .items-list .item-controls a {
+  font-size: 12px;
+  text-align: center;
+  margin: 0 6px;
+}
+.tirduin .items-list .item {
+  align-items: center;
+  padding: 0 2px;
+  border-bottom: 1px solid #c9c7b8;
+}
+.tirduin .items-list .item:last-child {
+  border-bottom: none;
+}
+.tirduin .items-list .item .item-name {
+  color: #191813;
+}
+.tirduin .items-list .item .item-name .item-image {
+  flex: 0 0 30px;
+  height: 30px;
+  background-size: 30px;
+  border: none;
+  margin-right: 5px;
+}
+.tirduin .items-list .item-prop {
+  text-align: center;
+  border-left: 1px solid #c9c7b8;
+  border-right: 1px solid #c9c7b8;
+  font-size: 12px;
+}
+.tirduin .items-list .items-header {
+  height: 28px;
+  margin: 2px 0;
+  padding: 0;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.05);
+  border: 2px groove #eeede0;
+  font-weight: bold;
+}
+.tirduin .items-list .items-header > * {
+  font-size: 12px;
+  text-align: center;
+}
+.tirduin .items-list .items-header .item-name {
+  padding-left: 5px;
+  text-align: left;
+}
+
+.tirduin .item-formula {
+  flex: 0 0 200px;
+  padding: 0 8px;
+}
+
+.tirduin .effects .item .effect-source,
+.tirduin .effects .item .effect-duration,
+.tirduin .effects .item .effect-controls {
+  text-align: center;
+  border-left: 1px solid #c9c7b8;
+  border-right: 1px solid #c9c7b8;
+  font-size: 12px;
+}
+.tirduin .effects .item .effect-controls {
+  border: none;
+}
