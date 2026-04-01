@@ -5,7 +5,7 @@
 }
 
 .rollable:hover, .rollable:focus {
-  color: #ffffff;
+  color: #000;
   text-shadow: 0 0 10px red;
   cursor: pointer;
 }
@@ -249,6 +249,297 @@
 .tirduin .tox .tox-edit-area {
   padding: 0 8px;
 }
+.tirduin .skills-sheet .skills-list,
+.tirduin .npc-skills .skills-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+  width: 100%;
+}
+.tirduin .skills-sheet .skill-row,
+.tirduin .npc-skills .skill-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 90px) minmax(0, 80px);
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 8px;
+  background: rgba(35, 35, 35, 0.6);
+  min-width: 0;
+}
+.tirduin .skills-sheet .skill-main,
+.tirduin .npc-skills .skill-main {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+}
+.tirduin .skills-sheet .skill-name,
+.tirduin .npc-skills .skill-name {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #fff;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.tirduin .skills-sheet .skill-ability,
+.tirduin .npc-skills .skill-ability {
+  font-size: 0.72rem;
+  color: #bbb;
+  font-style: normal;
+}
+.tirduin .skills-sheet .skill-total,
+.tirduin .npc-skills .skill-total {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #9ad;
+  min-width: 0;
+}
+.tirduin .skills-sheet select,
+.tirduin .skills-sheet .skill-extra,
+.tirduin .skills-sheet input[type=number],
+.tirduin .npc-skills select,
+.tirduin .npc-skills .skill-extra,
+.tirduin .npc-skills input[type=number] {
+  width: 100%;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  background: #000;
+  color: #fff;
+  padding: 0 6px;
+  font-size: 0.75rem;
+  box-sizing: border-box;
+}
+.tirduin .skills-sheet .skill-extra,
+.tirduin .npc-skills .skill-extra {
+  max-width: 70px;
+}
+@media (max-width: 950px) {
+  .tirduin .skills-sheet .skills-list,
+  .tirduin .npc-skills .skills-list {
+    grid-template-columns: 1fr;
+  }
+  .tirduin .skills-sheet .skill-row,
+  .tirduin .npc-skills .skill-row {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+  }
+  .tirduin .skills-sheet .skill-name,
+  .tirduin .skills-sheet .skill-total,
+  .tirduin .skills-sheet select,
+  .tirduin .skills-sheet .skill-extra,
+  .tirduin .npc-skills .skill-name,
+  .tirduin .npc-skills .skill-total,
+  .tirduin .npc-skills select,
+  .tirduin .npc-skills .skill-extra {
+    width: 100%;
+  }
+  .tirduin .skills-sheet .skill-name,
+  .tirduin .npc-skills .skill-name {
+    grid-column: 1/-1;
+  }
+}
+.tirduin {
+  /* =========================
+     NPC SHEET BASE
+  ========================= */
+}
+.tirduin .npc-sheet {
+  padding: 10px;
+  font-family: "Signika", sans-serif;
+  color: #e6e6e6;
+}
+.tirduin {
+  /* =========================
+     BLOQUE PRINCIPAL
+  ========================= */
+}
+.tirduin .npc-main {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.tirduin .npc-stat {
+  flex: 1;
+  background: #1e1e1e;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 6px;
+  text-align: center;
+}
+.tirduin .npc-stat label {
+  display: block;
+  font-size: 12px;
+  color: #aaa;
+  margin-bottom: 2px;
+}
+.tirduin .npc-stat input {
+  width: 100%;
+  background: #111;
+  border: 1px solid #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 4px;
+}
+.tirduin .hp-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  margin-top: 3px;
+}
+.tirduin {
+  /* =========================
+     ATRIBUTOS
+  ========================= */
+}
+.tirduin .npc-attributes {
+  margin-bottom: 10px;
+  padding: 6px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+}
+.tirduin .attr-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #151515;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 4px;
+  width: 100%;
+}
+.tirduin .attr-box input {
+  width: 40px;
+  text-align: center;
+  background: #111;
+  border: 1px solid #555;
+  color: #fff;
+  border-radius: 4px;
+  margin-bottom: 2px;
+}
+.tirduin .attr-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+.tirduin .attr-row span {
+  font-size: 11px;
+  color: #aaa;
+}
+.tirduin .attr-row input {
+  width: 40px;
+  text-align: center;
+  background: #111;
+  border: 1px solid #555;
+  color: #fff;
+  border-radius: 4px;
+}
+.tirduin {
+  /* =========================
+     BLOQUES DE TEXTO
+  ========================= */
+}
+.tirduin .npc-skills,
+.tirduin .npc-special,
+.tirduin .npc-abilities,
+.tirduin .npc-fear {
+  margin-bottom: 8px;
+  padding: 6px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+}
+.tirduin .npc-special label,
+.tirduin .npc-abilities label,
+.tirduin .npc-fear label {
+  display: block;
+  font-size: 12px;
+  color: #bbb;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 2px;
+}
+.tirduin textarea {
+  width: 100%;
+  min-height: 50px;
+  resize: vertical;
+  background: #111;
+  border: 1px solid #555;
+  color: #ddd;
+  font-size: 12px;
+  padding: 4px;
+  border-radius: 4px;
+}
+.tirduin .npc-abilities textarea {
+  min-height: 70px;
+}
+.tirduin .npc-fear textarea {
+  min-height: 60px;
+  border: 1px solid #6b1f1f;
+}
+.tirduin input:focus,
+.tirduin textarea:focus {
+  outline: none;
+  border: 1px solid #888;
+  box-shadow: 0 0 4px #000;
+}
+.tirduin small {
+  font-size: 10px;
+  color: #777;
+}
+.tirduin .npc-header {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.tirduin .npc-portrait {
+  flex: 0 0 100px;
+}
+.tirduin .profile-img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border: 2px solid #444;
+  border-radius: 6px;
+  background: #111;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.tirduin .profile-img:hover {
+  border-color: #888;
+  box-shadow: 0 0 6px #000;
+}
+.tirduin .npc-header-stats {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.tirduin .npc-name input {
+  width: 100%;
+  font-size: 18px;
+  font-weight: bold;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #444;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.tirduin .npc-name input:focus {
+  outline: none;
+  border-bottom: 1px solid #888;
+}
+.tirduin .npc-header .npc-main {
+  margin: 0;
+}
 .tirduin .resource-label {
   font-weight: bold;
 }
@@ -363,279 +654,4 @@
 }
 .tirduin .effects .item .effect-controls {
   border: none;
-}
-
-/* =========================
-   NPC SHEET BASE
-========================= */
-
-.npc-sheet {
-  padding: 10px;
-  font-family: "Signika", sans-serif;
-  color: #e6e6e6;
-}
-
-/* =========================
-   BLOQUE PRINCIPAL
-========================= */
-
-.npc-main {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.npc-stat {
-  flex: 1;
-  background: #1e1e1e;
-  border: 1px solid #444;
-  border-radius: 6px;
-  padding: 6px;
-  text-align: center;
-}
-
-.npc-stat label {
-  display: block;
-  font-size: 12px;
-  color: #aaa;
-  margin-bottom: 2px;
-}
-
-.npc-stat input {
-  width: 100%;
-  background: #111;
-  border: 1px solid #555;
-  color: #fff;
-  text-align: center;
-  border-radius: 4px;
-}
-
-.hp-row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 4px;
-  margin-top: 3px;
-}
-
-/* =========================
-   ATRIBUTOS
-========================= */
-
-.npc-attributes {
-  margin-bottom: 10px;
-  padding: 6px;
-  background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 6px;
-}
-
-.attr-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: #151515;
-  border: 1px solid #333;
-  border-radius: 6px;
-  padding: 4px;
-  width: 100%;
-}
-
-/* Input valor */
-.attr-box input {
-  width: 40px;
-  text-align: center;
-  background: #111;
-  border: 1px solid #555;
-  color: #fff;
-  border-radius: 4px;
-  margin-bottom: 2px;
-}
-
-.attr-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 6px;
-}
-
-.attr-row span {
-  font-size: 11px;
-  color: #aaa;
-}
-
-.attr-row input {
-  width: 40px;
-  text-align: center;
-  background: #111;
-  border: 1px solid #555;
-  color: #fff;
-  border-radius: 4px;
-}
-
-/* Nombre atributo */
-.attr-name {
-  font-size: 10px;
-  color: #aaa;
-  margin-bottom: 2px;
-}
-
-
-
-/* =========================
-   BLOQUES DE TEXTO
-========================= */
-
-.npc-skills,
-.npc-special,
-.npc-abilities,
-.npc-fear {
-  margin-bottom: 8px;
-  padding: 6px;
-  background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 6px;
-}
-
-.npc-skills label,
-.npc-special label,
-.npc-abilities label,
-.npc-fear label {
-  display: block;
-  font-size: 12px;
-  color: #bbb;
-  margin-bottom: 4px;
-  border-bottom: 1px solid #333;
-  padding-bottom: 2px;
-}
-
-/* =========================
-   TEXTAREA
-========================= */
-
-textarea {
-  width: 100%;
-  min-height: 50px;
-  resize: vertical;
-  background: #111;
-  border: 1px solid #555;
-  color: #ddd;
-  font-size: 12px;
-  padding: 4px;
-  border-radius: 4px;
-}
-
-/* =========================
-   ACCIONES DESTACADAS
-========================= */
-
-.npc-abilities textarea {
-  min-height: 70px;
-}
-
-.npc-fear textarea {
-  min-height: 60px;
-  border: 1px solid #6b1f1f;
-}
-
-/* =========================
-   HOVER / UX
-========================= */
-
-input:focus,
-textarea:focus {
-  outline: none;
-  border: 1px solid #888;
-  box-shadow: 0 0 4px #000;
-}
-
-/* =========================
-   PEQUEÑOS DETALLES
-========================= */
-
-small {
-  font-size: 10px;
-  color: #777;
-}
-
-/* =========================
-   OPCIONAL: ESTILO MÁS "MUERTE"
-========================= */
-
-.npc-sheet {
-  background: linear-gradient(180deg, #1a1a1a 0%, #121212 100%);
-  border: 1px solid #2a2a2a;
-  border-radius: 8px;
-}
-
-/* =========================
-   HEADER NPC
-========================= */
-
-.npc-header {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-/* =========================
-   IMAGEN
-========================= */
-
-.npc-portrait {
-  flex: 0 0 100px;
-}
-
-.profile-img {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  border: 2px solid #444;
-  border-radius: 6px;
-  background: #111;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.profile-img:hover {
-  border-color: #888;
-  box-shadow: 0 0 6px #000;
-}
-
-/* =========================
-   BLOQUE DERECHO
-========================= */
-
-.npc-header-stats {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-/* =========================
-   NOMBRE
-========================= */
-
-.npc-name input {
-  width: 100%;
-  font-size: 18px;
-  font-weight: bold;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid #444;
-  color: #fff;
-  margin-bottom: 6px;
-}
-
-.npc-name input:focus {
-  outline: none;
-  border-bottom: 1px solid #888;
-}
-
-/* =========================
-   AJUSTE STATS EN HEADER
-========================= */
-
-.npc-header .npc-main {
-  margin: 0;
 }

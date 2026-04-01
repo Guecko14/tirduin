@@ -1,6 +1,6 @@
 {
   "name": "tirduin",
-  "version": "2.0.0",
+  "version": "0.1.1",
   "description": "CSS compiler for the TirduinRPS system",
   "scripts": {
     "build": "sass src/scss/tirduin.scss css/tirduin.css --style=expanded --no-source-map",

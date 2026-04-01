@@ -74,10 +74,6 @@
             min="-5" max="5"
             onkeyup="if(value<-5) value=-5; if(value>5) value=5;" />
 
-          <span
-            class="attr-mod {{#if (lt ability.mod 0)}}neg{{else}}pos{{/if}}">
-            {{numberFormat ability.mod decimals=0 sign=true}}
-          </span>
         </div>
         {{/each}}
 
@@ -86,8 +82,7 @@
 
     <!-- HABILIDADES -->
     <div class="npc-skills">
-      <label>Habilidades</label>
-      <textarea name="system.skills">{{system.skills}}</textarea>
+      {{> "systems/tirduin/templates/actor/parts/actor-skills.hbs"}}
     </div>
 
     <!-- ESPECIALES -->

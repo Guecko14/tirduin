@@ -22,7 +22,22 @@ export default class TirduinRPSNPC extends TirduinRPSActorBase {
       });
       return obj;
     }, {}));
-    
+
+    const skillNames = [
+      'atletismo', 'sigilo', 'juegoManos', 'acrobacias',
+      'investigacion', 'artesania', 'historia', 'religion', 'aether', 'naturaleza', 'medicina',
+      'tratoAnimales', 'percepcion', 'perspicacia', 'supervivencia',
+      'persuasion', 'enganar', 'interpretacion', 'intimidacion'
+    ];
+
+    schema.skills = new fields.SchemaField(skillNames.reduce((obj, skill) => {
+      obj[skill] = new fields.SchemaField({
+        rank: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0, max: 5 }),
+        bonus: new fields.NumberField({ ...requiredInteger, initial: 0 })
+      });
+      return obj;
+    }, {}));
+
     return schema
   }
 
@@ -37,6 +52,29 @@ export default class TirduinRPSNPC extends TirduinRPSActorBase {
 
     this.attributes.armorClass.label = game.i18n.localize(CONFIG.TIRDUIN_RPS.attributes.armorClass);
     this.attributes.speed.label = game.i18n.localize(CONFIG.TIRDUIN_RPS.attributes.speed);
+
+    const skillAbilities = {
+      atletismo: 'vig',
+      sigilo: 'agil',
+      juegoManos: 'agil',
+      acrobacias: 'agil',
+      tratoAnimales: 'inst',
+      percepcion: 'inst',
+      perspicacia: 'inst',
+      supervivencia: 'inst',
+      persuasion: 'pre',
+      enganar: 'pre',
+      interpretacion: 'pre',
+      intimidacion: 'pre'
+    };
+
+    if (this.skills) {
+      for (const key of Object.keys(this.skills)) {
+        const skill = this.skills[key];
+        skill.label = game.i18n.localize(CONFIG.TIRDUIN_RPS.skills[key]) || key;
+        skill.ability = skillAbilities[key] ? skillAbilities[key].toUpperCase() : '-';
+      }
+    }
 
   }
 

@@ -25,6 +25,27 @@
         "short": "VEL"
       }
     },
+    "Skills": {
+      "atletismo": "Atletismo",
+      "sigilo": "Sigilo",
+      "juegoManos": "Juego de Manos",
+      "acrobacias": "Acrobacias",
+      "investigacion": "Investigación",
+      "artesania": "Artesanía",
+      "historia": "Historia",
+      "religion": "Religión",
+      "aether": "Aether",
+      "naturaleza": "Naturaleza",
+      "medicina": "Medicina",
+      "tratoAnimales": "Trato de Animales",
+      "percepcion": "Percepción",
+      "perspicacia": "Perspicacia",
+      "supervivencia": "Supervivencia",
+      "persuasion": "Persuasión",
+      "enganar": "Engañar",
+      "interpretacion": "Interpretación",
+      "intimidacion": "Intimidación"
+    },
     "SheetLabels": {
       "Actor": "TirduinRPS Actor Sheet",
       "Item": "TirduinRPS Item Sheet"
