@@ -308,7 +308,7 @@ export class TirduinRPSActorSheet extends ActorSheet {
     const name = data.category === 'fear'
       ? 'Nueva accion de miedo'
       : data.category === 'special'
-        ? 'Nueva entrada especial'
+        ? 'Nueva habilidad especial'
       : `New ${type.capitalize()}`;
     // Prepare the item object.
     const itemData = {
