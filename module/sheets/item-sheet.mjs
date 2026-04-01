@@ -27,6 +27,14 @@ export class TirduinRPSItemSheet extends ItemSheet {
   /** @override */
   get template() {
     const path = 'systems/tirduin/templates/item';
+    // Las acciones de miedo reutilizan el tipo feature, pero con una sheet dedicada.
+    if (this.item.type === 'feature' && this.item.system.category === 'fear') {
+      return `${path}/item-fear-sheet.hbs`;
+    }
+    // Los especiales del NPC reutilizan feature, pero con una sheet simplificada.
+    if (this.item.type === 'feature' && this.item.system.category === 'special') {
+      return `${path}/item-special-sheet.hbs`;
+    }
     // Return a single sheet for all item types.
     // return `${path}/item-sheet.hbs`;
 
@@ -39,15 +47,15 @@ export class TirduinRPSItemSheet extends ItemSheet {
 
   /** @override */
   async getData() {
+    // Construye el contexto comun para cualquier sheet de item.
     // Retrieve base data structure.
     const context = super.getData();
 
     // Use a safe clone of the item data for further operations.
     const itemData = this.document.toPlainObject();
 
-    // Enrich description info for display
-    // Enrichment turns text like `[[/r 1d20]]` into buttons
-    context.enrichedDescription = await TextEditor.enrichHTML(
+    // Se mantiene el enriquecido para las sheets que usan editor rico.
+    context.enrichedDescription = await foundry.applications.ux.TextEditor.implementation.enrichHTML(
       this.item.system.description,
       {
         // Whether to show secret blocks in the finished html
@@ -68,7 +76,7 @@ export class TirduinRPSItemSheet extends ItemSheet {
     // Adding a pointer to CONFIG.TIRDUIN_RPS
     context.config = CONFIG.TIRDUIN_RPS;
 
-    // Prepare active effects for easier access
+    // Normaliza efectos para el partial comun de efectos.
     context.effects = prepareActiveEffectCategories(this.item.effects);
 
     return context;

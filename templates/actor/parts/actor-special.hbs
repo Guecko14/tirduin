@@ -1,0 +1,39 @@
+<div class="special-actions">
+
+  {{!-- Cabecera del tab: titulo del bloque y accion para crear una nueva entrada especial --}}
+  <div class="special-actions-header">
+    <h2>Especiales</h2>
+    <a class="item-create special-add-btn" data-type="feature" data-category="special" title="Nueva entrada especial">
+      <i class="fas fa-plus"></i> Nueva
+    </a>
+  </div>
+
+  {{!-- Listado de entradas especiales ya creadas para este NPC --}}
+  {{#if specialActions.length}}
+  <ul class="special-list">
+    {{#each specialActions as |action|}}
+    <li class="special-item" data-item-id="{{action._id}}">
+
+      {{!-- Fila principal: nombre y controles de edicion/borrado --}}
+      <div class="special-item-main">
+        <span class="special-name">{{action.name}}</span>
+        <div class="special-controls">
+          <a class="item-edit special-edit" title="Editar"><i class="fas fa-edit"></i></a>
+          <a class="item-delete special-delete" title="Eliminar"><i class="fas fa-trash"></i></a>
+        </div>
+      </div>
+
+      {{!-- Resumen visible de la descripcion para no abrir la sheet en cada consulta --}}
+      {{#if action.system.description}}
+      <div class="special-desc">{{action.system.description}}</div>
+      {{/if}}
+
+    </li>
+    {{/each}}
+  </ul>
+  {{else}}
+  {{!-- Estado vacio cuando el NPC todavia no tiene especiales --}}
+  <p class="special-empty">No hay entradas especiales. Usa «Nueva» para añadir una.</p>
+  {{/if}}
+
+</div>

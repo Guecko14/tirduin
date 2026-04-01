@@ -1,0 +1,18 @@
+<form class="{{cssClass}} special-item-sheet" autocomplete="off">
+
+  {{!-- Panel principal de edicion: nombre y descripcion en una sola vista --}}
+  <section class="special-sheet-panel">
+    {{!-- Fila superior con el nombre visible del rasgo especial --}}
+    <div class="special-field special-field-name">
+      <label for="name">Nombre</label>
+      <input name="name" type="text" value="{{item.name}}" placeholder="Nombre de la entrada especial" />
+    </div>
+
+    {{!-- Campo largo para describir el efecto o la regla del especial --}}
+    <div class="special-field special-field-description">
+      <label for="system.description">Descripción</label>
+      <textarea name="system.description" placeholder="Describe qué hace esta entrada especial">{{system.description}}</textarea>
+    </div>
+  </section>
+
+</form>

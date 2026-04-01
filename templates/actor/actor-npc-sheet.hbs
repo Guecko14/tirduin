@@ -80,18 +80,18 @@
       </div>
     </div>
 
-    <!-- TABS LAYOUT -->
+    <!-- TABS LAYOUT: contenedor lateral para navegacion y contenido -->
     <div class="tabs-layout">
 
-    <!-- TABS NAVIGATION -->
+    <!-- TABS NAVIGATION: accesos rapidos a los bloques editables del NPC -->
     <nav class="sheet-tabs tabs" data-group="npc-sections">
       <a class="item active" data-tab="skills">Habilidades</a>
       <a class="item" data-tab="special">Especial</a>
       <a class="item" data-tab="abilities">Abilities</a>
-      <a class="item" data-tab="fear">Fear</a>
+      <a class="item" data-tab="fear">Miedo</a>
     </nav>
 
-    <!-- TABS CONTENT -->
+    <!-- TABS CONTENT: cada panel se muestra segun el tab activo -->
     <div class="tabs-content">
 
       <!-- HABILIDADES TAB -->
@@ -101,12 +101,9 @@
         </div>
       </div>
 
-      <!-- ESPECIALES TAB -->
+      <!-- ESPECIALES TAB: lista y gestiona entradas especiales como items del NPC -->
       <div class="tab" data-tab="special">
-        <div class="npc-special">
-          <label>Especial</label>
-          <textarea name="system.special">{{system.special}}</textarea>
-        </div>
+        {{> "systems/tirduin/templates/actor/parts/actor-special.hbs"}}
       </div>
 
       <!-- ABILITIES TAB -->
@@ -117,12 +114,9 @@
         </div>
       </div>
 
-      <!-- FEAR TAB -->
+      <!-- MIEDO TAB: lista y gestiona acciones de miedo como items del NPC -->
       <div class="tab" data-tab="fear">
-        <div class="npc-fear">
-          <label>Fear</label>
-          <textarea name="system.fear">{{system.fear}}</textarea>
-        </div>
+        {{> "systems/tirduin/templates/actor/parts/actor-fear.hbs"}}
       </div>
 
     </div>
