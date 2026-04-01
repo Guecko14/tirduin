@@ -229,6 +229,22 @@ export class TirduinRPSActorSheet extends ActorSheet {
     // Everything below here is only needed if the sheet is editable
     if (!this.isEditable) return;
 
+    // Auto-save changes on input
+    html.on('change', 'input[type="number"], input[type="text"], select, textarea', (ev) => {
+      const field = $(ev.currentTarget);
+      const name = field.attr('name');
+      if (!name) return;
+
+      let value = field.val();
+      if (field.attr('type') === 'number') {
+        value = Number(value) || 0;
+      }
+
+      const updateData = {};
+      updateData[name] = value;
+      this.actor.update(updateData);
+    });
+
     // Add Inventory Item
     html.on('click', '.item-create', this._onItemCreate.bind(this));
 
