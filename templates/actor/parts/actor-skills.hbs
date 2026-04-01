@@ -8,10 +8,9 @@
         <div class="skill-row">
 
             <div class="skill-main rollable"
-                title="{{skill.label}} ({{skill.ability}})"
+                title="{{skill.label}}"
                 data-roll="1d20+{{skill.total}}" data-label="{{skill.label}}">
-                <span class="skill-name">{{skill.label}}</span>
-                <span class="skill-ability">({{skill.ability}})</span>
+                <span class="skill-name">{{skill.labelShort}}</span>
                 <span class="skill-total">({{numberFormat skill.total
                     sign=true}})</span>
             </div>

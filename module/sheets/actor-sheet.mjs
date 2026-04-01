@@ -101,9 +101,12 @@ export class TirduinRPSActorSheet extends ActorSheet {
         const abilityKey = abilityMapping[key] || '-';
         const abilityVal = Number(context.system?.abilities?.[abilityKey.toLowerCase()]?.value) || 0;
 
+        const label = skill.label || CONFIG.TIRDUIN_RPS.skills?.[key] || key;
+        const labelShort = label.length > 18 ? `${label.slice(0, 15)}…` : label;
         return {
           key,
-          label: skill.label || CONFIG.TIRDUIN_RPS.skills?.[key] || key,
+          label,
+          labelShort,
           ability: abilityKey,
           rank,
           bonus,
