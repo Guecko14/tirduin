@@ -18,7 +18,7 @@ export class TirduinRPSActorSheet extends ActorSheet {
         {
           navSelector: '.sheet-tabs',
           contentSelector: '.sheet-body',
-          initial: 'features',
+          initial: 'skills',
         },
       ],
     });
@@ -90,7 +90,9 @@ export class TirduinRPSActorSheet extends ActorSheet {
       intimidacion: 'PRE'
     };
 
-    const skillKeys = this.actor.type === 'npc' ? npcSkillKeys : Object.keys(skills);
+    const skillKeys = this.actor.type === 'npc'
+      ? npcSkillKeys
+      : Object.keys(CONFIG.TIRDUIN_RPS.skills || {});
 
     context.system.skillList = skillKeys
       .filter((key) => Object.prototype.hasOwnProperty.call(skills, key))
