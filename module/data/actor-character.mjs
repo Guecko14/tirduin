@@ -11,6 +11,9 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
       level: new fields.SchemaField({
         value: new fields.NumberField({ ...requiredInteger, initial: 1 })
       }),
+      armorClass: new fields.SchemaField({
+        value: new fields.NumberField({ ...requiredInteger, initial: 10, min: 0 })
+      }),
     });
 
     // Iterate over ability names and create a new SchemaField for each.
@@ -32,6 +35,11 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
       // Handle ability label localization.
       this.abilities[key].label = game.i18n.localize(CONFIG.TIRDUIN_RPS.abilities[key]) ?? key;
     }
+
+    this.attributes.level.label = game.i18n.localize(CONFIG.TIRDUIN_RPS.attributes.level);
+    this.attributes.armorClass.label = game.i18n.localize(CONFIG.TIRDUIN_RPS.attributes.armorClass);
+    this.attributes.speed.label = game.i18n.localize(CONFIG.TIRDUIN_RPS.attributes.speed);
+
   }
 
   getRollData() {

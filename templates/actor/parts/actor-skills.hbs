@@ -1,0 +1,47 @@
+<div class="skills-sheet">
+
+    <h2>Habilidades</h2>
+
+    <div class="skills-list">
+
+        {{#each system.skillList as |skill|}}
+        <div class="skill-row">
+
+            <div class="skill-main rollable"
+                title="{{skill.label}} ({{skill.ability}})"
+                data-roll="1d20+{{skill.total}}" data-label="{{skill.label}}">
+                <span class="skill-name">{{skill.label}}</span>
+                <span class="skill-ability">({{skill.ability}})</span>
+                <span class="skill-total">({{numberFormat skill.total
+                    sign=true}})</span>
+            </div>
+
+            <div class="skill-proficiency">
+                <select name="system.skills.{{skill.key}}.rank">
+                    <option value="0" {{#if (eq skill.rank
+                        0)}}selected{{/if}}>—</option>
+                    <option value="1" {{#if (eq skill.rank
+                        1)}}selected{{/if}}>Basica</option>
+                    <option value="2" {{#if (eq skill.rank
+                        2)}}selected{{/if}}>Intermedia</option>
+                    <option value="3" {{#if (eq skill.rank
+                        3)}}selected{{/if}}>Avanzada</option>
+                    <option value="4" {{#if (eq skill.rank
+                        4)}}selected{{/if}}>Experta</option>
+                    <option value="5" {{#if (eq skill.rank
+                        5)}}selected{{/if}}>Maestra</option>
+                </select>
+            </div>
+
+            <div class="skill-extra-wrap">
+                <input class="skill-extra" type="number"
+                    name="system.skills.{{skill.key}}.bonus"
+                    value="{{skill.bonus}}" />
+            </div>
+
+        </div>
+        {{/each}}
+
+    </div>
+
+</div>

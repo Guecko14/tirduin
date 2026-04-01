@@ -1,11 +1,50 @@
 {
   "TIRDUIN_RPS": {
     "Ability": {
-      "Vig": { "long": "Vigor", "abbr": "vig" },
-      "Agil": { "long": "Agilidad", "abbr": "agil" },
-      "Ment": { "long": "Mente", "abbr": "ment" },
-      "Inst": { "long": "Instinto", "abbr": "inst" },
-      "Pre": { "long": "Precencia", "abbr": "pre" }
+      "Vig": { "long": "Vigor", "abbr": "Vig" },
+      "Agil": { "long": "Agilidad", "abbr": "Agil" },
+      "Ment": { "long": "Mente", "abbr": "Ment" },
+      "Inst": { "long": "Instinto", "abbr": "Inst" },
+      "Pre": { "long": "Precencia", "abbr": "Pre" }
+    },
+    "attributes": {
+      "level": {
+        "long": "Nivel",
+        "short": "NVL"
+      },
+      "exp": {
+        "long": "Experiencia",
+        "short": "EXP"
+      },
+      "armorClass": {
+        "long": "Clase de Armadura",
+        "short": "CA"
+      },
+      "speed": {
+        "long": "Velocidad",
+        "short": "VEL"
+      }
+    },
+    "Skills": {
+      "atletismo": "Atletismo",
+      "sigilo": "Sigilo",
+      "juegoManos": "Juego de Manos",
+      "acrobacias": "Acrobacias",
+      "investigacion": "Investigación",
+      "artesania": "Artesanía",
+      "historia": "Historia",
+      "religion": "Religión",
+      "aether": "Aether",
+      "naturaleza": "Naturaleza",
+      "medicina": "Medicina",
+      "tratoAnimales": "Trato de Animales",
+      "percepcion": "Percepción",
+      "perspicacia": "Perspicacia",
+      "supervivencia": "Supervivencia",
+      "persuasion": "Persuasión",
+      "enganar": "Engañar",
+      "interpretacion": "Interpretación",
+      "intimidacion": "Intimidación"
     },
     "SheetLabels": {
       "Actor": "TirduinRPS Actor Sheet",

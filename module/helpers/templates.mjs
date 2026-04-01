@@ -10,6 +10,7 @@ export const preloadHandlebarsTemplates = async function () {
     'systems/tirduin/templates/actor/parts/actor-items.hbs',
     'systems/tirduin/templates/actor/parts/actor-spells.hbs',
     'systems/tirduin/templates/actor/parts/actor-effects.hbs',
+    'systems/tirduin/templates/actor/parts/actor-skills.hbs',
     // Item partials
     'systems/tirduin/templates/item/parts/item-effects.hbs',
   ]);

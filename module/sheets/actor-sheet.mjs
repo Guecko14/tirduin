@@ -60,6 +60,57 @@ export class TirduinRPSActorSheet extends ActorSheet {
       this._prepareItems(context);
     }
 
+    // Ensure skills are represented as a normalized list for templates.
+    const skills = context.system?.skills || {};
+    const npcSkillKeys = [
+      'atletismo', 'sigilo', 'juegoManos', 'acrobacias',
+      'tratoAnimales', 'percepcion', 'perspicacia', 'supervivencia',
+      'persuasion', 'enganar', 'interpretacion', 'intimidacion'
+    ];
+
+    const abilityMapping = {
+      atletismo: 'VIG',
+      sigilo: 'AGIL',
+      juegoManos: 'AGIL',
+      acrobacias: 'AGIL',
+      investigacion: 'MENT',
+      artesania: 'MENT',
+      historia: 'MENT',
+      religion: 'MENT',
+      aether: 'MENT',
+      naturaleza: 'MENT',
+      medicina: 'MENT',
+      tratoAnimales: 'INST',
+      percepcion: 'INST',
+      perspicacia: 'INST',
+      supervivencia: 'INST',
+      persuasion: 'PRE',
+      enganar: 'PRE',
+      interpretacion: 'PRE',
+      intimidacion: 'PRE'
+    };
+
+    const skillKeys = this.actor.type === 'npc' ? npcSkillKeys : Object.keys(skills);
+
+    context.system.skillList = skillKeys
+      .filter((key) => Object.prototype.hasOwnProperty.call(skills, key))
+      .map((key) => {
+        const skill = skills[key] || {};
+        const rank = Number(skill.rank) || 0;
+        const bonus = Number(skill.bonus) || 0;
+        const abilityKey = abilityMapping[key] || '-';
+        const abilityVal = Number(context.system?.abilities?.[abilityKey.toLowerCase()]?.value) || 0;
+
+        return {
+          key,
+          label: skill.label || CONFIG.TIRDUIN_RPS.skills?.[key] || key,
+          ability: abilityKey,
+          rank,
+          bonus,
+          total: abilityVal + rank + bonus
+        };
+    });
+
     // Enrich biography info for display
     // Enrichment turns text like `[[/r 1d20]]` into buttons
     context.enrichedBiography = await TextEditor.enrichHTML(
