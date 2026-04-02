@@ -109,6 +109,7 @@
   border-left: 2px solid rgba(154, 173, 221, 0.3);
   overflow: hidden;
   display: -webkit-box;
+  line-clamp: 2;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
@@ -161,12 +162,36 @@
 
 .npc-armor-col-name      { flex: 2;       font-size: 0.82rem; color: #e0e0e0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .npc-armor-col-cat       { flex: 1;       font-size: 0.75rem; color: #bbb; text-align: center; }
-.npc-armor-col-ca        { flex: 0 0 34px; font-size: 0.8rem;  color: #7ec8a0; text-align: center; font-weight: 700; }
-.npc-armor-col-ca-broken { flex: 0 0 50px; font-size: 0.75rem; color: #c0a07e; text-align: center; }
+.npc-armor-col-ca        { flex: 0 0 50px; font-size: 0.72rem;  color: #7ec8a0; text-align: center; font-weight: 700; }
+.npc-armor-col-ca-broken { flex: 0 0 50px; font-size: 0.7rem; color: #c0a07e; text-align: center; }
 .npc-armor-col-vd        { flex: 0 0 40px; font-size: 0.75rem; color: #9ad; text-align: center; }
-.npc-armor-col-ra        { flex: 0 0 46px; font-size: 0.75rem; color: #bbb; text-align: center; }
+.npc-armor-col-ra        { flex: 0 0 56px; font-size: 0.75rem; color: #bbb; text-align: center; }
+.npc-armor-col-resistance { flex: 0 0 28px; font-size: 0.75rem; color: #bbb; text-align: center; }
+.npc-armor-col-damage-type { flex: 0 0 68px; font-size: 0.67rem; color: #bbb; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.npc-armor-col-vigor     { flex: 0 0 28px; font-size: 0.75rem; color: #bbb; text-align: center; }
+.npc-armor-col-broken    { flex: 0 0 42px; font-size: 0.75rem; color: #c77; text-align: center; }
 .npc-armor-col-stealth   { flex: 0 0 44px; font-size: 0.75rem; color: #888; text-align: center; }
-.npc-armor-col-controls  { flex: 0 0 44px; display: flex; justify-content: flex-end; }
+.npc-armor-col-controls  { flex: 0 0 64px; display: flex; justify-content: flex-end; }
+
+.armor-equip-toggle {
+  color: #666;
+  cursor: pointer;
+}
+.armor-equip-toggle:hover {
+  color: #9ad;
+}
+.armor-equip-toggle.is-equipped {
+  color: #f0c070;
+  text-shadow: 0 0 6px rgba(240, 192, 112, 0.4);
+}
+
+.npc-armor-roll-vd {
+  cursor: pointer;
+  text-decoration: underline dotted rgba(154, 173, 221, 0.55);
+}
+.npc-armor-roll-vd:hover {
+  color: #d6e7ff;
+}
 
 /* ================================================================
    WEAPON ITEM SHEET
@@ -286,12 +311,42 @@
   flex-wrap: wrap;
 }
 
+.armor-row-defense {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(62px, 1fr));
+  gap: 8px;
+  align-items: end;
+}
+
 .armor-field {
   display: flex;
   flex-direction: column;
   gap: 4px;
   flex: 1;
   min-width: 70px;
+}
+.armor-field-compact {
+  flex: 0 0 68px;
+  min-width: 68px;
+}
+.armor-field-vd {
+  flex: 0 0 56px;
+  min-width: 56px;
+}
+.armor-row-defense .armor-field-compact,
+.armor-row-defense .armor-field-vd {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.armor-row-defense .armor-field label {
+  white-space: nowrap;
+}
+.armor-field-max-agi-broken {
+  min-width: 78px;
+}
+.armor-field-vd input {
+  text-align: center;
+  padding: 4px 2px;
 }
 .armor-field label {
   font-size: 0.72rem;
@@ -360,8 +415,31 @@
   gap: 8px;
   min-width: 60px;
 }
+.armor-field-broken {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  min-width: 60px;
+}
 .armor-field-stealth input[type="checkbox"] {
   width: 16px;
   height: 16px;
   margin: 0;
+}
+.armor-field-broken input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+@media (max-width: 860px) {
+  .armor-row-defense {
+    grid-template-columns: repeat(3, minmax(62px, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .armor-row-defense {
+    grid-template-columns: repeat(2, minmax(62px, 1fr));
+  }
 }

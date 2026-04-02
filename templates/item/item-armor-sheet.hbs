@@ -27,22 +27,45 @@
             </select>
         </div>
 
-        {{!-- Fila de valores de defensa: CA, CA rota, VD --}}
+        {{!-- Fila de valores de defensa: CA + Agi max, CA rota + Agi max rota,
+        VD --}}
         <div class="armor-row armor-row-defense">
 
-            <div class="armor-field">
+            {{#if (eq system.category 'escudo')}}
+            <div class="armor-field armor-field-compact armor-field-defense">
+                <label for="system.bonus">Bonif.</label>
+                <input name="system.bonus" type="number"
+                    value="{{system.bonus}}"
+                    min="0" />
+            </div>
+            {{else}}
+            <div class="armor-field armor-field-compact armor-field-defense">
                 <label for="system.ca">CA</label>
                 <input name="system.ca" type="number" value="{{system.ca}}"
                     min="0" />
             </div>
 
-            <div class="armor-field">
+            <div class="armor-field armor-field-compact armor-field-defense">
+                <label for="system.maxAgility">Max Agi</label>
+                <input name="system.maxAgility" type="number"
+                    value="{{system.maxAgility}}" min="-5" max="5" />
+            </div>
+
+            <div class="armor-field armor-field-compact armor-field-defense">
                 <label for="system.caBroken">CA rota</label>
                 <input name="system.caBroken" type="number"
                     value="{{system.caBroken}}" min="0" />
             </div>
 
-            <div class="armor-field">
+            <div
+                class="armor-field armor-field-compact armor-field-defense armor-field-max-agi-broken">
+                <label for="system.maxAgilityBroken">Max Agi R</label>
+                <input name="system.maxAgilityBroken" type="number"
+                    value="{{system.maxAgilityBroken}}" min="-5" max="5" />
+            </div>
+            {{/if}}
+
+            <div class="armor-field armor-field-vd armor-field-defense">
                 <label for="system.vd"
                     title="Valor Defensivo: tirada de dados">VD</label>
                 <input name="system.vd" type="text" value="{{system.vd}}"
@@ -65,12 +88,14 @@
                 <label for="system.raCurrent"
                     title="Resistencia de Armadura actual">RA actual</label>
                 <input name="system.raCurrent" type="number"
-                    value="{{system.raCurrent}}" min="0" />
+                    value="{{system.raCurrent}}" min="0" max="{{system.ra}}" />
             </div>
 
         </div>
 
-        {{!-- Resistencia (R): valor numérico + tipo de daño --}}
+        {{!-- Resistencia (R): valor numérico + tipo de daño (no aplica a
+        escudos) --}}
+        {{#unless (eq system.category 'escudo')}}
         <div class="armor-row armor-row-resistance">
 
             <div class="armor-field">
@@ -97,8 +122,9 @@
             </div>
 
         </div>
+        {{/unless}}
 
-        {{!-- Fila de datos de equipamiento: Vigor, marcador de sigilo y peso
+        {{!-- Fila de datos de equipamiento: Vigor, rota, sigilo y peso
         --}}
         <div class="armor-row armor-row-equip">
 
@@ -110,14 +136,24 @@
                     value="{{system.vigor}}" min="0" />
             </div>
 
+            {{!-- Rota: marcador booleano del estado de la armadura. --}}
+            <div class="armor-field armor-field-broken">
+                <label for="system.broken"
+                    title="Marca si la armadura esta rota">Rota</label>
+                <input name="system.broken" type="checkbox"
+                    {{#if system.broken}}checked{{/if}} />
+            </div>
+
             {{!-- Sigilo: marcador booleano (checkbox) indicando penalización
             --}}
+            {{#unless (eq system.category 'escudo')}}
             <div class="armor-field armor-field-stealth">
                 <label for="system.stealth"
                     title="Marca si la armadura penaliza el sigilo">Sigilo</label>
                 <input name="system.stealth" type="checkbox"
                     {{#if system.stealth}}checked{{/if}} />
             </div>
+            {{/unless}}
 
             <div class="armor-field">
                 <label for="system.weight">Peso</label>

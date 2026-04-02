@@ -26,11 +26,34 @@ export default class TirduinRPSArmor extends TirduinRPSItemBase {
       min: 0,
     });
 
+    // Bonificador de escudo: se suma a la CA cuando el escudo esta equipado y no roto.
+    schema.bonus = new fields.NumberField({
+      ...requiredInteger,
+      initial: 0,
+      min: 0,
+    });
+
+    // Agilidad maxima permitida por la armadura cuando esta intacta.
+    schema.maxAgility = new fields.NumberField({
+      ...requiredInteger,
+      initial: 0,
+      min: -5,
+      max: 5,
+    });
+
     // CA que proporciona la armadura cuando está rota.
     schema.caBroken = new fields.NumberField({
       ...requiredInteger,
       initial: 10,
       min: 0,
+    });
+
+    // Agilidad maxima permitida por la armadura cuando esta rota.
+    schema.maxAgilityBroken = new fields.NumberField({
+      ...requiredInteger,
+      initial: 0,
+      min: -5,
+      max: 5,
     });
 
     // VD (Valor Defensivo): representado como tirada de dados (ej. "1d6").
@@ -71,6 +94,12 @@ export default class TirduinRPSArmor extends TirduinRPSItemBase {
     // Sigilo: marcador booleano que indica si la armadura penaliza sigilo.
     schema.stealth = new fields.BooleanField({ initial: false });
 
+    // Estado de rotura de la armadura.
+    schema.broken = new fields.BooleanField({ initial: false });
+
+    // Marca si la armadura esta equipada actualmente.
+    schema.equipped = new fields.BooleanField({ initial: false });
+
     // Peso de la armadura en la unidad del sistema.
     schema.weight = new fields.NumberField({
       required: true,
@@ -80,6 +109,23 @@ export default class TirduinRPSArmor extends TirduinRPSItemBase {
     });
 
     return schema;
+  }
+
+  prepareDerivedData() {
+    const maxRa = Math.max(0, Number(this.ra) || 0);
+    const currentRa = Math.max(0, Math.min(Number(this.raCurrent) || 0, maxRa));
+    const maxAgility = Math.max(-5, Math.min(5, Number(this.maxAgility) || 0));
+    const maxAgilityBroken = Math.max(-5, Math.min(5, Number(this.maxAgilityBroken) || 0));
+
+    this.ra = maxRa;
+    this.raCurrent = currentRa;
+    this.maxAgility = maxAgility;
+    this.maxAgilityBroken = maxAgilityBroken;
+
+    // Al alcanzar el maximo de RA, la armadura se marca automaticamente como rota.
+    if (maxRa > 0 && currentRa >= maxRa) {
+      this.broken = true;
+    }
   }
 
 }

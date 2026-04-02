@@ -93,13 +93,75 @@ Handlebars.registerHelper('toLowerCase', function (str) {
   return str.toLowerCase();
 });
 
+Handlebars.registerHelper('armorCategoryLabel', function (category) {
+  const labels = {
+    sinArmadura: 'Sin armadura',
+    ligera: 'Ligera',
+    media: 'Media',
+    pesada: 'Pesada',
+    escudo: 'Escudo',
+  };
+  return labels[category] || category;
+});
+
 /* -------------------------------------------- */
 /*  Ready Hook                                  */
 /* -------------------------------------------- */
 
 Hooks.once('ready', function () {
+  const calculateArmorClassFromArmor = (actor, armorSystem, isBroken = false) => {
+    const agility = Number(actor.system?.abilities?.agil?.value) || 0;
+    const caBase = isBroken
+      ? Number(armorSystem?.caBroken) || 0
+      : Number(armorSystem?.ca) || 0;
+    const agilityCap = isBroken
+      ? Number(armorSystem?.maxAgilityBroken) || 0
+      : Number(armorSystem?.maxAgility) || 0;
+    return caBase + Math.min(agility, agilityCap);
+  };
+
+  const calculateArmorClassFromEquippedArmors = (actor) => {
+    const equippedArmors = actor.items.filter((i) => i.type === 'armor' && i.system?.equipped);
+    const mainArmor = equippedArmors.find((i) => i.system?.category !== 'escudo');
+    const shield = equippedArmors.find((i) => i.system?.category === 'escudo');
+
+    const agility = Number(actor.system?.abilities?.agil?.value) || 0;
+    let armorClass = mainArmor
+      ? calculateArmorClassFromArmor(actor, mainArmor.system, Boolean(mainArmor.system?.broken))
+      : 10 + agility;
+
+    if (shield && !shield.system?.broken) {
+      armorClass += Number(shield.system?.bonus) || 0;
+    }
+
+    return armorClass;
+  };
+
+  const syncNpcArmorClass = async (actor) => {
+    if (!actor || actor.type !== 'npc') return;
+    const armorClass = calculateArmorClassFromEquippedArmors(actor);
+    if (Number(actor.system?.attributes?.armorClass?.value) === armorClass) return;
+    await actor.update({ 'system.attributes.armorClass.value': armorClass });
+  };
+
   // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to
   Hooks.on('hotbarDrop', (bar, data, slot) => createItemMacro(data, slot));
+
+  // Mantiene sincronizada la CA del NPC al editar/cerrar una armadura equipada.
+  Hooks.on('updateItem', async (item) => {
+    if (item.type !== 'armor') return;
+
+    const actor = item.parent;
+    await syncNpcArmorClass(actor);
+  });
+
+  // Si cambia Agilidad del NPC, la CA se recalcula automaticamente.
+  Hooks.on('updateActor', async (actor, changedData) => {
+    if (!actor || actor.type !== 'npc') return;
+    const agilChanged = foundry.utils.hasProperty(changedData, 'system.abilities.agil.value');
+    if (!agilChanged) return;
+    await syncNpcArmorClass(actor);
+  });
 });
 
 /* -------------------------------------------- */

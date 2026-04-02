@@ -259,6 +259,12 @@ export class TirduinRPSActorSheet extends ActorSheet {
       item.sheet.render(true);
     });
 
+    // Click en una armadura del NPC: tira VD y aplica desgaste de RA.
+    html.on('click', '.npc-armor-item', this._onArmorItemClick.bind(this));
+
+    // Toggle de armadura equipada (icono de escudo en la tabla de armaduras).
+    html.on('click', '.armor-equip-toggle', this._onArmorEquipToggle.bind(this));
+
     // -------------------------------------------------------------
     // Everything below here is only needed if the sheet is editable
     if (!this.isEditable) return;
@@ -386,5 +392,153 @@ export class TirduinRPSActorSheet extends ActorSheet {
       });
       return roll;
     }
+  }
+
+  /**
+   * Handle click on armor rows: roll VD, increment RA current and auto-mark broken.
+   * @param {Event} event
+   * @private
+   */
+  async _onArmorItemClick(event) {
+    const clickedControl = event.target.closest('.npc-object-controls, .armor-equip-toggle');
+    if (clickedControl) return;
+
+    const row = event.currentTarget;
+    const itemId = row?.dataset?.itemId;
+    const item = this.actor.items.get(itemId);
+    if (!item || item.type !== 'armor') return;
+
+    if (item.system?.broken) {
+      ui.notifications?.warn(`${item.name} esta rota y no puede tirar VD.`);
+      return null;
+    }
+
+    const vdFormula = String(item.system?.vd || '').trim();
+    if (!vdFormula) return;
+
+    const actorRollData = this.actor.getRollData();
+    const roll = new Roll(vdFormula, actorRollData);
+    roll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      flavor: `[armor] ${item.name} VD`,
+      rollMode: game.settings.get('core', 'rollMode'),
+    });
+
+    const raMax = Math.max(0, Number(item.system?.ra) || 0);
+    const raCurrent = Math.min(
+      Math.max(0, Number(item.system?.raCurrent) || 0) + 1,
+      raMax
+    );
+
+    const updateData = {
+      'system.raCurrent': raCurrent,
+    };
+
+    if (raMax > 0 && raCurrent >= raMax) {
+      updateData['system.broken'] = true;
+    }
+
+    await item.update(updateData);
+
+    if (item.system?.equipped) {
+      const armorClass = this._calculateArmorClassFromEquippedArmors();
+      await this.actor.update({ 'system.attributes.armorClass.value': armorClass });
+    }
+
+    return roll;
+  }
+
+  /**
+   * Toggle equipped armor and update actor AC using armor CA plus agility cap.
+   * @param {Event} event
+   * @private
+   */
+  async _onArmorEquipToggle(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const row = event.currentTarget.closest('[data-item-id]');
+    const itemId = row?.dataset?.itemId;
+    const armor = this.actor.items.get(itemId);
+    if (!armor || armor.type !== 'armor') return;
+
+    const willEquip = !armor.system?.equipped;
+    const isShield = armor.system?.category === 'escudo';
+    const updates = [];
+
+    // Siempre actualiza el estado del item pulsado.
+    updates.push(armor.update({ 'system.equipped': willEquip }));
+
+    // Si se equipa una armadura no-escudo, desequipa el resto de no-escudos.
+    // Si se equipa un escudo, desequipa el resto de escudos.
+    for (const item of this.actor.items) {
+      if (item.type !== 'armor' || item.id === armor.id) continue;
+      if (!willEquip) continue;
+      if (!item.system?.equipped) continue;
+      if (isShield && item.system?.category !== 'escudo') continue;
+      if (!isShield && item.system?.category === 'escudo') continue;
+      updates.push(item.update({ 'system.equipped': false }));
+    }
+
+    if (updates.length) await Promise.all(updates);
+
+    const armorClass = this._calculateArmorClassFromEquippedArmors();
+
+    await this.actor.update({ 'system.attributes.armorClass.value': armorClass });
+  }
+
+  /**
+   * Calculate AC from a specific armor and NPC agility using armor cap.
+   * @param {object} armorSystem
+   * @param {boolean} isBroken
+   * @returns {number}
+   * @private
+   */
+  _calculateArmorClassFromArmor(armorSystem, isBroken = false) {
+    const agility = Number(this.actor.system?.abilities?.agil?.value) || 0;
+    const caBase = isBroken
+      ? Number(armorSystem?.caBroken) || 0
+      : Number(armorSystem?.ca) || 0;
+    const agilityCap = isBroken
+      ? Number(armorSystem?.maxAgilityBroken) || 0
+      : Number(armorSystem?.maxAgility) || 0;
+
+    const agilityContribution = Math.min(agility, agilityCap);
+    return caBase + agilityContribution;
+  }
+
+  /**
+   * Calculate AC using currently equipped armors, with support for shield coexistence.
+   * - No armor equipped: 10 + Agi
+   * - Non-shield equipped: its CA + capped Agi
+   * - Shield equipped together with non-shield: adds shield CA on top
+   * - Only shield equipped: shield CA + capped Agi
+   * @returns {number}
+   * @private
+   */
+  _calculateArmorClassFromEquippedArmors() {
+    const equippedArmors = this.actor.items.filter((i) => i.type === 'armor' && i.system?.equipped);
+    const mainArmor = equippedArmors.find((i) => i.system?.category !== 'escudo');
+    const shield = equippedArmors.find((i) => i.system?.category === 'escudo');
+
+    let armorClass = mainArmor
+      ? this._calculateArmorClassFromArmor(mainArmor.system, Boolean(mainArmor.system?.broken))
+      : this._calculateUnarmoredArmorClass();
+
+    if (shield && !shield.system?.broken) {
+      armorClass += Number(shield.system?.bonus) || 0;
+    }
+
+    return armorClass;
+  }
+
+  /**
+   * Fallback AC when no armor is equipped.
+   * @returns {number}
+   * @private
+   */
+  _calculateUnarmoredArmorClass() {
+    const agility = Number(this.actor.system?.abilities?.agil?.value) || 0;
+    return 10 + agility;
   }
 }
