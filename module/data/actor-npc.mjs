@@ -14,6 +14,15 @@ export default class TirduinRPSNPC extends TirduinRPSActorBase {
       speed: new fields.SchemaField({
         value: new fields.NumberField({ ...requiredInteger, initial: 20})
       }),
+      slotsExtra: new fields.SchemaField({
+        value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 })
+      }),
+    });
+
+    schema.money = new fields.SchemaField({
+      gold: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+      silver: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+      copper: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
     });
 
      schema.abilities = new fields.SchemaField(Object.keys(CONFIG.TIRDUIN_RPS.abilities).reduce((obj, ability) => {

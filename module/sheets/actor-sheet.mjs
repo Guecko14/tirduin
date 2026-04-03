@@ -168,6 +168,7 @@ export class TirduinRPSActorSheet extends ActorSheet {
     const npcGenericObjects = [];
     const npcWeapons = [];
     const npcArmors = [];
+    let currentSlots = 0;
     const spells = {
       1: [],
       2: [],
@@ -189,6 +190,7 @@ export class TirduinRPSActorSheet extends ActorSheet {
         gear.push(i);
         // Los NPCs usan los items genéricos también en la sección de objetos.
         npcGenericObjects.push(i);
+        currentSlots += Number(i.system?.weight) || 0;
       }
       // Las acciones de miedo son features marcadas con category=fear.
       else if (i.type === 'feature' && i.system.category === 'fear') {
@@ -205,10 +207,12 @@ export class TirduinRPSActorSheet extends ActorSheet {
       // Armas del NPC: van al listado de armas del tab de objetos.
       else if (i.type === 'weapon') {
         npcWeapons.push(i);
+        currentSlots += Number(i.system?.weight) || 0;
       }
       // Armaduras del NPC: van al listado de armaduras del tab de objetos.
       else if (i.type === 'armor') {
         npcArmors.push(i);
+        currentSlots += Number(i.system?.weight) || 0;
       }
       // Conjuros agrupados por nivel para el partial de spells.
       else if (i.type === 'spell') {
@@ -227,6 +231,18 @@ export class TirduinRPSActorSheet extends ActorSheet {
     context.npcGenericObjects = npcGenericObjects;
     context.npcWeapons = npcWeapons;
     context.npcArmors = npcArmors;
+
+    const vigor = Number(context.system?.abilities?.vig?.value) || 0;
+    const slotsExtra = Number(context.system?.attributes?.slotsExtra?.value) || 0;
+    const capacitySlots = vigor <= 0
+      ? Math.max(0, 5 + slotsExtra)
+      : Math.max(0, 5 + (2 * vigor) + slotsExtra);
+    context.npcSlots = {
+      current: Number(currentSlots.toFixed(2)),
+      capacity: Number(capacitySlots.toFixed(2)),
+      extra: slotsExtra,
+    };
+
     context.spells = spells;
   }
 
@@ -261,6 +277,9 @@ export class TirduinRPSActorSheet extends ActorSheet {
 
     // Click en una armadura del NPC: tira VD y aplica desgaste de RA.
     html.on('click', '.npc-armor-item', this._onArmorItemClick.bind(this));
+
+    // Click en un arma del NPC: dialogo de ataque (VIG/AGIL + competencia) y daño.
+    html.on('click', '.npc-weapon-item', this._onWeaponItemClick.bind(this));
 
     // Toggle de armadura equipada (icono de escudo en la tabla de armaduras).
     html.on('click', '.armor-equip-toggle', this._onArmorEquipToggle.bind(this));
@@ -446,6 +465,163 @@ export class TirduinRPSActorSheet extends ActorSheet {
     }
 
     return roll;
+  }
+
+  /**
+   * Handle click on weapon rows: choose attribute + edge mode, then roll attack and damage.
+   * @param {Event} event
+   * @private
+   */
+  async _onWeaponItemClick(event) {
+    const clickedControl = event.target.closest('.npc-object-controls');
+    if (clickedControl) return;
+
+    const row = event.currentTarget;
+    const itemId = row?.dataset?.itemId;
+    const weapon = this.actor.items.get(itemId);
+    if (!weapon || weapon.type !== 'weapon') return;
+
+    const damageDie = String(weapon.system?.damageDie || '').trim();
+    if (!damageDie) {
+      ui.notifications?.warn(`${weapon.name} no tiene dado de daño configurado.`);
+      return null;
+    }
+
+    const proficiency = Number(weapon.system?.proficiency) || 0;
+    const actorRollData = this.actor.getRollData();
+    const selection = await this._promptWeaponRollOptions({
+      weaponName: weapon.name,
+      damageDie,
+      proficiency,
+      actorRollData,
+    });
+    if (!selection) return null;
+
+    const abilityKey = selection.abilityKey;
+    const edgeMode = selection.edgeMode;
+    const abilityValue = Number(this.actor.system?.abilities?.[abilityKey]?.value) || 0;
+    const abilityLabel = abilityKey === 'agil' ? 'Agilidad' : 'Vigor';
+
+    const attackBaseFormula = `1d20 + (${abilityValue}) + (${proficiency})`;
+    const attackFormula = applyRollEdgeToFormula(attackBaseFormula, edgeMode);
+    const damageFormula = `${damageDie} + (${abilityValue})`;
+
+    const attackRoll = new Roll(attackFormula, actorRollData);
+    await attackRoll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      flavor: `[weapon] ${weapon.name} Ataque (${abilityLabel} + Competencia)${getRollEdgeFlavorSuffix(edgeMode)}`,
+      rollMode: game.settings.get('core', 'rollMode'),
+    });
+
+    const damageRoll = new Roll(damageFormula, actorRollData);
+    await damageRoll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      flavor: `[weapon] ${weapon.name} Daño (${abilityLabel})`,
+      rollMode: game.settings.get('core', 'rollMode'),
+    });
+
+    return { attackRoll, damageRoll };
+  }
+
+  /**
+   * Prompt weapon attack options with attribute selector and edge radios.
+   * @param {{weaponName: string, damageDie: string, proficiency: number, actorRollData: object}} options
+   * @returns {Promise<{abilityKey: 'vig'|'agil', edgeMode: string}|null>}
+   * @private
+   */
+  async _promptWeaponRollOptions({ weaponName, damageDie, proficiency, actorRollData }) {
+    return new Promise((resolve) => {
+      let settled = false;
+
+      const safeResolve = (value) => {
+        if (settled) return;
+        settled = true;
+        resolve(value);
+      };
+
+      const content = `
+        <form class="tirduin-roll-confirmation tirduin-weapon-roll-confirmation">
+          <div class="roll-summary">
+            <div class="weapon-roll-topline">
+              <span>Atributo</span>
+              <select name="tirduin-weapon-ability">
+                <option value="vig">Vigor</option>
+                <option value="agil">Agilidad</option>
+              </select>
+              <span class="weapon-roll-prof">Comp: +${proficiency}</span>
+            </div>
+            <p class="weapon-roll-preview" data-role="weapon-attack-preview"></p>
+            <p class="weapon-roll-preview" data-role="weapon-damage-preview"></p>
+          </div>
+          <div class="roll-edge-row">
+            <label class="roll-edge-option">
+              <input type="radio" name="tirduin-roll-edge" value="advantage">
+              Ventaja
+            </label>
+            <label class="roll-edge-option">
+              <input type="radio" name="tirduin-roll-edge" value="disadvantage">
+              Desventaja
+            </label>
+          </div>
+        </form>
+      `;
+
+      new Dialog({
+        title: `Ataque de arma: ${weaponName}`,
+        content,
+        buttons: {
+          roll: {
+            icon: '<i class="fas fa-dice-d20"></i>',
+            label: 'Tirar',
+            callback: (html) => {
+              const abilityKey = html.find('select[name="tirduin-weapon-ability"]').val() || 'vig';
+              const edgeMode = html.find('input[name="tirduin-roll-edge"]:checked').val() || 'none';
+              safeResolve({ abilityKey, edgeMode });
+            },
+          },
+          cancel: {
+            icon: '<i class="fas fa-times"></i>',
+            label: 'Cancelar',
+            callback: () => safeResolve(null),
+          },
+        },
+        default: 'roll',
+        classes: ['tirduin', 'tirduin-roll-dialog'],
+        render: (html) => {
+          const abilitySelect = html.find('select[name="tirduin-weapon-ability"]');
+          const edgeRadios = html.find('input[name="tirduin-roll-edge"]');
+          const attackPreview = html.find('[data-role="weapon-attack-preview"]');
+          const damagePreview = html.find('[data-role="weapon-damage-preview"]');
+
+          const refreshPreview = () => {
+            const abilityKey = abilitySelect.val() || 'vig';
+            const edgeMode = html.find('input[name="tirduin-roll-edge"]:checked').val() || 'none';
+            const abilityValue = Number(this.actor.system?.abilities?.[abilityKey]?.value) || 0;
+
+            const attackBase = `1d20 + (${abilityValue}) + (${proficiency})`;
+            const attackFormula = applyRollEdgeToFormula(attackBase, edgeMode);
+            const damageFormula = `${damageDie} + (${abilityValue})`;
+
+            try {
+              attackPreview.text(`Ataque: ${new Roll(attackFormula, actorRollData).formula}`);
+            } catch (_error) {
+              attackPreview.text(`Ataque: ${attackFormula}`);
+            }
+
+            try {
+              damagePreview.text(`Daño: ${new Roll(damageFormula, actorRollData).formula}`);
+            } catch (_error) {
+              damagePreview.text(`Daño: ${damageFormula}`);
+            }
+          };
+
+          abilitySelect.on('change', refreshPreview);
+          edgeRadios.on('change', refreshPreview);
+          refreshPreview();
+        },
+        close: () => safeResolve(null),
+      }).render(true);
+    });
   }
 
   /**

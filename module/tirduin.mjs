@@ -104,6 +104,23 @@ Handlebars.registerHelper('armorCategoryLabel', function (category) {
   return labels[category] || category;
 });
 
+Handlebars.registerHelper('weaponCategoryLabel', function (category) {
+  const labels = {
+    simple: 'Simple',
+    marcial: 'Marcial',
+    magica: 'Magica',
+  };
+  return labels[category] || category;
+});
+
+Handlebars.registerHelper('weaponSubcategoryLabel', function (subcategory) {
+  const labels = {
+    melee: 'Melee',
+    distancia: 'Distancia',
+  };
+  return labels[subcategory] || subcategory;
+});
+
 /* -------------------------------------------- */
 /*  Ready Hook                                  */
 /* -------------------------------------------- */
@@ -138,7 +155,7 @@ Hooks.once('ready', function () {
   };
 
   const syncNpcArmorClass = async (actor) => {
-    if (!actor || actor.type !== 'npc') return;
+    if (!actor || !['npc', 'character'].includes(actor.type)) return;
     const armorClass = calculateArmorClassFromEquippedArmors(actor);
     if (Number(actor.system?.attributes?.armorClass?.value) === armorClass) return;
     await actor.update({ 'system.attributes.armorClass.value': armorClass });
@@ -157,7 +174,7 @@ Hooks.once('ready', function () {
 
   // Si cambia Agilidad del NPC, la CA se recalcula automaticamente.
   Hooks.on('updateActor', async (actor, changedData) => {
-    if (!actor || actor.type !== 'npc') return;
+    if (!actor || !['npc', 'character'].includes(actor.type)) return;
     const agilChanged = foundry.utils.hasProperty(changedData, 'system.abilities.agil.value');
     if (!agilChanged) return;
     await syncNpcArmorClass(actor);

@@ -1,5 +1,40 @@
 <div class="npc-objects">
 
+    <div class="npc-slots-summary">
+        <div class="npc-slots-values">
+            <span class="npc-slots-label">Slots</span>
+            <span class="npc-slots-current">{{npcSlots.current}}</span>
+            <span class="npc-slots-separator">/</span>
+            <span class="npc-slots-capacity">{{npcSlots.capacity}}</span>
+        </div>
+        <div class="npc-slots-extra">
+            <label for="system.attributes.slotsExtra.value">Contenedores</label>
+            <input type="number" name="system.attributes.slotsExtra.value"
+                value="{{system.attributes.slotsExtra.value}}" min="0" />
+        </div>
+    </div>
+
+    <div class="npc-money-summary">
+        <div class="npc-money-label">Monedas</div>
+        <div class="npc-money-fields">
+            <label>
+                Oro
+                <input type="number" name="system.money.gold"
+                    value="{{system.money.gold}}" min="0" />
+            </label>
+            <label>
+                Plata
+                <input type="number" name="system.money.silver"
+                    value="{{system.money.silver}}" min="0" />
+            </label>
+            <label>
+                Cobre
+                <input type="number" name="system.money.copper"
+                    value="{{system.money.copper}}" min="0" />
+            </label>
+        </div>
+    </div>
+
     {{!-- ================================================================
     SECCIÓN: ARMAS
     Items de tipo "weapon" con categoría, subcategoría, dado de daño y alcance.
@@ -34,9 +69,11 @@
                 data-item-id="{{weapon._id}}">
                 <span class="npc-weapon-col-name">{{weapon.name}}</span>
                 <span
-                    class="npc-weapon-col-cat">{{weapon.system.category}}</span>
+                    class="npc-weapon-col-cat">{{weaponCategoryLabel
+                    weapon.system.category}}</span>
                 <span
-                    class="npc-weapon-col-sub">{{weapon.system.subcategory}}</span>
+                    class="npc-weapon-col-sub">{{weaponSubcategoryLabel
+                    weapon.system.subcategory}}</span>
                 <span
                     class="npc-weapon-col-die">{{weapon.system.damageDie}}</span>
                 <span class="npc-weapon-col-range">{{weapon.system.range}}

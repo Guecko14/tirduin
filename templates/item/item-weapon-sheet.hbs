@@ -64,6 +64,24 @@
             </div>
 
             <div class="weapon-field">
+                <label for="system.proficiency">Competencia</label>
+                <select name="system.proficiency">
+                    <option value="0" {{#if (eq system.proficiency
+                        0)}}selected{{/if}}>—</option>
+                    <option value="1" {{#if (eq system.proficiency
+                        1)}}selected{{/if}}>Basica</option>
+                    <option value="2" {{#if (eq system.proficiency
+                        2)}}selected{{/if}}>Intermedia</option>
+                    <option value="3" {{#if (eq system.proficiency
+                        3)}}selected{{/if}}>Avanzada</option>
+                    <option value="4" {{#if (eq system.proficiency
+                        4)}}selected{{/if}}>Experta</option>
+                    <option value="5" {{#if (eq system.proficiency
+                        5)}}selected{{/if}}>Maestra</option>
+                </select>
+            </div>
+
+            <div class="weapon-field">
                 <label for="system.weight">Peso</label>
                 <input name="system.weight" type="number"
                     value="{{system.weight}}" min="0" step="0.1" />

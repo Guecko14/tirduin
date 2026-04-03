@@ -10,6 +10,111 @@
   padding: 6px 2px;
 }
 
+.npc-slots-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(154, 173, 221, 0.25);
+  border-radius: 6px;
+  background: rgba(12, 18, 28, 0.55);
+}
+
+.npc-slots-values {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.npc-slots-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  color: #9ad;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.npc-slots-current,
+.npc-slots-capacity {
+  font-size: 0.95rem;
+  color: #f1f1f1;
+  font-weight: 700;
+}
+
+.npc-slots-separator {
+  color: #9aa;
+  font-weight: 700;
+}
+
+.npc-slots-extra {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.npc-slots-extra label {
+  font-size: 0.72rem;
+  color: #9aa;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.npc-slots-extra input {
+  width: 60px;
+  background: #111;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: #fff;
+  padding: 2px 6px;
+  text-align: right;
+}
+
+.npc-money-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(240, 192, 112, 0.25);
+  border-radius: 6px;
+  background: rgba(28, 20, 10, 0.45);
+}
+
+.npc-money-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  color: #f0c070;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.npc-money-fields {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.npc-money-fields label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: #cbb;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.npc-money-fields input {
+  width: 58px;
+  background: #111;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: #fff;
+  padding: 2px 6px;
+  text-align: right;
+}
+
 /* Sección individual: genéricos, armas o armaduras. */
 .npc-objects-section {
   background: rgba(0, 0, 0, 0.25);

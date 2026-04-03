@@ -33,6 +33,36 @@
   text-align: center;
 }
 
+.tirduin-weapon-roll-confirmation .weapon-roll-topline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.tirduin-weapon-roll-confirmation .weapon-roll-topline select {
+  height: 28px;
+  min-width: 96px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  background: #0b0b0b;
+  color: #f1f1f1;
+  padding: 0 6px;
+}
+
+.tirduin-weapon-roll-confirmation .weapon-roll-prof {
+  color: #9ad;
+  font-weight: 700;
+}
+
+.tirduin-weapon-roll-confirmation .weapon-roll-preview {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
 /* Fila de radios ventaja/desventaja en una sola línea centrada. */
 .tirduin-roll-confirmation .roll-edge-row {
   display: flex;

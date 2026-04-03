@@ -4,16 +4,14 @@
       class='profile-img'
       src='{{item.img}}'
       data-edit='img'
-      title='{{item.name}}'
-    />
+      title='{{item.name}}' />
     <div class='header-fields'>
       <label class='resource-label'>Nombre</label>
       <h1 class='charname'><input
           name='name'
           type='text'
           value='{{item.name}}'
-          placeholder='Name'
-        /></h1>
+          placeholder='Name' /></h1>
       <div class='grid grid-2col'>
         <div class='resource'>
           <label class='resource-label'>Cantidad</label>
@@ -21,17 +19,17 @@
             type='text'
             name='system.quantity'
             value='{{system.quantity}}'
-            data-dtype='Number'
-          />
+            data-dtype='Number' />
         </div>
         <div class='resource'>
           <label class='resource-label'>Peso</label>
           <input
-            type='text'
+            type='number'
             name='system.weight'
             value='{{system.weight}}'
-            data-dtype='Number'
-          />
+            min='0'
+            step='0.1'
+            data-dtype='Number' />
         </div>
       </div>
     </div>
@@ -48,13 +46,14 @@
 
     {{! Description Tab }}
     <div class='tab' data-group='primary' data-tab='description'>
-      {{! Editors must receive enriched text data from getData to properly handle rolls }}
+      {{! Editors must receive enriched text data from getData to properly
+      handle rolls }}
       {{editor
-        enrichedDescription
-        target='system.description'
-        engine='prosemirror'
-        button=true
-        editable=editable
+      enrichedDescription
+      target='system.description'
+      engine='prosemirror'
+      button=true
+      editable=editable
       }}
     </div>
 
@@ -71,8 +70,7 @@
               type='text'
               name='system.roll.diceNum'
               value='{{system.roll.diceNum}}'
-              data-dtype='Number'
-            />
+              data-dtype='Number' />
           </div>
           <div class='grid-span-1'>
             <label class='resource-label'>Die Size</label>
@@ -80,8 +78,7 @@
               type='text'
               name='system.roll.diceSize'
               value='{{system.roll.diceSize}}'
-              data-dtype='String'
-            />
+              data-dtype='String' />
           </div>
           <div class='grid-span-2'>
             <label class='resource-label'>Roll Modifier</label>
@@ -89,8 +86,7 @@
               type='text'
               name='system.roll.diceBonus'
               value='{{system.roll.diceBonus}}'
-              data-dtype='String'
-            />
+              data-dtype='String' />
           </div>
         </div>
 

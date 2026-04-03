@@ -17,6 +17,15 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
       speed: new fields.SchemaField({
         value: new fields.NumberField({ ...requiredInteger, initial: 20, min: 0 })
       }),
+      slotsExtra: new fields.SchemaField({
+        value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 })
+      }),
+    });
+
+    schema.money = new fields.SchemaField({
+      gold: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+      silver: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+      copper: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
     });
 
     // Iterate over ability names and create a new SchemaField for each.

@@ -26,6 +26,16 @@ export default class TirduinRPSWeapon extends TirduinRPSItemBase {
       choices: ['melee', 'distancia'],
     });
 
+    // Competencia del arma con la misma escala de las skills (0..5).
+    schema.proficiency = new fields.NumberField({
+      required: true,
+      nullable: false,
+      integer: true,
+      initial: 0,
+      min: 0,
+      max: 5,
+    });
+
     // Dado de daño del arma expresado como cadena (ej. "1d6", "2d8").
     schema.damageDie = new fields.StringField({
       required: true,
