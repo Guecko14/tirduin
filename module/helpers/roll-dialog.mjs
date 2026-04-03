@@ -354,6 +354,8 @@ export function buildWeaponAttackDamageFlavorHtml({
   damageTypeLabel = '',
   damageRoll2 = null,
   damageTypeLabel2 = '',
+  targetName = null,
+  targetAC = null,
 } = {}) {
   const attackTitle = buildTypedRollTitle(
     'weapon',
@@ -362,12 +364,21 @@ export function buildWeaponAttackDamageFlavorHtml({
   const damageTitle = damageTypeLabel || 'Danio';
   const damageTitle2 = damageTypeLabel2 || 'Danio 2';
 
+  let attackOutcomeText = getD20OutcomeText(attackRoll);
+  if (targetName !== null && targetAC !== null) {
+    const hit = (Number(attackRoll.total) || 0) >= Number(targetAC);
+    const hitLabel = hit ? 'IMPACTA' : 'FALLA';
+    attackOutcomeText = [attackOutcomeText, `${hitLabel} a ${targetName}`]
+      .filter(Boolean)
+      .join(' | ');
+  }
+
   return `
     <div class="tirduin-roll-bundle">
       ${buildRollFlavorHtml({
         title: attackTitle,
         roll: attackRoll,
-        outcomeText: getD20OutcomeText(attackRoll),
+        outcomeText: attackOutcomeText,
         edgeMode,
       })}
       ${buildRollFlavorHtml({

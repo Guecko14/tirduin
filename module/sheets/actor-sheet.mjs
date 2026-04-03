@@ -578,6 +578,12 @@ export class TirduinRPSActorSheet extends ActorSheet {
       await damageRoll2.evaluate();
     }
 
+    const targetToken = game.user?.targets?.first();
+    const targetName = targetToken?.name ?? null;
+    const targetAC = targetToken?.actor
+      ? (Number(targetToken.actor.system?.attributes?.armorClass?.value) || null)
+      : null;
+
     await ChatMessage.create(applyChatRollMode({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       content: buildWeaponAttackDamageFlavorHtml({
@@ -589,6 +595,8 @@ export class TirduinRPSActorSheet extends ActorSheet {
         damageTypeLabel,
         damageRoll2,
         damageTypeLabel2,
+        targetName,
+        targetAC,
       }),
     }));
 
@@ -647,12 +655,6 @@ export class TirduinRPSActorSheet extends ActorSheet {
     const magic = this.actor.items.get(itemId);
     if (!magic || magic.type !== 'feature' || magic.system?.category !== 'magicAction') return;
 
-    const targetToken = game.user?.targets?.first();
-    if (!targetToken?.actor) {
-      ui.notifications?.warn('Selecciona un token objetivo para resolver la salvacion.');
-      return null;
-    }
-
     const damageFormula = String(magic.system?.damageDie || '').trim();
     if (!damageFormula) {
       ui.notifications?.warn(`${magic.name} no tiene daño configurado.`);
@@ -668,12 +670,31 @@ export class TirduinRPSActorSheet extends ActorSheet {
       voluntad: 'Voluntad',
     };
     const saveLabel = saveLabelMap[saveType] || 'Salvacion';
-    const targetSaveBonus = this._getSaveValue(targetToken.actor, saveType);
 
-    const saveRoll = new Roll(`1d20 + (${targetSaveBonus})`, targetToken.actor.getRollData?.() || {});
-    await saveRoll.evaluate();
+    const targetToken = game.user?.targets?.first();
+
     const damageRoll = new Roll(damageFormula, this.actor.getRollData());
     await damageRoll.evaluate();
+
+    // No target: show damage directly without a save
+    if (!targetToken?.actor) {
+      const damageCard = buildRollFlavorHtml({
+        title: buildTypedRollTitle('spell', `${magic.name} Daño`),
+        roll: damageRoll,
+        outcomeText: `CD ${dc} (${saveLabel})`,
+        showDiceBreakdown: true,
+        showBonus: true,
+      });
+      await ChatMessage.create(applyChatRollMode({
+        speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+        content: `<div class="tirduin-roll-bundle">${damageCard}</div>`,
+      }));
+      return { damageRoll };
+    }
+
+    const targetSaveBonus = this._getSaveValue(targetToken.actor, saveType);
+    const saveRoll = new Roll(`1d20 + (${targetSaveBonus})`, targetToken.actor.getRollData?.() || {});
+    await saveRoll.evaluate();
 
     const success = (Number(saveRoll.total) || 0) >= dc;
     const resultText = success
