@@ -101,6 +101,22 @@
    CHAT ROLL FLAVOR CARD
 ================================================================ */
 
+.chat-message:has(.tirduin-roll-bundle) .message-content {
+  background: linear-gradient(180deg, rgba(30, 24, 16, 0.88) 0%, rgba(19, 15, 10, 0.92) 100%);
+  border: 1px solid #5d4a2b;
+  border-radius: 10px;
+  padding: 6px;
+}
+
+.chat-scroll .chat-message .message-content .tirduin-roll-bundle,
+#chat-log .chat-message .message-content .tirduin-roll-bundle,
+.chat-log .chat-message .message-content .tirduin-roll-bundle {
+  background: linear-gradient(180deg, rgba(30, 24, 16, 0.88) 0%, rgba(19, 15, 10, 0.92) 100%);
+  border: 1px solid #5d4a2b;
+  border-radius: 10px;
+  padding: 6px;
+}
+
 .chat-message .tirduin-roll-flavor {
   margin: 0;
   padding: 8px 10px;
@@ -121,10 +137,12 @@
 
 .chat-message .tirduin-roll-flavor.is-esperanza {
   border-left-color: #3e8f72;
+  background: linear-gradient(180deg, rgba(31, 48, 41, 0.96) 0%, rgba(23, 34, 30, 0.98) 100%);
 }
 
 .chat-message .tirduin-roll-flavor.is-miedo {
   border-left-color: #9b4e4e;
+  background: linear-gradient(180deg, rgba(49, 33, 33, 0.96) 0%, rgba(36, 24, 24, 0.98) 100%);
 }
 
 .chat-message .tirduin-roll-title {

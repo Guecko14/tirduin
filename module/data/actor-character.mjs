@@ -22,6 +22,32 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
       }),
     });
 
+    schema.hope = new fields.SchemaField({
+      value: new fields.NumberField({ ...requiredInteger, initial: 2, min: 0, max: 6 }),
+      max: new fields.NumberField({ ...requiredInteger, initial: 6, min: 0, max: 6 })
+    });
+
+    schema.stress = new fields.SchemaField({
+      value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0, max: 6 }),
+      max: new fields.NumberField({ ...requiredInteger, initial: 6, min: 0, max: 6 })
+    });
+
+    schema.luck = new fields.SchemaField({
+      value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0, max: 3 }),
+      max: new fields.NumberField({ ...requiredInteger, initial: 3, min: 0, max: 3 })
+    });
+
+    schema.details = new fields.SchemaField({
+      race: new fields.StringField({ required: true, nullable: false, initial: '' }),
+      className: new fields.StringField({
+        required: true,
+        nullable: false,
+        initial: 'combatiente',
+        choices: ['combatiente', 'especialista', 'canalizador']
+      }),
+      background: new fields.StringField({ required: true, nullable: false, initial: '' }),
+    });
+
     schema.money = new fields.SchemaField({
       gold: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
       silver: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
@@ -103,17 +129,35 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
     const ment = Number(this.abilities?.ment?.value) || 0;
     const pre = Number(this.abilities?.pre?.value) || 0;
 
+    const sourceHasHope = foundry.utils.hasProperty(this._source ?? {}, 'system.hope');
+    const legacyPowerValue = Number(this.power?.value) || 0;
+    const currentHope = sourceHasHope
+      ? (Number(this.hope?.value) || 0)
+      : legacyPowerValue;
+    // Rehidrata Esperanza desde power en actores previos a la migración del recurso.
+    this.hope.value = Math.max(0, Math.min(6, currentHope));
+    this.hope.max = 6;
+
+    this.stress.value = Math.max(0, Math.min(6, Number(this.stress?.value) || 0));
+    this.stress.max = 6;
+
+    this.luck.value = Math.max(0, Math.min(3, Number(this.luck?.value) || 0));
+    this.luck.max = 3;
+
+    // Character speed is derived from agility.
+    this.attributes.speed.value = 20 + (5 * agil);
+
     this.saves = {
       fortaleza: {
-        label: 'Fortaleza',
+        label: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Saves.Fortaleza'),
         value: (vig * 2),
       },
       reflejos: {
-        label: 'Reflejos',
+        label: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Saves.Reflejos'),
         value: (agil + inst),
       },
       voluntad: {
-        label: 'Voluntad',
+        label: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Saves.Voluntad'),
         value: (ment + pre),
       },
     };

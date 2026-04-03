@@ -54,13 +54,17 @@
   border-radius: 4px;
   padding: 4px 8px;
   color: #fff;
-  margin-bottom: 6px;
+  margin-bottom: 0;
   box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
 }
 .tirduin .npc-name input:focus {
   outline: none;
   border: 1px solid #888;
   box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+}
+
+.tirduin .npc-name {
+  margin-bottom: 6px;
 }
 
 .tirduin .npc-header .npc-main {

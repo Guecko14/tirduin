@@ -60,6 +60,28 @@ export class TirduinRPSActorSheet extends ActorSheet {
     if (actorData.type == 'character') {
       this._prepareItems(context);
       this._prepareCharacterData(context);
+      // Esperanza mantiene compatibilidad con actores antiguos que solo tenían power.
+      const currentHope = foundry.utils.hasProperty(context.system ?? {}, 'hope.value')
+        ? context.system?.hope?.value
+        : context.system?.power?.value;
+      context.hopePips = this._buildResourcePips({
+        path: 'system.hope.value',
+        maxPath: 'system.hope.max',
+        value: currentHope,
+        max: context.system?.hope?.max ?? 6,
+      });
+      context.stressPips = this._buildResourcePips({
+        path: 'system.stress.value',
+        maxPath: 'system.stress.max',
+        value: context.system?.stress?.value,
+        max: context.system?.stress?.max ?? 6,
+      });
+      context.luckPips = this._buildResourcePips({
+        path: 'system.luck.value',
+        maxPath: 'system.luck.max',
+        value: context.system?.luck?.value,
+        max: context.system?.luck?.max ?? 3,
+      });
     }
 
     // Prepare NPC data and items.
@@ -156,6 +178,22 @@ export class TirduinRPSActorSheet extends ActorSheet {
   _prepareCharacterData(context) {
     // This is where you can enrich character-specific editor fields
     // or setup anything else that's specific to this type
+  }
+
+  _buildResourcePips({ path, maxPath, value, max }) {
+    // La sheet usa la misma UI de pips para varios recursos, así que se prepara
+    // una estructura común con la ruta de update y el estado visual de cada pip.
+    const safeMax = Math.max(0, Number(max) || 0);
+    const currentValue = Math.max(0, Math.min(safeMax, Number(value) || 0));
+
+    return Array.from({ length: safeMax }, (_, index) => ({
+      value: index + 1,
+      filled: index < currentValue,
+      path,
+      maxPath,
+      max: safeMax,
+      currentValue,
+    }));
   }
 
   /**
@@ -321,6 +359,38 @@ export class TirduinRPSActorSheet extends ActorSheet {
     // -------------------------------------------------------------
     // Everything below here is only needed if the sheet is editable
     if (!this.isEditable) return;
+
+    html.on('click', '.resource-pip', async (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+
+      const pip = ev.currentTarget;
+      const value = Number(pip.dataset.value) || 0;
+      const currentValue = Number(pip.dataset.currentValue) || 0;
+      const resourcePath = pip.dataset.resourcePath;
+      const maxPath = pip.dataset.maxPath;
+      const maxValue = Number(pip.dataset.maxValue) || 0;
+
+      if (!resourcePath) return;
+
+      const nextValue = currentValue === value ? Math.max(0, value - 1) : value;
+      const updateData = {
+        [resourcePath]: nextValue,
+      };
+
+      if (maxPath && maxValue > 0) {
+        updateData[maxPath] = maxValue;
+      }
+
+      if (resourcePath === 'system.hope.value') {
+        // Sincroniza el campo heredado para que Esperanza siga funcionando en
+        // actores creados antes del cambio desde power hacia hope.
+        updateData['system.power.value'] = nextValue;
+        updateData['system.power.max'] = 6;
+      }
+
+      await this.actor.update(updateData);
+    });
 
     // Persistencia inmediata de campos simples sin esperar al submit del formulario.
     html.on('change', 'input[type="number"], input[type="text"], select, textarea', (ev) => {

@@ -132,6 +132,42 @@
       "Actor": "TirduinRPS Actor Sheet",
       "Item": "TirduinRPS Item Sheet"
     },
+    "CharacterSheet": {
+      "Name": "Nombre",
+      "Race": "Raza",
+      "Class": "Clase",
+      "Background": "Transfondo",
+      "HitPoints": "Puntos de Vida",
+      "TempHitPoints": "PV temporal",
+      "TempShort": "Temp",
+      "Abilities": "Atributos",
+      "SavingThrows": "Salvaciones",
+      "Of": "de",
+      "ClassOptions": {
+        "Combatiente": "Combatiente",
+        "Especialista": "Especialista",
+        "Canalizador": "Canalizador"
+      },
+      "Saves": {
+        "Fortaleza": "Fortaleza",
+        "Reflejos": "Reflejos",
+        "Voluntad": "Voluntad"
+      },
+      "Resources": {
+        "Hope": "Esperanza",
+        "HopeCurrent": "Esperanza actual",
+        "Stress": "Estrés",
+        "StressCurrent": "Estrés actual",
+        "Luck": "Suerte",
+        "LuckCurrent": "Suerte actual"
+      },
+      "Tabs": {
+        "Skills": "Habilidades",
+        "Features": "Dotes",
+        "Items": "Objetos",
+        "Spells": "Conjuros"
+      }
+    },
     "Item": {
       "Spell": {
         "SpellLVL": "Level {level} Spells",
