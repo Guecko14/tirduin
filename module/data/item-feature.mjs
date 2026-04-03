@@ -15,6 +15,35 @@ export default class TirduinRPSFeature extends TirduinRPSItemBase {
 			min: 0,
 		});
 
+		// Campos para acciones mágicas de NPC.
+		schema.damageDie = new fields.StringField({
+			required: false,
+			blank: true,
+			initial: '1d6',
+		});
+
+		schema.saveType = new fields.StringField({
+			required: false,
+			blank: false,
+			initial: 'fortaleza',
+			choices: ['fortaleza', 'reflejos', 'voluntad'],
+		});
+
+		schema.dc = new fields.NumberField({
+			required: false,
+			nullable: false,
+			integer: true,
+			initial: 10,
+			min: 1,
+		});
+
+		schema.onSaveSuccess = new fields.StringField({
+			required: false,
+			blank: false,
+			initial: 'half',
+			choices: ['half', 'negate'],
+		});
+
 		return schema;
 	}
 

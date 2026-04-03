@@ -48,6 +48,40 @@
             </div>
 
             <div class="weapon-field">
+                <label for="system.damageType">Tipo daño 1</label>
+                <select name="system.damageType">
+                    {{#each config.damageTypes as |label key|}}
+                    <option value="{{key}}"
+                        {{#if (eq ../system.damageType key)}}selected{{/if}}>
+                        {{localize label}}
+                    </option>
+                    {{/each}}
+                </select>
+            </div>
+
+            <div class="weapon-field">
+                <label for="system.damageDie2">Dado daño 2</label>
+                <input name="system.damageDie2" type="text"
+                    value="{{system.damageDie2}}"
+                    placeholder="(opcional)" />
+            </div>
+
+            <div class="weapon-field">
+                <label for="system.damageType2">Tipo daño 2</label>
+                <select name="system.damageType2">
+                    <option value {{#unless
+                        system.damageType2}}selected{{/unless}}>— Ninguno
+                        —</option>
+                    {{#each config.damageTypes as |label key|}}
+                    <option value="{{key}}"
+                        {{#if (eq ../system.damageType2 key)}}selected{{/if}}>
+                        {{localize label}}
+                    </option>
+                    {{/each}}
+                </select>
+            </div>
+
+            <div class="weapon-field">
                 <label for="system.range">Alcance (ft)</label>
                 <input name="system.range" type="number"
                     value="{{system.range}}" min="0" />

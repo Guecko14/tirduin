@@ -180,6 +180,62 @@
   padding: 0 6px;
 }
 
+/* ================================================================
+   SAVING THROWS SHARED
+   Salvaciones comunes para NPC y Character (debajo de atributos).
+================================================================ */
+
+.tirduin .saving-throws {
+  margin-bottom: 10px;
+  padding: 6px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+}
+
+.tirduin .saving-throws h2 {
+  margin: 0 0 6px;
+  font-size: 0.82rem;
+  color: #9ad;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tirduin .saving-throws-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tirduin .saving-throw-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #151515;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+
+.tirduin .saving-throw-name {
+  font-size: 0.78rem;
+  color: #cfcfcf;
+  font-weight: 700;
+}
+
+.tirduin .saving-throw-value {
+  font-size: 0.82rem;
+  color: #9ad;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .tirduin .saving-throws-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* El bonus desaparece primero cuando el espacio se reduce. */
 @container skills-list (max-width: 560px) {
   .skill-extra-wrap {

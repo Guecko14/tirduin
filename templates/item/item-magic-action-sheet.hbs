@@ -1,0 +1,53 @@
+<form class="{{cssClass}} weapon-item-sheet" autocomplete="off">
+
+    <section class="weapon-sheet-panel">
+        <div class="weapon-field weapon-field-name">
+            <label for="name">Nombre</label>
+            <input name="name" type="text" value="{{item.name}}"
+                placeholder="Nombre de la accion magica" />
+        </div>
+
+        <div class="weapon-row">
+            <div class="weapon-field">
+                <label for="system.damageDie">Daño</label>
+                <input name="system.damageDie" type="text"
+                    value="{{system.damageDie}}" placeholder="1d6" />
+            </div>
+
+            <div class="weapon-field">
+                <label for="system.dc">CD</label>
+                <input name="system.dc" type="number" value="{{system.dc}}"
+                    min="1" />
+            </div>
+
+            <div class="weapon-field">
+                <label for="system.saveType">Salvacion requerida</label>
+                <select name="system.saveType">
+                    <option value="fortaleza" {{#if (eq system.saveType
+                        'fortaleza')}}selected{{/if}}>Fortaleza</option>
+                    <option value="reflejos" {{#if (eq system.saveType
+                        'reflejos')}}selected{{/if}}>Reflejos</option>
+                    <option value="voluntad" {{#if (eq system.saveType
+                        'voluntad')}}selected{{/if}}>Voluntad</option>
+                </select>
+            </div>
+
+            <div class="weapon-field">
+                <label for="system.onSaveSuccess">Si supera</label>
+                <select name="system.onSaveSuccess">
+                    <option value="half" {{#if (eq system.onSaveSuccess
+                        'half')}}selected{{/if}}>Reduce a mitad</option>
+                    <option value="negate" {{#if (eq system.onSaveSuccess
+                        'negate')}}selected{{/if}}>Niega</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="weapon-field">
+            <label for="system.description">Descripcion</label>
+            <textarea name="system.description"
+                placeholder="Describe el efecto">{{system.description}}</textarea>
+        </div>
+    </section>
+
+</form>

@@ -43,6 +43,54 @@ export default class TirduinRPSWeapon extends TirduinRPSItemBase {
       initial: '1d6',
     });
 
+    // Tipo de daño del daño principal.
+    schema.damageType = new fields.StringField({
+      required: true,
+      blank: false,
+      initial: 'slashingPiercing',
+      choices: [
+        'slashingPiercing',
+        'bludgeoning',
+        'acid',
+        'cold',
+        'fire',
+        'lightning',
+        'sonic',
+        'psychic',
+        'necrotic',
+        'poison',
+        'aetherMagic',
+      ],
+    });
+
+    // Segundo dado de daño opcional para armas con doble componente.
+    schema.damageDie2 = new fields.StringField({
+      required: false,
+      blank: true,
+      initial: '',
+    });
+
+    // Tipo del segundo daño (opcional, ligado a damageDie2).
+    schema.damageType2 = new fields.StringField({
+      required: false,
+      blank: true,
+      initial: '',
+      choices: [
+        '',
+        'slashingPiercing',
+        'bludgeoning',
+        'acid',
+        'cold',
+        'fire',
+        'lightning',
+        'sonic',
+        'psychic',
+        'necrotic',
+        'poison',
+        'aetherMagic',
+      ],
+    });
+
     // Alcance del arma en pies. 0 indica arma cuerpo a cuerpo sin alcance especial.
     schema.range = new fields.NumberField({
       required: true,
@@ -73,6 +121,12 @@ export default class TirduinRPSWeapon extends TirduinRPSItemBase {
       required: false,
       blank: true,
       initial: '',
+    });
+
+    // Si está activo, el arma aparece como acción en el tab de Acciones.
+    schema.actionEnabled = new fields.BooleanField({
+      required: true,
+      initial: false,
     });
 
     return schema;

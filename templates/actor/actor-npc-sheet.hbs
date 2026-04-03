@@ -80,12 +80,40 @@
       </div>
     </div>
 
+    <div class="saving-throws">
+      <h2>Salvaciones</h2>
+      <div class="saving-throws-row">
+        <div class="saving-throw-box rollable"
+          data-roll="1d20+{{system.saves.fortaleza.value}}"
+          data-label="Fortaleza">
+          <span class="saving-throw-name">Fortaleza</span>
+          <span class="saving-throw-value">{{numberFormat
+            system.saves.fortaleza.value sign=true}}</span>
+        </div>
+        <div class="saving-throw-box rollable"
+          data-roll="1d20+{{system.saves.reflejos.value}}"
+          data-label="Reflejos">
+          <span class="saving-throw-name">Reflejos</span>
+          <span class="saving-throw-value">{{numberFormat
+            system.saves.reflejos.value sign=true}}</span>
+        </div>
+        <div class="saving-throw-box rollable"
+          data-roll="1d20+{{system.saves.voluntad.value}}"
+          data-label="Voluntad">
+          <span class="saving-throw-name">Voluntad</span>
+          <span class="saving-throw-value">{{numberFormat
+            system.saves.voluntad.value sign=true}}</span>
+        </div>
+      </div>
+    </div>
+
     <!-- TABS LAYOUT: contenedor lateral para navegacion y contenido -->
     <div class="tabs-layout">
 
       <!-- TABS NAVIGATION: accesos rapidos a los bloques editables del NPC -->
       <nav class="sheet-tabs tabs" data-group="npc-sections">
-        <a class="item active" data-tab="skills">Habilidades</a>
+        <a class="item active" data-tab="actions">Acciones</a>
+        <a class="item" data-tab="skills">Habilidades</a>
         <a class="item" data-tab="special">Especial</a>
         <a class="item" data-tab="fear">Miedo</a>
         <a class="item" data-tab="objects">Objetos</a>
@@ -94,8 +122,13 @@
       <!-- TABS CONTENT: cada panel se muestra segun el tab activo -->
       <div class="tabs-content">
 
+        <!-- ACCIONES TAB: ataques de arma, parar con armadura y ataques mágicos -->
+        <div class="tab active" data-tab="actions">
+          {{> "systems/tirduin/templates/actor/parts/actor-npc-actions.hbs"}}
+        </div>
+
         <!-- HABILIDADES TAB -->
-        <div class="tab active" data-tab="skills">
+        <div class="tab" data-tab="skills">
           <div class="npc-skills">
             {{> "systems/tirduin/templates/actor/parts/actor-skills.hbs"}}
           </div>

@@ -3,7 +3,12 @@ import {
   prepareActiveEffectCategories,
 } from '../helpers/effects.mjs';
 import {
+  applyChatRollMode,
   applyRollEdgeToFormula,
+  buildRollFlavorHtml,
+  buildTypedRollTitle,
+  buildWeaponAttackDamageFlavorHtml,
+  getD20OutcomeText,
   getRollEdgeFlavorSuffix,
   promptRollConfirmation,
 } from '../helpers/roll-dialog.mjs';
@@ -164,6 +169,7 @@ export class TirduinRPSActorSheet extends ActorSheet {
     const features = [];
     const fearActions = [];
     const specialActions = [];
+    const magicActions = [];
     // Objetos del NPC: genéricos, armas y armaduras separados para el tab de Objetos.
     const npcGenericObjects = [];
     const npcWeapons = [];
@@ -200,6 +206,10 @@ export class TirduinRPSActorSheet extends ActorSheet {
       else if (i.type === 'feature' && i.system.category === 'special') {
         specialActions.push(i);
       }
+      // Acciones mágicas manuales del NPC.
+      else if (i.type === 'feature' && i.system.category === 'magicAction') {
+        magicActions.push(i);
+      }
       // El resto de features siguen apareciendo en la seccion de dotes.
       else if (i.type === 'feature') {
         features.push(i);
@@ -216,8 +226,9 @@ export class TirduinRPSActorSheet extends ActorSheet {
       }
       // Conjuros agrupados por nivel para el partial de spells.
       else if (i.type === 'spell') {
-        if (i.system.spellLevel != undefined) {
-          spells[i.system.spellLevel].push(i);
+        const level = Number(i.system?.spellLevel);
+        if (Number.isFinite(level) && spells[level]) {
+          spells[level].push(i);
         }
       }
     }
@@ -227,10 +238,13 @@ export class TirduinRPSActorSheet extends ActorSheet {
     context.features = features;
     context.fearActions = fearActions;
     context.specialActions = specialActions;
+    context.npcMagicActions = magicActions;
     // Colecciones para el tab de Objetos del NPC.
     context.npcGenericObjects = npcGenericObjects;
     context.npcWeapons = npcWeapons;
     context.npcArmors = npcArmors;
+    context.npcWeaponActions = npcWeapons.filter((w) => !!w.system?.actionEnabled);
+    context.npcArmorActions = npcArmors.filter((a) => !!a.system?.equipped);
 
     const vigor = Number(context.system?.abilities?.vig?.value) || 0;
     const slotsExtra = Number(context.system?.attributes?.slotsExtra?.value) || 0;
@@ -252,6 +266,17 @@ export class TirduinRPSActorSheet extends ActorSheet {
   activateListeners(html) {
     super.activateListeners(html);
 
+    // En NPC: por defecto abre en Acciones, pero conserva el tab actual en rerenders.
+    if (this.actor.type === 'npc') {
+      const selectedTab = this._npcActiveTab || 'actions';
+      const nav = html.find('.sheet-tabs[data-group="npc-sections"]');
+      const content = html.find('.tabs-content');
+      nav.find('.item').removeClass('active');
+      content.find('.tab').removeClass('active');
+      nav.find(`.item[data-tab="${selectedTab}"]`).addClass('active');
+      content.find(`.tab[data-tab="${selectedTab}"]`).addClass('active');
+    }
+
     // Navegacion custom de tabs para ambas sheets de actor.
     html.on('click', '.sheet-tabs .item', (ev) => {
       ev.preventDefault();
@@ -265,6 +290,9 @@ export class TirduinRPSActorSheet extends ActorSheet {
       // Activate selected tab
       $(ev.currentTarget).addClass('active');
       tabContent.find(`.tab[data-tab="${tabName}"]`).addClass('active');
+
+      // Guarda selección de tab para NPC durante la vida de esta sheet.
+      if (this.actor.type === 'npc') this._npcActiveTab = tabName;
     });
 
     // Abre cualquier item embebido usando el data-item-id del bloque pulsado.
@@ -283,6 +311,12 @@ export class TirduinRPSActorSheet extends ActorSheet {
 
     // Toggle de armadura equipada (icono de escudo en la tabla de armaduras).
     html.on('click', '.armor-equip-toggle', this._onArmorEquipToggle.bind(this));
+
+    // Toggle de arma disponible en Acciones.
+    html.on('click', '.weapon-action-toggle', this._onWeaponActionToggle.bind(this));
+
+    // Click en filas del tab de Acciones (arma, parar, mágico).
+    html.on('click', '.npc-action-item', this._onActionItemClick.bind(this));
 
     // -------------------------------------------------------------
     // Everything below here is only needed if the sheet is editable
@@ -352,11 +386,19 @@ export class TirduinRPSActorSheet extends ActorSheet {
     const type = header.dataset.type;
     // Grab any data associated with this control.
     const data = foundry.utils.duplicate(header.dataset);
+    // Normaliza flags booleanas que llegan como string desde data-*.
+    if (typeof data.actionEnabled !== 'undefined') {
+      data.actionEnabled = data.actionEnabled === true || data.actionEnabled === 'true';
+    }
     // Da nombres utiles por defecto segun la categoria del item creado.
     const name = data.category === 'fear'
       ? 'Nueva accion de miedo'
       : data.category === 'special'
         ? 'Nueva habilidad especial'
+      : data.category === 'magicAction'
+        ? 'Nuevo ataque magico'
+      : (type === 'weapon' && data.actionEnabled)
+        ? 'Nuevo ataque'
       : `New ${type.capitalize()}`;
     // Prepare the item object.
     const itemData = {
@@ -400,15 +442,21 @@ export class TirduinRPSActorSheet extends ActorSheet {
       if (edgeMode === null) return null;
 
       const formula = applyRollEdgeToFormula(dataset.roll, edgeMode);
-      let label = dataset.label ? `[ability] ${dataset.label}` : '';
-      label += getRollEdgeFlavorSuffix(edgeMode);
-
       let roll = new Roll(formula, actorRollData);
-      roll.toMessage({
-        speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-        flavor: label,
-        rollMode: game.settings.get('core', 'rollMode'),
+      await roll.evaluate();
+      const title = buildTypedRollTitle('ability', dataset.label || 'Tirada');
+      const outcomeText = getD20OutcomeText(roll);
+      const edgeText = getRollEdgeFlavorSuffix(edgeMode);
+      const flavor = buildRollFlavorHtml({
+        title: `${title}${edgeText}`,
+        roll,
+        outcomeText,
+        edgeMode,
       });
+      await ChatMessage.create(applyChatRollMode({
+        speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+        content: flavor,
+      }));
       return roll;
     }
   }
@@ -437,11 +485,14 @@ export class TirduinRPSActorSheet extends ActorSheet {
 
     const actorRollData = this.actor.getRollData();
     const roll = new Roll(vdFormula, actorRollData);
-    roll.toMessage({
+    await roll.evaluate();
+    await ChatMessage.create(applyChatRollMode({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      flavor: `[armor] ${item.name} VD`,
-      rollMode: game.settings.get('core', 'rollMode'),
-    });
+      content: buildRollFlavorHtml({
+        title: buildTypedRollTitle('armor', `${item.name} VD`),
+        roll,
+      }),
+    }));
 
     const raMax = Math.max(0, Number(item.system?.ra) || 0);
     const raCurrent = Math.min(
@@ -486,12 +537,16 @@ export class TirduinRPSActorSheet extends ActorSheet {
       ui.notifications?.warn(`${weapon.name} no tiene dado de daño configurado.`);
       return null;
     }
+    const damageDie2 = String(weapon.system?.damageDie2 || '').trim();
+    const damageTypeKey = String(weapon.system?.damageType || '').trim();
+    const damageTypeKey2 = String(weapon.system?.damageType2 || '').trim();
 
     const proficiency = Number(weapon.system?.proficiency) || 0;
     const actorRollData = this.actor.getRollData();
     const selection = await this._promptWeaponRollOptions({
       weaponName: weapon.name,
       damageDie,
+      damageDie2,
       proficiency,
       actorRollData,
     });
@@ -500,36 +555,194 @@ export class TirduinRPSActorSheet extends ActorSheet {
     const abilityKey = selection.abilityKey;
     const edgeMode = selection.edgeMode;
     const abilityValue = Number(this.actor.system?.abilities?.[abilityKey]?.value) || 0;
-    const abilityLabel = abilityKey === 'agil' ? 'Agilidad' : 'Vigor';
 
     const attackBaseFormula = `1d20 + (${abilityValue}) + (${proficiency})`;
     const attackFormula = applyRollEdgeToFormula(attackBaseFormula, edgeMode);
     const damageFormula = `${damageDie} + (${abilityValue})`;
+    const damageFormula2 = damageDie2 || '';
+
+    const damageTypeLabel = damageTypeKey
+      ? game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[damageTypeKey] || damageTypeKey)
+      : '';
+    const damageTypeLabel2 = damageTypeKey2
+      ? game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[damageTypeKey2] || damageTypeKey2)
+      : '';
 
     const attackRoll = new Roll(attackFormula, actorRollData);
-    await attackRoll.toMessage({
-      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      flavor: `[weapon] ${weapon.name} Ataque (${abilityLabel} + Competencia)${getRollEdgeFlavorSuffix(edgeMode)}`,
-      rollMode: game.settings.get('core', 'rollMode'),
-    });
-
+    await attackRoll.evaluate();
     const damageRoll = new Roll(damageFormula, actorRollData);
-    await damageRoll.toMessage({
+    await damageRoll.evaluate();
+    let damageRoll2 = null;
+    if (damageFormula2) {
+      damageRoll2 = new Roll(damageFormula2, actorRollData);
+      await damageRoll2.evaluate();
+    }
+
+    await ChatMessage.create(applyChatRollMode({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      flavor: `[weapon] ${weapon.name} Daño (${abilityLabel})`,
-      rollMode: game.settings.get('core', 'rollMode'),
+      content: buildWeaponAttackDamageFlavorHtml({
+        weaponName: weapon.name,
+        edgeText: getRollEdgeFlavorSuffix(edgeMode),
+        edgeMode,
+        attackRoll,
+        damageRoll,
+        damageTypeLabel,
+        damageRoll2,
+        damageTypeLabel2,
+      }),
+    }));
+
+    return { attackRoll, damageRoll, damageRoll2 };
+  }
+
+  /**
+   * Toggle whether a weapon appears in the NPC Actions tab.
+   * @param {Event} event
+   * @private
+   */
+  async _onWeaponActionToggle(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const row = event.currentTarget.closest('[data-item-id]');
+    const itemId = row?.dataset?.itemId;
+    const weapon = this.actor.items.get(itemId);
+    if (!weapon || weapon.type !== 'weapon') return;
+
+    const next = !weapon.system?.actionEnabled;
+    await weapon.update({ 'system.actionEnabled': next });
+  }
+
+  /**
+   * Execute an action row from the NPC Actions tab.
+   * @param {Event} event
+   * @private
+   */
+  async _onActionItemClick(event) {
+    const clickedControl = event.target.closest('.npc-object-controls');
+    if (clickedControl) return;
+
+    const row = event.currentTarget;
+    const actionKind = row?.dataset?.actionKind;
+    const itemId = row?.dataset?.itemId;
+    if (!actionKind || !itemId) return;
+
+    if (actionKind === 'weapon') {
+      return this._onWeaponItemClick(event);
+    }
+    if (actionKind === 'armor') {
+      return this._onArmorItemClick(event);
+    }
+    if (actionKind === 'magic') {
+      return this._onMagicActionUse(itemId);
+    }
+  }
+
+  /**
+   * Roll and resolve a magical action against the first targeted token.
+   * @param {string} itemId
+   * @private
+   */
+  async _onMagicActionUse(itemId) {
+    const magic = this.actor.items.get(itemId);
+    if (!magic || magic.type !== 'feature' || magic.system?.category !== 'magicAction') return;
+
+    const targetToken = game.user?.targets?.first();
+    if (!targetToken?.actor) {
+      ui.notifications?.warn('Selecciona un token objetivo para resolver la salvacion.');
+      return null;
+    }
+
+    const damageFormula = String(magic.system?.damageDie || '').trim();
+    if (!damageFormula) {
+      ui.notifications?.warn(`${magic.name} no tiene daño configurado.`);
+      return null;
+    }
+
+    const dc = Math.max(1, Number(magic.system?.dc) || 1);
+    const saveType = String(magic.system?.saveType || 'fortaleza');
+    const onSaveSuccess = String(magic.system?.onSaveSuccess || 'half');
+    const saveLabelMap = {
+      fortaleza: 'Fortaleza',
+      reflejos: 'Reflejos',
+      voluntad: 'Voluntad',
+    };
+    const saveLabel = saveLabelMap[saveType] || 'Salvacion';
+    const targetSaveBonus = this._getSaveValue(targetToken.actor, saveType);
+
+    const saveRoll = new Roll(`1d20 + (${targetSaveBonus})`, targetToken.actor.getRollData?.() || {});
+    await saveRoll.evaluate();
+    const damageRoll = new Roll(damageFormula, this.actor.getRollData());
+    await damageRoll.evaluate();
+
+    const success = (Number(saveRoll.total) || 0) >= dc;
+    const resultText = success
+      ? `${targetToken.name} supera ${saveLabel} (CD ${dc}).`
+      : `${targetToken.name} falla ${saveLabel} (CD ${dc}).`;
+    const rolledDamageTotal = Number(damageRoll.total) || 0;
+    const appliedDamageTotal = !success
+      ? rolledDamageTotal
+      : onSaveSuccess === 'negate'
+        ? 0
+        : Math.floor(rolledDamageTotal / 2);
+    const damageOutcomeText = !success
+      ? `${targetToken.name} recibe el daño completo.`
+      : onSaveSuccess === 'negate'
+        ? `${targetToken.name} niega completamente el daño.`
+        : `${targetToken.name} reduce el daño a la mitad.`;
+
+    const saveCard = buildRollFlavorHtml({
+      title: `[Salvacion] ${targetToken.name} - ${saveLabel}`,
+      roll: saveRoll,
+      outcomeText: resultText,
     });
 
-    return { attackRoll, damageRoll };
+    const damageCard = buildRollFlavorHtml({
+      title: buildTypedRollTitle('spell', `${magic.name} Daño`),
+      roll: damageRoll,
+      outcomeText: damageOutcomeText,
+      totalOverride: appliedDamageTotal,
+      showDiceBreakdown: true,
+      showBonus: true,
+    });
+
+    await ChatMessage.create(applyChatRollMode({
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      content: `<div class="tirduin-roll-bundle">${saveCard}${damageCard}</div>`,
+    }));
+
+    return { saveRoll, damageRoll, success, appliedDamageTotal };
+  }
+
+  /**
+   * Get a save bonus from actor data with a fallback computed from abilities.
+   * @param {Actor} targetActor
+   * @param {'fortaleza'|'reflejos'|'voluntad'} saveType
+   * @returns {number}
+   * @private
+   */
+  _getSaveValue(targetActor, saveType) {
+    const direct = Number(targetActor?.system?.saves?.[saveType]?.value);
+    if (Number.isFinite(direct)) return direct;
+
+    const vig = Number(targetActor?.system?.abilities?.vig?.value) || 0;
+    const agil = Number(targetActor?.system?.abilities?.agil?.value) || 0;
+    const inst = Number(targetActor?.system?.abilities?.inst?.value) || 0;
+    const ment = Number(targetActor?.system?.abilities?.ment?.value) || 0;
+    const pre = Number(targetActor?.system?.abilities?.pre?.value) || 0;
+
+    if (saveType === 'fortaleza') return vig * 2;
+    if (saveType === 'reflejos') return agil + inst;
+    return ment + pre;
   }
 
   /**
    * Prompt weapon attack options with attribute selector and edge radios.
-   * @param {{weaponName: string, damageDie: string, proficiency: number, actorRollData: object}} options
+  * @param {{weaponName: string, damageDie: string, damageDie2?: string, proficiency: number, actorRollData: object}} options
    * @returns {Promise<{abilityKey: 'vig'|'agil', edgeMode: string}|null>}
    * @private
    */
-  async _promptWeaponRollOptions({ weaponName, damageDie, proficiency, actorRollData }) {
+  async _promptWeaponRollOptions({ weaponName, damageDie, damageDie2 = '', proficiency, actorRollData }) {
     return new Promise((resolve) => {
       let settled = false;
 
@@ -552,6 +765,7 @@ export class TirduinRPSActorSheet extends ActorSheet {
             </div>
             <p class="weapon-roll-preview" data-role="weapon-attack-preview"></p>
             <p class="weapon-roll-preview" data-role="weapon-damage-preview"></p>
+            <p class="weapon-roll-preview" data-role="weapon-damage2-preview"></p>
           </div>
           <div class="roll-edge-row">
             <label class="roll-edge-option">
@@ -592,6 +806,7 @@ export class TirduinRPSActorSheet extends ActorSheet {
           const edgeRadios = html.find('input[name="tirduin-roll-edge"]');
           const attackPreview = html.find('[data-role="weapon-attack-preview"]');
           const damagePreview = html.find('[data-role="weapon-damage-preview"]');
+          const damagePreview2 = html.find('[data-role="weapon-damage2-preview"]');
 
           const refreshPreview = () => {
             const abilityKey = abilitySelect.val() || 'vig';
@@ -601,6 +816,7 @@ export class TirduinRPSActorSheet extends ActorSheet {
             const attackBase = `1d20 + (${abilityValue}) + (${proficiency})`;
             const attackFormula = applyRollEdgeToFormula(attackBase, edgeMode);
             const damageFormula = `${damageDie} + (${abilityValue})`;
+            const damageFormula2 = damageDie2 || '';
 
             try {
               attackPreview.text(`Ataque: ${new Roll(attackFormula, actorRollData).formula}`);
@@ -612,6 +828,17 @@ export class TirduinRPSActorSheet extends ActorSheet {
               damagePreview.text(`Daño: ${new Roll(damageFormula, actorRollData).formula}`);
             } catch (_error) {
               damagePreview.text(`Daño: ${damageFormula}`);
+            }
+
+            if (!damageFormula2) {
+              damagePreview2.text('');
+              return;
+            }
+
+            try {
+              damagePreview2.text(`Daño 2: ${new Roll(damageFormula2, actorRollData).formula}`);
+            } catch (_error) {
+              damagePreview2.text(`Daño 2: ${damageFormula2}`);
             }
           };
 

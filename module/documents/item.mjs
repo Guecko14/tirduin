@@ -3,7 +3,11 @@
  * @extends {Item}
  */
 import {
+  applyChatRollMode,
   applyRollEdgeToFormula,
+  buildRollFlavorHtml,
+  buildTypedRollTitle,
+  getD20OutcomeText,
   getRollEdgeFlavorSuffix,
   promptRollConfirmation,
 } from '../helpers/roll-dialog.mjs';
@@ -87,16 +91,15 @@ export class TirduinRPSItem extends Item {
     // Initialize chat data.
     const speaker = ChatMessage.getSpeaker({ actor: this.actor });
     const rollMode = game.settings.get('core', 'rollMode');
-    const label = `[${item.type}] ${item.name}`;
+    const label = buildTypedRollTitle(item.type, item.name);
 
     // If there's no roll data, send a chat message.
     if (!this.system.formula) {
-      ChatMessage.create({
+      ChatMessage.create(applyChatRollMode({
         speaker: speaker,
-        rollMode: rollMode,
         flavor: label,
         content: item.system.description ?? '',
-      });
+      }, rollMode));
     }
     // Otherwise, create a roll and send a chat message from it.
     else {
@@ -112,13 +115,19 @@ export class TirduinRPSItem extends Item {
 
       // Invoke the roll and submit it to chat.
       const roll = new Roll(formula, rollData.actor);
+      await roll.evaluate();
+      const outcomeText = getD20OutcomeText(roll);
       // If you need to store the value first, uncomment the next line.
       // const result = await roll.evaluate();
-      roll.toMessage({
+      await ChatMessage.create(applyChatRollMode({
         speaker: speaker,
-        rollMode: rollMode,
-        flavor: `${label}${getRollEdgeFlavorSuffix(edgeMode)}`,
-      });
+        content: buildRollFlavorHtml({
+          title: `${label}${getRollEdgeFlavorSuffix(edgeMode)}`,
+          roll,
+          outcomeText,
+          edgeMode,
+        }),
+      }, rollMode));
       return roll;
     }
   }

@@ -58,7 +58,7 @@
                 <span class="npc-weapon-col-name">Nombre</span>
                 <span class="npc-weapon-col-cat">Cat.</span>
                 <span class="npc-weapon-col-sub">Subtipo</span>
-                <span class="npc-weapon-col-die">Daño</span>
+                <span class="npc-weapon-col-damage">Daños</span>
                 <span class="npc-weapon-col-range">Alcance</span>
                 <span class="npc-weapon-col-grip">Grip</span>
                 <span class="npc-weapon-col-controls"></span>
@@ -74,12 +74,23 @@
                 <span
                     class="npc-weapon-col-sub">{{weaponSubcategoryLabel
                     weapon.system.subcategory}}</span>
-                <span
-                    class="npc-weapon-col-die">{{weapon.system.damageDie}}</span>
+                <span class="npc-weapon-col-damage">
+                    {{weapon.system.damageDie}}
+                    ({{damageTypeAbbr weapon.system.damageType}})
+                    {{#if weapon.system.damageDie2}}
+                    / {{weapon.system.damageDie2}}
+                    ({{damageTypeAbbr weapon.system.damageType2}})
+                    {{/if}}
+                </span>
                 <span class="npc-weapon-col-range">{{weapon.system.range}}
                     ft</span>
                 <span class="npc-weapon-col-grip">{{weapon.system.grip}}M</span>
                 <div class="npc-object-controls npc-weapon-col-controls">
+                    <a
+                        class="weapon-action-toggle {{#if (isTrue weapon.system.actionEnabled)}}is-enabled{{/if}}"
+                        title="{{#if (isTrue weapon.system.actionEnabled)}}Quitar de Acciones{{else}}Añadir a Acciones{{/if}}">
+                        <i class="fas fa-bolt"></i>
+                    </a>
                     <a class="item-edit" title="Editar"><i
                             class="fas fa-edit"></i></a>
                     <a class="item-delete" title="Eliminar"><i

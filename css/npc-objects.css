@@ -248,10 +248,28 @@
 .npc-weapon-col-name     { flex: 2;       font-size: 0.82rem; color: #e0e0e0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .npc-weapon-col-cat      { flex: 1;       font-size: 0.75rem; color: #bbb; text-align: center; }
 .npc-weapon-col-sub      { flex: 1;       font-size: 0.75rem; color: #bbb; text-align: center; }
-.npc-weapon-col-die      { flex: 0 0 46px; font-size: 0.8rem;  color: #f0c070; text-align: center; font-weight: 700; }
+.npc-weapon-col-damage   { flex: 0 0 190px; font-size: 0.74rem; color: #dcb97a; text-align: center; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .npc-weapon-col-range    { flex: 0 0 56px; font-size: 0.75rem; color: #bbb; text-align: center; }
 .npc-weapon-col-grip     { flex: 0 0 30px; font-size: 0.75rem; color: #bbb; text-align: center; }
-.npc-weapon-col-controls { flex: 0 0 44px; display: flex; justify-content: flex-end; }
+.npc-weapon-col-controls { flex: 0 0 72px; display: flex; justify-content: flex-end; }
+
+.weapon-action-toggle {
+  color: #666;
+  cursor: pointer;
+}
+
+.weapon-action-toggle:hover {
+  color: #9ad;
+}
+
+.weapon-action-toggle.is-enabled {
+  color: #7ec8a0;
+  text-shadow: 0 0 6px rgba(126, 200, 160, 0.35);
+}
+
+.npc-action-item {
+  cursor: pointer;
+}
 
 /* ================================================================
    ARMOR LIST COLUMNS

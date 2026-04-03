@@ -91,6 +91,33 @@
       </div>
     </div>
 
+    <div class="saving-throws">
+      <h2>Salvaciones</h2>
+      <div class="saving-throws-row">
+        <div class="saving-throw-box rollable"
+          data-roll="1d20+{{system.saves.fortaleza.value}}"
+          data-label="Fortaleza">
+          <span class="saving-throw-name">Fortaleza</span>
+          <span class="saving-throw-value">{{numberFormat
+            system.saves.fortaleza.value sign=true}}</span>
+        </div>
+        <div class="saving-throw-box rollable"
+          data-roll="1d20+{{system.saves.reflejos.value}}"
+          data-label="Reflejos">
+          <span class="saving-throw-name">Reflejos</span>
+          <span class="saving-throw-value">{{numberFormat
+            system.saves.reflejos.value sign=true}}</span>
+        </div>
+        <div class="saving-throw-box rollable"
+          data-roll="1d20+{{system.saves.voluntad.value}}"
+          data-label="Voluntad">
+          <span class="saving-throw-name">Voluntad</span>
+          <span class="saving-throw-value">{{numberFormat
+            system.saves.voluntad.value sign=true}}</span>
+        </div>
+      </div>
+    </div>
+
     {{!-- TABS LAYOUT: sidebar lateral + panel principal del contenido --}}
     <div class="tabs-layout">
 

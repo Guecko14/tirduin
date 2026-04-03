@@ -121,6 +121,27 @@ Handlebars.registerHelper('weaponSubcategoryLabel', function (subcategory) {
   return labels[subcategory] || subcategory;
 });
 
+Handlebars.registerHelper('isTrue', function (value) {
+  return value === true;
+});
+
+Handlebars.registerHelper('damageTypeAbbr', function (damageType) {
+  const labels = {
+    slashingPiercing: 'C/P',
+    bludgeoning: 'CON',
+    acid: 'ACI',
+    cold: 'FRI',
+    fire: 'FUE',
+    lightning: 'ELE',
+    sonic: 'SON',
+    psychic: 'PSI',
+    necrotic: 'NEC',
+    poison: 'VEN',
+    aetherMagic: 'AET',
+  };
+  return labels[damageType] || '—';
+});
+
 /* -------------------------------------------- */
 /*  Ready Hook                                  */
 /* -------------------------------------------- */

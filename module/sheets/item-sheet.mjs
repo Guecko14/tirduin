@@ -35,6 +35,10 @@ export class TirduinRPSItemSheet extends ItemSheet {
     if (this.item.type === 'feature' && this.item.system.category === 'special') {
       return `${path}/item-special-sheet.hbs`;
     }
+    // Acciones mágicas del NPC: feature con editor específico.
+    if (this.item.type === 'feature' && this.item.system.category === 'magicAction') {
+      return `${path}/item-magic-action-sheet.hbs`;
+    }
     // Armas y armaduras tienen sus propias sheets de edición.
     if (this.item.type === 'weapon') return `${path}/item-weapon-sheet.hbs`;
     if (this.item.type === 'armor') return `${path}/item-armor-sheet.hbs`;
