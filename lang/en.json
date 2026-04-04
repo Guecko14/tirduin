@@ -188,8 +188,60 @@
     },
     "Item": {
       "Spell": {
-        "SpellLVL": "Level {level} Spells",
-        "AddLVL": "Add LVL {level}"
+        "SpellLVL": "Conjuros de Nivel {level}",
+        "AddLVL": "Anadir Conjuro Nvl {level}",
+        "Edit": "Editar conjuro",
+        "Delete": "Eliminar conjuro",
+        "EmptyLevel": "No hay conjuros en nivel {level}.",
+        "None": "Ninguno",
+        "Abbr": {
+          "Cost": "E",
+          "Verbal": "V",
+          "Somatic": "S"
+        },
+        "Units": {
+          "Ft": "ft"
+        },
+        "Fields": {
+          "Name": "Nombre",
+          "Type": "Tipo",
+          "Level": "Nivel",
+          "Action": "Accion",
+          "Cost": "Coste",
+          "Range": "Rango",
+          "Area": "Area (ft)",
+          "Components": "Componentes",
+          "Duration": "Duracion",
+          "Description": "Descripcion"
+        },
+        "Options": {
+          "Type": {
+            "Conj": "Conj.",
+            "Apt": "Apt."
+          },
+          "Action": {
+            "One": "1",
+            "Two": "2",
+            "Reaction": "Reaccion"
+          },
+          "Cost": {
+            "Hope": "Esperanza (E)",
+            "Stress": "Estres (E)"
+          },
+          "Range": {
+            "Melee": "Toque",
+            "Ranged": "A distancia"
+          },
+          "Components": {
+            "Verbal": "Verbal (V)",
+            "Somatic": "Somatico (S)"
+          },
+          "Duration": {
+            "Instant": "Inst.",
+            "Turns": "Turnos",
+            "Minutes": "Minutos"
+          }
+        }
       }
     },
     "Effect": {
@@ -203,13 +255,13 @@
 
   "TYPES": {
     "Actor": {
-      "character": "Character",
+      "character": "Personaje",
       "npc": "NPC"
     },
     "Item": {
-      "item": "Item",
+      "item": "Objeto",
       "feature": "Dote",
-      "spell": "Spell"
+      "spell": "Conjuro"
     }
   }
 }

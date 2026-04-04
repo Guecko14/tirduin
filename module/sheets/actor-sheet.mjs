@@ -9,6 +9,7 @@ import {
   buildTypedRollTitle,
   buildWeaponAttackDamageFlavorHtml,
   getD20OutcomeText,
+  getNaturalD20Result,
   getRollEdgeFlavorSuffix,
   promptRollConfirmation,
 } from '../helpers/roll-dialog.mjs';
@@ -281,6 +282,9 @@ export class TirduinRPSActorSheet extends ActorSheet {
       }
       // El resto de features siguen apareciendo en la seccion de dotes.
       else if (i.type === 'feature') {
+        if (i.img === Item.DEFAULT_ICON) {
+          i.img = 'icons/svg/upgrade.svg';
+        }
         features.push(i);
       }
       // Armas del NPC: van al listado de armas del tab de objetos.
@@ -295,6 +299,9 @@ export class TirduinRPSActorSheet extends ActorSheet {
       }
       // Conjuros agrupados por nivel para el partial de spells.
       else if (i.type === 'spell') {
+        if (i.img === Item.DEFAULT_ICON) {
+          i.img = 'icons/svg/book.svg';
+        }
         const level = Number(i.system?.spellLevel);
         if (Number.isFinite(level) && spells[level]) {
           spells[level].push(i);
@@ -390,6 +397,9 @@ export class TirduinRPSActorSheet extends ActorSheet {
     // -------------------------------------------------------------
     // Everything below here is only needed if the sheet is editable
     if (!this.isEditable) return;
+
+    // Boton de tirada de muerte (d20): actualiza pips de Esperanza o Miedo segun resultado.
+    html.on('click', '.death-roll-btn', this._onDeathRoll.bind(this));
 
     html.on('click', '.resource-pip', async (ev) => {
       ev.preventDefault();
@@ -498,6 +508,10 @@ export class TirduinRPSActorSheet extends ActorSheet {
         ? 'Nueva habilidad especial'
       : data.category === 'magicAction'
         ? 'Nuevo ataque magico'
+      : (type === 'spell')
+        ? 'Nuevo conjuro'
+      : (type === 'feature')
+        ? 'Nueva dote'
       : (type === 'weapon' && data.actionEnabled)
         ? 'Nuevo ataque'
       : `New ${type.capitalize()}`;
@@ -507,6 +521,12 @@ export class TirduinRPSActorSheet extends ActorSheet {
       type: type,
       system: data,
     };
+    if (type === 'spell') {
+      itemData.img = 'icons/svg/book.svg';
+    }
+    if (type === 'feature') {
+      itemData.img = 'icons/svg/upgrade.svg';
+    }
     // El tipo ya viaja en itemData.type; se elimina del system inicial.
     delete itemData.system['type'];
 
@@ -560,6 +580,48 @@ export class TirduinRPSActorSheet extends ActorSheet {
       }));
       return roll;
     }
+  }
+
+  /**
+   * Handle the death-roll button: roll 1d20, then increment hope or fear pips
+   * depending on whether the natural result is even (Esperanza) or odd (Miedo).
+   * @param {Event} event
+   * @private
+   */
+  async _onDeathRoll(event) {
+    event.preventDefault();
+
+    const actorRollData = this.actor.getRollData();
+    const edgeMode = await promptRollConfirmation({ formula: '1d20', rollData: actorRollData });
+    if (edgeMode === null) return;
+
+    const formula = applyRollEdgeToFormula('1d20', edgeMode);
+    const roll = new Roll(formula, actorRollData);
+    await roll.evaluate();
+
+    const natural = getNaturalD20Result(roll);
+    const isHope = natural !== null && natural % 2 === 0;
+
+    // Increment the corresponding death-roll counter (capped at max).
+    const system = this.actor.system;
+    if (isHope) {
+      const current = Number(system?.deathRoll?.hope?.value) || 0;
+      const max = Number(system?.deathRoll?.hope?.max) || 3;
+      await this.actor.update({ 'system.deathRoll.hope.value': Math.min(current + 1, max) });
+    } else {
+      const current = Number(system?.deathRoll?.fear?.value) || 0;
+      const max = Number(system?.deathRoll?.fear?.max) || 3;
+      await this.actor.update({ 'system.deathRoll.fear.value': Math.min(current + 1, max) });
+    }
+
+    const outcomeText = getD20OutcomeText(roll);
+    const edgeText = getRollEdgeFlavorSuffix(edgeMode);
+    const title = buildTypedRollTitle('save', `Tirada de Muerte${edgeText}`);
+    const flavor = buildRollFlavorHtml({ title, roll, outcomeText, edgeMode });
+    await ChatMessage.create(applyChatRollMode({
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      content: flavor,
+    }));
   }
 
   /**

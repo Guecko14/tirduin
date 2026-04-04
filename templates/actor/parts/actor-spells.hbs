@@ -1,49 +1,113 @@
-<ol class='items-list'>
+<section class="character-spells">
   {{#each spells as |spells spellLevel|}}
-    <li class='item flexrow items-header'>
-      <div class='item-name'>
-        {{localize 'TIRDUIN_RPS.Item.Spell.SpellLVL' level=spellLevel}}
-      </div>
-      <div class='item-controls'>
-        <a
-          class='item-control item-create'
-          title='{{localize "DOCUMENT.Create" type='Spell'}}'
-          data-type='spell'
-          data-spell-level='{{spellLevel}}'
-        >
-          <i class='fas fa-plus'></i>
-          {{localize 'TIRDUIN_RPS.Item.Spell.AddLVL' level=spellLevel}}
-        </a>
-      </div>
-    </li>
-    {{#each spells as |item id|}}
-      <li class='item flexrow' data-item-id='{{item._id}}'>
-        <div class='item-name flexrow'>
-          <div class='item-image'>
-            <a class='rollable' data-roll-type='item'><img
-                src='{{item.img}}'
-                title='{{item.name}}'
-                width='24'
-                height='24'
-              /></a>
+  <div class="character-spell-level">
+    <div class="character-spells-header">
+      <h2>{{localize 'TIRDUIN_RPS.Item.Spell.SpellLVL' level=spellLevel}}</h2>
+      <a class="item-control item-create character-spell-add"
+        data-type="spell"
+        data-spell-level="{{spellLevel}}"
+        title="{{localize 'TIRDUIN_RPS.Item.Spell.AddLVL' level=spellLevel}}">
+        <i class="fas fa-plus"></i>
+        {{localize 'TIRDUIN_RPS.Item.Spell.AddLVL' level=spellLevel}}
+      </a>
+    </div>
+
+    {{#if spells.length}}
+    <ol class="character-spells-list">
+      {{#each spells as |item|}}
+      <li class="character-spell-item" data-item-id="{{item._id}}">
+        <div class="character-spell-main item-edit"
+          title="{{localize 'TIRDUIN_RPS.Item.Spell.Edit'}}">
+          <div class="character-spell-title-row">
+            <img src="{{item.img}}" title="{{item.name}}" width="22"
+              height="22" />
+            <h4>{{item.name}}</h4>
           </div>
-          <h4>{{item.name}}</h4>
+
+          <div class="character-spell-meta-row">
+            <span class="character-feature-chip">
+              {{localize "TIRDUIN_RPS.Item.Spell.Fields.Type"}}:
+              {{#if (eq item.system.spellType "apt")}}
+              {{localize "TIRDUIN_RPS.Item.Spell.Options.Type.Apt"}}
+              {{else}}
+              {{localize "TIRDUIN_RPS.Item.Spell.Options.Type.Conj"}}
+              {{/if}}
+            </span>
+            <span class="character-feature-chip">
+              {{localize "TIRDUIN_RPS.Item.Spell.Fields.Action"}}:
+              {{#if (eq item.system.actionCost "2")}}
+              {{localize "TIRDUIN_RPS.Item.Spell.Options.Action.Two"}}
+              {{else if (eq item.system.actionCost "reaction")}}
+              {{localize "TIRDUIN_RPS.Item.Spell.Options.Action.Reaction"}}
+              {{else}}
+              {{localize "TIRDUIN_RPS.Item.Spell.Options.Action.One"}}
+              {{/if}}
+            </span>
+            <span class="character-feature-chip">
+              {{localize "TIRDUIN_RPS.Item.Spell.Fields.Cost"}}:
+              {{item.system.costValue}}
+              {{localize "TIRDUIN_RPS.Item.Spell.Abbr.Cost"}}
+            </span>
+            <span class="character-feature-chip">
+              {{localize "TIRDUIN_RPS.Item.Spell.Fields.Range"}}:
+              {{#if (eq item.system.rangeType "melee")}}
+              {{localize "TIRDUIN_RPS.Item.Spell.Options.Range.Melee"}}
+              {{else}}
+              {{item.system.rangeFeet}} {{localize
+              "TIRDUIN_RPS.Item.Spell.Units.Ft"}}
+              {{/if}}
+            </span>
+            <span class="character-feature-chip">
+              {{localize "TIRDUIN_RPS.Item.Spell.Fields.Duration"}}:
+              {{#if (eq item.system.durationType "instant")}}
+              {{localize "TIRDUIN_RPS.Item.Spell.Options.Duration.Instant"}}
+              {{else if (eq item.system.durationType "minutes")}}
+              {{item.system.durationValue}} {{localize
+              "TIRDUIN_RPS.Item.Spell.Options.Duration.Minutes"}}
+              {{else}}
+              {{item.system.durationValue}} {{localize
+              "TIRDUIN_RPS.Item.Spell.Options.Duration.Turns"}}
+              {{/if}}
+            </span>
+            <span class="character-feature-chip">
+              {{localize "TIRDUIN_RPS.Item.Spell.Fields.Components"}}:
+              {{#if item.system.components.verbal}}{{localize
+              "TIRDUIN_RPS.Item.Spell.Abbr.Verbal"}}{{/if}}
+              {{#if item.system.components.verbal}}{{#if
+              item.system.components.somatic}} / {{/if}}{{/if}}
+              {{#if item.system.components.somatic}}{{localize
+              "TIRDUIN_RPS.Item.Spell.Abbr.Somatic"}}{{/if}}
+              {{#unless item.system.components.verbal}}
+              {{#unless item.system.components.somatic}}
+              {{localize "TIRDUIN_RPS.Item.Spell.None"}}
+              {{/unless}}
+              {{/unless}}
+            </span>
+          </div>
+
+          {{#if item.system.description}}
+          <p
+            class="character-feature-description">{{item.system.description}}</p>
+          {{/if}}
         </div>
-        <div class='item-controls'>
-          <a
-            class='item-control item-edit'
-            title='{{localize "DOCUMENT.Edit" type='spell'}}'
-          >
-            <i class='fas fa-edit'></i>
+
+        <div class="character-feature-controls item-controls">
+          <a class="item-control item-edit"
+            title="{{localize 'TIRDUIN_RPS.Item.Spell.Edit'}}">
+            <i class="fas fa-edit"></i>
           </a>
-          <a
-            class='item-control item-delete'
-            title='{{localize "DOCUMENT.Delete" type='spell'}}'
-          >
-            <i class='fas fa-trash'></i>
+          <a class="item-control item-delete"
+            title="{{localize 'TIRDUIN_RPS.Item.Spell.Delete'}}">
+            <i class="fas fa-trash"></i>
           </a>
         </div>
       </li>
-    {{/each}}
+      {{/each}}
+    </ol>
+    {{else}}
+    <p class="character-features-empty">{{localize
+      "TIRDUIN_RPS.Item.Spell.EmptyLevel" level=spellLevel}}</p>
+    {{/if}}
+  </div>
   {{/each}}
-</ol>
+</section>

@@ -1,55 +1,140 @@
-<form class='{{cssClass}}' autocomplete='off'>
-  <header class='sheet-header'>
-    <img
-      class='profile-img'
-      src='{{item.img}}'
-      data-edit='img'
-      title='{{item.name}}'
-    />
-    <div class='header-fields'>
-      <label class='resource-label'>Nombre</label>
-      <h1 class='charname'><input
-          name='name'
-          type='text'
-          value='{{item.name}}'
-          placeholder='Name'
-        /></h1>
-    </div>
-  </header>
+<form class="{{cssClass}} special-item-sheet" autocomplete="off">
 
-  {{! Sheet Tab Navigation }}
-  <nav class='sheet-tabs tabs' data-group='primary'>
-    <a class='item' data-tab='description'>Descripción</a>
-    <a class='item' data-tab='attributes'>Atributos</a>
-  </nav>
-
-  {{! Sheet Body }}
-  <section class='sheet-body'>
-
-    {{! Description Tab }}
-    <div class='tab' data-group='primary' data-tab='description'>
-      {{! Editors must receive enriched text data from getData to properly handle rolls }}
-      {{editor
-        enrichedDescription
-        target='system.description'
-        engine='prosemirror'
-        button=true
-        editable=editable
-      }}
+  <section class="special-sheet-panel">
+    <div class="special-field special-field-name">
+      <label for="name">{{localize
+        "TIRDUIN_RPS.Item.Spell.Fields.Name"}}</label>
+      <input name="name" type="text" value="{{item.name}}"
+        placeholder="{{localize "TIRDUIN_RPS.Item.Spell.Fields.Name"}}" />
     </div>
 
-    {{! Attributes Tab }}
-    <div class='tab attributes' data-group='primary' data-tab='attributes'>
-      {{! As you add new fields, add them in here! }}
-      <div class='resource'>
-        <label class='resource-label'>Nivel de Hechizo</label>
-        <input
-          type='text'
-          name='system.spellLevel'
-          value='{{system.spellLevel}}'
-          data-dtype='Number'
-        />
+    <div class="fear-sheet-grid">
+      <div class="fear-field">
+        <label for="system.spellType">{{localize
+          "TIRDUIN_RPS.Item.Spell.Fields.Type"}}</label>
+        <select name="system.spellType">
+          <option value="conj" {{#if (eq system.spellType
+            "conj")}}selected{{/if}}>{{localize
+            "TIRDUIN_RPS.Item.Spell.Options.Type.Conj"}}</option>
+          <option value="apt" {{#if (eq system.spellType
+            "apt")}}selected{{/if}}>{{localize
+            "TIRDUIN_RPS.Item.Spell.Options.Type.Apt"}}</option>
+        </select>
+      </div>
+
+      <div class="fear-field fear-field-cost">
+        <label for="system.spellLevel">{{localize
+          "TIRDUIN_RPS.Item.Spell.Fields.Level"}}</label>
+        <input name="system.spellLevel" type="number"
+          value="{{system.spellLevel}}"
+          min="1" max="10" data-dtype="Number" />
       </div>
     </div>
+
+    <div class="fear-sheet-grid">
+      <div class="fear-field">
+        <label for="system.actionCost">{{localize
+          "TIRDUIN_RPS.Item.Spell.Fields.Action"}}</label>
+        <select name="system.actionCost">
+          <option value="1" {{#if (eq system.actionCost
+            "1")}}selected{{/if}}>{{localize
+            "TIRDUIN_RPS.Item.Spell.Options.Action.One"}}</option>
+          <option value="2" {{#if (eq system.actionCost
+            "2")}}selected{{/if}}>{{localize
+            "TIRDUIN_RPS.Item.Spell.Options.Action.Two"}}</option>
+          <option value="reaction" {{#if (eq system.actionCost
+            "reaction")}}selected{{/if}}>{{localize
+            "TIRDUIN_RPS.Item.Spell.Options.Action.Reaction"}}</option>
+        </select>
+      </div>
+
+      <div class="fear-field fear-field-cost">
+        <label for="system.costValue">{{localize
+          "TIRDUIN_RPS.Item.Spell.Fields.Cost"}} (E)</label>
+        <input name="system.costValue" type="number"
+          value="{{system.costValue}}"
+          min="0" data-dtype="Number" />
+      </div>
+    </div>
+
+    <div class="fear-sheet-grid">
+      <div class="fear-field">
+        <label for="system.rangeType">{{localize
+          "TIRDUIN_RPS.Item.Spell.Fields.Range"}}</label>
+        <div class="fear-sheet-grid">
+          <select name="system.rangeType">
+            <option value="melee" {{#if (eq system.rangeType
+              "melee")}}selected{{/if}}>{{localize
+              "TIRDUIN_RPS.Item.Spell.Options.Range.Melee"}}</option>
+            <option value="ranged" {{#if (eq system.rangeType
+              "ranged")}}selected{{/if}}>{{localize
+              "TIRDUIN_RPS.Item.Spell.Options.Range.Ranged"}}</option>
+          </select>
+          {{#if (eq system.rangeType "ranged")}}
+          <input name="system.rangeFeet" type="number"
+            value="{{system.rangeFeet}}"
+            min="0" data-dtype="Number"
+            placeholder="{{localize "TIRDUIN_RPS.Item.Spell.Units.Ft"}}" />
+          {{/if}}
+        </div>
+      </div>
+
+      {{#if (eq system.rangeType "ranged")}}
+      <div class="fear-field fear-field-cost">
+        <label for="system.areaFeet">{{localize
+          "TIRDUIN_RPS.Item.Spell.Fields.Area"}}</label>
+        <input name="system.areaFeet" type="number" value="{{system.areaFeet}}"
+          min="0" data-dtype="Number"
+          placeholder="{{localize "TIRDUIN_RPS.Item.Spell.Units.Ft"}}" />
+      </div>
+      {{/if}}
+    </div>
+
+    <div class="fear-sheet-grid">
+      <div class="fear-field">
+        <label>{{localize "TIRDUIN_RPS.Item.Spell.Fields.Components"}}</label>
+        <div class="spell-components">
+          <label class="spell-component-chip">
+            <input type="checkbox" name="system.components.verbal"
+              {{#if system.components.verbal}}checked{{/if}} />
+            {{localize "TIRDUIN_RPS.Item.Spell.Options.Components.Verbal"}}
+          </label>
+          <label class="spell-component-chip">
+            <input type="checkbox" name="system.components.somatic"
+              {{#if system.components.somatic}}checked{{/if}} />
+            {{localize "TIRDUIN_RPS.Item.Spell.Options.Components.Somatic"}}
+          </label>
+        </div>
+      </div>
+
+      <div class="fear-field fear-field-cost">
+        <label for="system.durationType">{{localize
+          "TIRDUIN_RPS.Item.Spell.Fields.Duration"}}</label>
+        <div class="fear-sheet-grid">
+          <select name="system.durationType">
+            <option value="instant" {{#if (eq system.durationType
+              "instant")}}selected{{/if}}>{{localize
+              "TIRDUIN_RPS.Item.Spell.Options.Duration.Instant"}}</option>
+            <option value="turns" {{#if (eq system.durationType
+              "turns")}}selected{{/if}}>{{localize
+              "TIRDUIN_RPS.Item.Spell.Options.Duration.Turns"}}</option>
+            <option value="minutes" {{#if (eq system.durationType
+              "minutes")}}selected{{/if}}>{{localize
+              "TIRDUIN_RPS.Item.Spell.Options.Duration.Minutes"}}</option>
+          </select>
+          <input name="system.durationValue" type="number"
+            value="{{system.durationValue}}"
+            min="0" data-dtype="Number" />
+        </div>
+      </div>
+    </div>
+
+    <div class="special-field special-field-description">
+      <label for="system.description">{{localize
+        "TIRDUIN_RPS.Item.Spell.Fields.Description"}}</label>
+      <textarea name="system.description"
+        placeholder="{{localize "TIRDUIN_RPS.Item.Spell.Fields.Description"}}">{{system.description}}</textarea>
+    </div>
   </section>
+
 </form>

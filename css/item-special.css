@@ -123,8 +123,10 @@
 .special-item-sheet {
   display: flex;
   flex-direction: column;
+  height: 100%;
   min-height: 100%;
   margin: 0;
+  overflow: hidden;
   background: linear-gradient(180deg, #191612 0%, #120f0d 100%);
   color: #e6e6e6;
 }
@@ -134,8 +136,44 @@
   flex-direction: column;
   gap: 12px;
   flex: 1 1 auto;
-  min-height: 100%;
+  min-height: 0;
   padding: 12px;
+  overflow-y: auto;
+}
+
+.special-item-sheet .fear-sheet-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+}
+
+.special-item-sheet .fear-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.special-item-sheet .spell-components {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.special-item-sheet .spell-component-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: #d9caab;
+  background: #2a2217;
+  border: 1px solid #5e4b2a;
+}
+
+.special-item-sheet .spell-component-chip input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
 }
 
 .special-item-sheet .special-field {
@@ -189,7 +227,8 @@
 }
 
 .special-item-sheet textarea {
-  min-height: 240px;
+  min-height: 140px;
+  max-height: 320px;
   padding: 10px;
   line-height: 1.45;
   resize: vertical;
@@ -201,4 +240,10 @@
   outline: none;
   border-color: #b08b43;
   box-shadow: 0 0 0 1px rgba(176, 139, 67, 0.25);
+}
+
+@media (max-width: 700px) {
+  .special-item-sheet .fear-sheet-grid {
+    grid-template-columns: 1fr;
+  }
 }
