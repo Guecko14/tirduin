@@ -229,6 +229,25 @@ export class TirduinRPSActorSheet extends ActorSheet {
   }
 
   /**
+   * Return a suitable fallback icon path for an item by type/category.
+   * @param {object} itemLike
+   * @returns {string|null}
+   */
+  _getSuggestedItemIcon(itemLike) {
+    const type = itemLike?.type;
+    const category = itemLike?.system?.category;
+
+    if (type === 'spell') return 'icons/svg/book.svg';
+    if (type === 'weapon') return 'icons/svg/sword.svg';
+    if (type === 'armor') return 'icons/svg/shield.svg';
+    if (type === 'feature' && category === 'fear') return 'icons/svg/skull.svg';
+    if (type === 'feature' && category === 'special') return 'icons/svg/aura.svg';
+    if (type === 'feature' && category === 'magicAction') return 'icons/svg/explosion.svg';
+    if (type === 'feature') return 'icons/svg/upgrade.svg';
+    return null;
+  }
+
+  /**
    * Organize and classify Items for Actor sheets.
    *
    * @param {object} context The context object to mutate
@@ -261,6 +280,10 @@ export class TirduinRPSActorSheet extends ActorSheet {
     // Iterate through items, allocating to containers
     for (let i of context.items) {
       i.img = i.img || Item.DEFAULT_ICON;
+      const suggestedIcon = this._getSuggestedItemIcon(i);
+      if (i.img === Item.DEFAULT_ICON && suggestedIcon) {
+        i.img = suggestedIcon;
+      }
       // Objetos normales del inventario.
       if (i.type === 'item') {
         gear.push(i);
@@ -282,9 +305,6 @@ export class TirduinRPSActorSheet extends ActorSheet {
       }
       // El resto de features siguen apareciendo en la seccion de dotes.
       else if (i.type === 'feature') {
-        if (i.img === Item.DEFAULT_ICON) {
-          i.img = 'icons/svg/upgrade.svg';
-        }
         features.push(i);
       }
       // Armas del NPC: van al listado de armas del tab de objetos.
@@ -299,9 +319,6 @@ export class TirduinRPSActorSheet extends ActorSheet {
       }
       // Conjuros agrupados por nivel para el partial de spells.
       else if (i.type === 'spell') {
-        if (i.img === Item.DEFAULT_ICON) {
-          i.img = 'icons/svg/book.svg';
-        }
         const level = Number(i.system?.spellLevel);
         if (Number.isFinite(level) && spells[level]) {
           spells[level].push(i);
@@ -477,10 +494,11 @@ export class TirduinRPSActorSheet extends ActorSheet {
     // Drag events for macros.
     if (this.actor.isOwner) {
       let handler = (ev) => this._onDragStart(ev);
-      html.find('li.item').each((i, li) => {
-        if (li.classList.contains('inventory-header')) return;
-        li.setAttribute('draggable', true);
-        li.addEventListener('dragstart', handler, false);
+      html.find('[data-item-id]').each((i, el) => {
+        // Avoid duplicate listeners on rerenders when reusing DOM nodes.
+        el.removeEventListener('dragstart', handler, false);
+        el.setAttribute('draggable', true);
+        el.addEventListener('dragstart', handler, false);
       });
     }
   }
@@ -521,17 +539,34 @@ export class TirduinRPSActorSheet extends ActorSheet {
       type: type,
       system: data,
     };
-    if (type === 'spell') {
-      itemData.img = 'icons/svg/book.svg';
-    }
-    if (type === 'feature') {
-      itemData.img = 'icons/svg/upgrade.svg';
-    }
+    const suggestedIcon = this._getSuggestedItemIcon({ type, system: data });
+    if (suggestedIcon) itemData.img = suggestedIcon;
     // El tipo ya viaja en itemData.type; se elimina del system inicial.
     delete itemData.system['type'];
 
     // Finally, create the item!
     return await Item.create(itemData, { parent: this.actor });
+  }
+
+  /** @override */
+  _onDragStart(event) {
+    const row = event.currentTarget?.closest('[data-item-id]');
+    const itemId = row?.dataset?.itemId;
+    const item = itemId ? this.actor.items.get(itemId) : null;
+    if (!item) return super._onDragStart(event);
+
+    const dragData = item.toDragData();
+    const suggestedIcon = this._getSuggestedItemIcon(item);
+
+    // When source item keeps default icon, ship explicit item data with fallback icon.
+    if ((item.img === Item.DEFAULT_ICON || !item.img) && suggestedIcon) {
+      const itemData = item.toObject();
+      itemData.img = suggestedIcon;
+      dragData.data = itemData;
+      delete dragData.uuid;
+    }
+
+    event.dataTransfer.setData('text/plain', JSON.stringify(dragData));
   }
 
   /**
