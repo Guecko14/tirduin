@@ -151,6 +151,7 @@
 }
 
 .special-item-sheet input,
+.special-item-sheet select,
 .special-item-sheet textarea {
   width: 100%;
   background: #0f0d0a;
@@ -167,6 +168,26 @@
   font-weight: 700;
 }
 
+.special-item-sheet select {
+  height: 34px;
+  padding: 0 8px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  color-scheme: dark;
+  background-image: linear-gradient(45deg, transparent 50%, #d0b47a 50%), linear-gradient(135deg, #d0b47a 50%, transparent 50%);
+  background-position: calc(100% - 14px) calc(50% - 3px), calc(100% - 8px) calc(50% - 3px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.special-item-sheet select option {
+  background: #16120e;
+  color: #f0e4ca;
+}
+
 .special-item-sheet textarea {
   min-height: 240px;
   padding: 10px;
@@ -175,6 +196,7 @@
 }
 
 .special-item-sheet input:focus,
+.special-item-sheet select:focus,
 .special-item-sheet textarea:focus {
   outline: none;
   border-color: #b08b43;

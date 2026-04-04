@@ -7,6 +7,19 @@ export default class TirduinRPSFeature extends TirduinRPSItemBase {
 		const schema = super.defineSchema();
 
 		schema.category = new fields.StringField({ required: true, blank: true, initial: "" });
+		schema.origin = new fields.StringField({
+			required: true,
+			blank: false,
+			initial: 'class',
+			choices: ['class', 'race', 'background'],
+		});
+		schema.level = new fields.NumberField({
+			required: true,
+			nullable: false,
+			integer: true,
+			initial: 1,
+			min: 1,
+		});
 		schema.cost = new fields.NumberField({
 			required: true,
 			nullable: false,

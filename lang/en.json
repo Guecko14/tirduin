@@ -137,6 +137,7 @@
       "Race": "Raza",
       "Class": "Clase",
       "Background": "Transfondo",
+      "FatigueDeath": "Muerte",
       "HitPoints": "Puntos de Vida",
       "TempHitPoints": "PV temporal",
       "TempShort": "Temp",
@@ -166,7 +167,24 @@
         "Features": "Dotes",
         "Items": "Objetos",
         "Spells": "Conjuros"
-      }
+      },
+      "Features": {
+        "Name": "Nombre",
+        "Origin": "Origen",
+        "Level": "Nivel",
+        "Description": "Descripción",
+        "Add": "Nueva dote",
+        "Edit": "Editar dote",
+        "Delete": "Eliminar dote",
+        "Empty": "No hay dotes todavía. Usa Nueva dote para añadir una.",
+        "Origins": {
+          "Class": "Clase",
+          "Race": "Raza",
+          "Background": "Transfondo"
+        }
+      },
+      "DeathRoll": "Tirada de Muerte",
+      "DeathRollFear": "Miedo"
     },
     "Item": {
       "Spell": {
@@ -190,7 +208,7 @@
     },
     "Item": {
       "item": "Item",
-      "feature": "Feature",
+      "feature": "Dote",
       "spell": "Spell"
     }
   }

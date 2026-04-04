@@ -1,35 +1,44 @@
-<form class="{{cssClass}}" autocomplete="off">
-  <header class="sheet-header">
-    <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"/>
-    <div class="header-fields">
-      <h1 class="charname"><input name="name" type="text" value="{{item.name}}" placeholder="Name"/></h1>
-    </div>
-  </header>
+<form class="{{cssClass}} special-item-sheet" autocomplete="off">
 
-  {{!-- Sheet Tab Navigation --}}
-  <nav class="sheet-tabs tabs" data-group="primary">
-    <a class="item" data-tab="description">Descripción</a>
-    <a class="item" data-tab="attributes">Atributos</a>
-    <a class="item" data-tab="effects">Efectos</a>
-  </nav>
-
-  {{!-- Sheet Body --}}
-  <section class="sheet-body">
-
-    {{!-- Description Tab --}}
-    <div class="tab" data-group="primary" data-tab="description">
-      {{!-- Editors must receive enriched text data from getData to properly handle rolls --}}
-      {{editor enrichedDescription target="system.description" engine="prosemirror" button=true editable=editable}}
+  <section class="special-sheet-panel">
+    <div class="special-field special-field-name">
+      <label for="name">{{localize
+        "TIRDUIN_RPS.CharacterSheet.Features.Name"}}</label>
+      <input name="name" type="text" value="{{item.name}}"
+        placeholder="{{localize "TIRDUIN_RPS.CharacterSheet.Features.Name"}}" />
     </div>
 
-    {{!-- Attributes Tab --}}
-    <div class="tab attributes" data-group="primary" data-tab="attributes">
-      {{!-- As you add new fields, add them in here! --}}
+    <div class="fear-sheet-grid">
+      <div class="fear-field">
+        <label for="system.origin">{{localize
+          "TIRDUIN_RPS.CharacterSheet.Features.Origin"}}</label>
+        <select name="system.origin" class="sheet-skill-select">
+          <option value="class" {{#if (eq system.origin
+            "class")}}selected{{/if}}>{{localize
+            "TIRDUIN_RPS.CharacterSheet.Features.Origins.Class"}}</option>
+          <option value="race" {{#if (eq system.origin
+            "race")}}selected{{/if}}>{{localize
+            "TIRDUIN_RPS.CharacterSheet.Features.Origins.Race"}}</option>
+          <option value="background" {{#if (eq system.origin
+            "background")}}selected{{/if}}>{{localize
+            "TIRDUIN_RPS.CharacterSheet.Features.Origins.Background"}}</option>
+        </select>
+      </div>
+
+      <div class="fear-field fear-field-cost">
+        <label for="system.level">{{localize
+          "TIRDUIN_RPS.CharacterSheet.Features.Level"}}</label>
+        <input name="system.level" type="number" value="{{system.level}}"
+          min="1"
+          data-dtype="Number" />
+      </div>
     </div>
 
-    {{!-- Effects Tab --}}
-    <div class="tab effects" data-group="primary" data-tab="effects">
-      {{> "systems/tirduin/templates/item/parts/item-effects.hbs"}}
+    <div class="special-field special-field-description">
+      <label for="system.description">{{localize
+        "TIRDUIN_RPS.CharacterSheet.Features.Description"}}</label>
+      <textarea name="system.description"
+        placeholder="{{localize "TIRDUIN_RPS.CharacterSheet.Features.Description"}}">{{system.description}}</textarea>
     </div>
   </section>
 

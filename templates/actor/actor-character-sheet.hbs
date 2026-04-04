@@ -38,7 +38,7 @@
           <div class="character-meta-field npc-stat">
             <label for="system.details.className">{{localize
               "TIRDUIN_RPS.CharacterSheet.Class"}}</label>
-            <select name="system.details.className">
+            <select name="system.details.className" class="sheet-skill-select">
               <option value="combatiente" {{#if (eq system.details.className
                 'combatiente')}}selected{{/if}}>{{localize
                 "TIRDUIN_RPS.CharacterSheet.ClassOptions.Combatiente"}}</option>
@@ -95,6 +95,27 @@
               value="{{system.attributes.speed.value}}" min="0"
               onkeyup="if(value<0) value=0" data-dtype="Number" readonly />
           </div>
+
+          <div class="npc-stat">
+            <label for="system.attributes.fatigue.value">{{localize
+              "TIRDUIN_RPS.AlteredState.fatigue.label"}}</label>
+            <select name="system.attributes.fatigue.value"
+              class="sheet-skill-select">
+              <option value="0" {{#if (eq system.attributes.fatigue.value
+                0)}}selected{{/if}}>0</option>
+              <option value="1" {{#if (eq system.attributes.fatigue.value
+                1)}}selected{{/if}}>1</option>
+              <option value="2" {{#if (eq system.attributes.fatigue.value
+                2)}}selected{{/if}}>2</option>
+              <option value="3" {{#if (eq system.attributes.fatigue.value
+                3)}}selected{{/if}}>3</option>
+              <option value="4" {{#if (eq system.attributes.fatigue.value
+                4)}}selected{{/if}}>4</option>
+              <option value="5" {{#if (eq system.attributes.fatigue.value
+                5)}}selected{{/if}}>{{localize
+                "TIRDUIN_RPS.CharacterSheet.FatigueDeath"}}</option>
+            </select>
+          </div>
         </div>
       </div>
     </header>
@@ -106,7 +127,7 @@
         <div class="attr-box">
           <label for="system.abilities.{{key}}.value"
             class="resource-label rollable"
-            data-roll="d20+@abilities.{{key}}.mod"
+            data-roll="1d20+{{ability.rollMod}}"
             data-label="{{localize (lookup @root.config.abilities key)}}">{{localize
             (lookup @root.config.abilities key)}}</label>
           <input type="number" name="system.abilities.{{key}}.value"
@@ -114,9 +135,9 @@
             onkeyup="if(value<-5) value=-5; if(value>5) value=5;"
             data-dtype="Number" />
           <span class="ability-mod rollable"
-            data-roll="d20+@abilities.{{key}}.mod"
+            data-roll="1d20+{{ability.rollMod}}"
             data-label="{{localize (lookup @root.config.abilities key)}}">{{numberFormat
-            ability.mod decimals=0 sign=true}}</span>
+            ability.rollMod decimals=0 sign=true}}</span>
         </div>
         {{/each}}
       </div>
@@ -212,6 +233,47 @@
       </div>
     </div>
 
+    <div class="death-roll-section">
+      <h3>{{localize "TIRDUIN_RPS.CharacterSheet.DeathRoll"}}</h3>
+      <div class="death-roll-container">
+        <div class="death-roll-group">
+          <label>{{localize
+            "TIRDUIN_RPS.CharacterSheet.Resources.Hope"}}</label>
+          <div class="resource-pips resource-pips--hope">
+            {{#each deathRollHopePips as |pip|}}
+            <button type="button"
+              class="resource-pip {{#if pip.filled}}is-filled{{/if}}"
+              data-value="{{pip.value}}"
+              data-current-value="{{pip.currentValue}}"
+              data-resource-path="{{pip.path}}"
+              data-max-path="{{pip.maxPath}}"
+              data-max-value="{{pip.max}}"
+              title="{{localize "TIRDUIN_RPS.CharacterSheet.Resources.Hope"}}
+              {{pip.value}} {{localize "TIRDUIN_RPS.CharacterSheet.Of"}}
+              {{pip.max}}"></button>
+            {{/each}}
+          </div>
+        </div>
+        <div class="death-roll-group">
+          <label>{{localize "TIRDUIN_RPS.CharacterSheet.DeathRollFear"}}</label>
+          <div class="resource-pips resource-pips--fear">
+            {{#each deathRollFearPips as |pip|}}
+            <button type="button"
+              class="resource-pip {{#if pip.filled}}is-filled{{/if}}"
+              data-value="{{pip.value}}"
+              data-current-value="{{pip.currentValue}}"
+              data-resource-path="{{pip.path}}"
+              data-max-path="{{pip.maxPath}}"
+              data-max-value="{{pip.max}}"
+              title="{{localize "TIRDUIN_RPS.CharacterSheet.DeathRollFear"}}
+              {{pip.value}} {{localize "TIRDUIN_RPS.CharacterSheet.Of"}}
+              {{pip.max}}"></button>
+            {{/each}}
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="tabs-layout">
       <nav class="sheet-tabs tabs" data-group="primary">
         <a class="item active" data-tab="skills">{{localize
@@ -232,12 +294,7 @@
         </div>
 
         <div class="tab features" data-group="primary" data-tab="features">
-          <section class="grid grid-3col">
-            <aside class="sidebar"></aside>
-            <section class="main grid-span-2">
-              {{> "systems/tirduin/templates/actor/parts/actor-features.hbs"}}
-            </section>
-          </section>
+          {{> "systems/tirduin/templates/actor/parts/actor-features.hbs"}}
         </div>
 
         <div class="tab items" data-group="primary" data-tab="items">

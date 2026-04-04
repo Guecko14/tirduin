@@ -82,6 +82,18 @@ export class TirduinRPSActorSheet extends ActorSheet {
         value: context.system?.luck?.value,
         max: context.system?.luck?.max ?? 3,
       });
+      context.deathRollHopePips = this._buildResourcePips({
+        path: 'system.deathRoll.hope.value',
+        maxPath: 'system.deathRoll.hope.max',
+        value: context.system?.deathRoll?.hope?.value,
+        max: context.system?.deathRoll?.hope?.max ?? 3,
+      });
+      context.deathRollFearPips = this._buildResourcePips({
+        path: 'system.deathRoll.fear.value',
+        maxPath: 'system.deathRoll.fear.max',
+        value: context.system?.deathRoll?.fear?.value,
+        max: context.system?.deathRoll?.fear?.max ?? 3,
+      });
     }
 
     // Prepare NPC data and items.
@@ -122,6 +134,25 @@ export class TirduinRPSActorSheet extends ActorSheet {
     const skillKeys = this.actor.type === 'npc'
       ? npcSkillKeys
       : Object.keys(CONFIG.TIRDUIN_RPS.skills || {});
+    const fatigueLevel = Math.max(0, Math.min(5, Number(this.actor.system?.attributes?.fatigue?.value) || 0));
+    const fallbackFatiguePenalty = {
+      0: 0,
+      1: -2,
+      2: -3,
+      3: -4,
+      4: -5,
+      5: -5,
+    }[fatigueLevel] ?? 0;
+    const fatigueRollPenalty = this.actor.type === 'character'
+      ? (Number(this.actor.system?.attributes?.fatigue?.rollPenalty) || fallbackFatiguePenalty)
+      : 0;
+
+    context.fatigueRollPenalty = fatigueRollPenalty;
+    if (this.actor.type === 'character') {
+      for (const [abilityKey, abilityData] of Object.entries(context.system?.abilities || {})) {
+        abilityData.rollMod = (Number(abilityData?.value) || 0) + fatigueRollPenalty;
+      }
+    }
 
     context.system.skillList = skillKeys
       .filter((key) => Object.prototype.hasOwnProperty.call(skills, key))
@@ -130,7 +161,7 @@ export class TirduinRPSActorSheet extends ActorSheet {
         const rank = Number(skill.rank) || 0;
         const bonus = Number(skill.bonus) || 0;
         const abilityKey = abilityMapping[key] || '-';
-        const abilityVal = Number(context.system?.abilities?.[abilityKey.toLowerCase()]?.value) || 0;
+        const abilityVal = Number(this.actor.system?.abilities?.[abilityKey.toLowerCase()]?.value) || 0;
 
         const label = skill.label || CONFIG.TIRDUIN_RPS.skills?.[key] || key;
         const labelShort = label.length > 18 ? `${label.slice(0, 15)}…` : label;
@@ -141,7 +172,7 @@ export class TirduinRPSActorSheet extends ActorSheet {
           ability: abilityKey,
           rank,
           bonus,
-          total: abilityVal + rank + bonus
+          total: abilityVal + rank + bonus + fatigueRollPenalty
         };
     });
 
@@ -624,7 +655,10 @@ export class TirduinRPSActorSheet extends ActorSheet {
 
     const abilityKey = selection.abilityKey;
     const edgeMode = selection.edgeMode;
-    const abilityValue = Number(this.actor.system?.abilities?.[abilityKey]?.value) || 0;
+    const fatigueRollPenalty = this.actor.type === 'character'
+      ? (Number(this.actor.system?.attributes?.fatigue?.rollPenalty) || 0)
+      : 0;
+    const abilityValue = (Number(this.actor.system?.abilities?.[abilityKey]?.value) || 0) + fatigueRollPenalty;
 
     const attackBaseFormula = `1d20 + (${abilityValue}) + (${proficiency})`;
     const attackFormula = applyRollEdgeToFormula(attackBaseFormula, edgeMode);
@@ -731,7 +765,8 @@ export class TirduinRPSActorSheet extends ActorSheet {
       return null;
     }
 
-    const dc = Math.max(1, Number(magic.system?.dc) || 1);
+    const fatigueDcPenalty = Number(this.actor.system?.attributes?.fatigue?.dcPenalty) || 0;
+    const dc = Math.max(1, (Number(magic.system?.dc) || 1) + fatigueDcPenalty);
     const saveType = String(magic.system?.saveType || 'fortaleza');
     const onSaveSuccess = String(magic.system?.onSaveSuccess || 'half');
     const saveLabelMap = {
@@ -902,7 +937,10 @@ export class TirduinRPSActorSheet extends ActorSheet {
           const refreshPreview = () => {
             const abilityKey = abilitySelect.val() || 'vig';
             const edgeMode = html.find('input[name="tirduin-roll-edge"]:checked').val() || 'none';
-            const abilityValue = Number(this.actor.system?.abilities?.[abilityKey]?.value) || 0;
+            const fatigueRollPenalty = this.actor.type === 'character'
+              ? (Number(this.actor.system?.attributes?.fatigue?.rollPenalty) || 0)
+              : 0;
+            const abilityValue = (Number(this.actor.system?.abilities?.[abilityKey]?.value) || 0) + fatigueRollPenalty;
 
             const attackBase = `1d20 + (${abilityValue}) + (${proficiency})`;
             const attackFormula = applyRollEdgeToFormula(attackBase, edgeMode);

@@ -17,6 +17,9 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
       speed: new fields.SchemaField({
         value: new fields.NumberField({ ...requiredInteger, initial: 20, min: 0 })
       }),
+      fatigue: new fields.SchemaField({
+        value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0, max: 5 })
+      }),
       slotsExtra: new fields.SchemaField({
         value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 })
       }),
@@ -35,6 +38,17 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
     schema.luck = new fields.SchemaField({
       value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0, max: 3 }),
       max: new fields.NumberField({ ...requiredInteger, initial: 3, min: 0, max: 3 })
+    });
+
+    schema.deathRoll = new fields.SchemaField({
+      hope: new fields.SchemaField({
+        value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0, max: 3 }),
+        max: new fields.NumberField({ ...requiredInteger, initial: 3, min: 0, max: 3 })
+      }),
+      fear: new fields.SchemaField({
+        value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0, max: 3 }),
+        max: new fields.NumberField({ ...requiredInteger, initial: 3, min: 0, max: 3 })
+      })
     });
 
     schema.details = new fields.SchemaField({
@@ -128,6 +142,24 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
     const inst = Number(this.abilities?.inst?.value) || 0;
     const ment = Number(this.abilities?.ment?.value) || 0;
     const pre = Number(this.abilities?.pre?.value) || 0;
+    const fatigueLevel = Math.max(0, Math.min(5, Number(this.attributes?.fatigue?.value) || 0));
+    // Fatiga usa una progresión no lineal definida por las reglas del sistema.
+    const fatigueEffects = {
+      0: { rollPenalty: 0, speedPenalty: 0 },
+      1: { rollPenalty: -2, speedPenalty: -5 },
+      2: { rollPenalty: -3, speedPenalty: -10 },
+      3: { rollPenalty: -4, speedPenalty: -15 },
+      4: { rollPenalty: -5, speedPenalty: -20 },
+      5: { rollPenalty: -5, speedPenalty: -20, isDeadly: true },
+    };
+    const fatigueEffect = fatigueEffects[fatigueLevel] || fatigueEffects[0];
+
+    this.attributes.fatigue.value = fatigueLevel;
+    this.attributes.fatigue.label = game.i18n.localize('TIRDUIN_RPS.AlteredState.fatigue.label');
+    this.attributes.fatigue.rollPenalty = fatigueEffect.rollPenalty;
+    this.attributes.fatigue.dcPenalty = fatigueEffect.rollPenalty;
+    this.attributes.fatigue.speedPenalty = fatigueEffect.speedPenalty;
+    this.attributes.fatigue.isDeadly = Boolean(fatigueEffect.isDeadly);
 
     const sourceHasHope = foundry.utils.hasProperty(this._source ?? {}, 'system.hope');
     const legacyPowerValue = Number(this.power?.value) || 0;
@@ -145,20 +177,20 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
     this.luck.max = 3;
 
     // Character speed is derived from agility.
-    this.attributes.speed.value = 20 + (5 * agil);
+    this.attributes.speed.value = Math.max(0, 20 + (5 * agil) + this.attributes.fatigue.speedPenalty);
 
     this.saves = {
       fortaleza: {
         label: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Saves.Fortaleza'),
-        value: (vig * 2),
+        value: (vig * 2) + this.attributes.fatigue.rollPenalty,
       },
       reflejos: {
         label: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Saves.Reflejos'),
-        value: (agil + inst),
+        value: (agil + inst) + this.attributes.fatigue.rollPenalty,
       },
       voluntad: {
         label: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Saves.Voluntad'),
-        value: (ment + pre),
+        value: (ment + pre) + this.attributes.fatigue.rollPenalty,
       },
     };
 
@@ -166,16 +198,30 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
 
   getRollData() {
     const data = {};
+    const fatigueRollPenalty = Number(this.attributes?.fatigue?.rollPenalty) || 0;
 
     // Copy the ability scores to the top level, so that rolls can use
     // formulas like `@vig.mod + 4`.
     if (this.abilities) {
       for (let [k,v] of Object.entries(this.abilities)) {
         data[k] = foundry.utils.deepClone(v);
+        data[k].mod = (Number(data[k].mod) || 0) + fatigueRollPenalty;
+      }
+
+      // Sobrescribe también el árbol de abilities para las fórmulas que usan
+      // rutas del tipo @abilities.agil.mod dentro de plantillas y macros.
+      data.abilities = foundry.utils.deepClone(this.abilities);
+      for (const ability of Object.values(data.abilities)) {
+        ability.mod = (Number(ability.mod) || 0) + fatigueRollPenalty;
       }
     }
 
     data.lvl = this.attributes.level.value;
+    data.fatigue = {
+      value: Number(this.attributes?.fatigue?.value) || 0,
+      rollPenalty: fatigueRollPenalty,
+      dcPenalty: Number(this.attributes?.fatigue?.dcPenalty) || 0,
+    };
 
     return data
   }

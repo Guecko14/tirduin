@@ -129,6 +129,49 @@
   border-radius: 4px;
 }
 
+.tirduin .character .npc-stat select {
+  width: 100%;
+  background: #111;
+  border: 1px solid #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 4px;
+  height: 30px;
+}
+
+.tirduin .character .sheet-skill-select {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  padding: 0 6px 0 6px;
+  font-size: 0.75rem;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  color-scheme: dark;
+  background-color: #050505;
+  background-image: linear-gradient(45deg, transparent 50%, #9ad 50%), linear-gradient(135deg, #9ad 50%, transparent 50%);
+  background-position: calc(100% - 14px) calc(50% - 3px), calc(100% - 8px) calc(50% - 3px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.tirduin .character .sheet-skill-select:focus {
+  outline: none;
+  border-color: #9ad;
+  box-shadow: 0 0 0 1px rgba(153, 170, 221, 0.35), 0 0 6px rgba(0, 0, 0, 0.45);
+}
+
+.tirduin .character .sheet-skill-select option {
+  background: #161616;
+  color: #f2f2f2;
+}
+
+.tirduin .character .sheet-skill-select option:checked {
+  background: #24405f;
+  color: #fff;
+}
+
 .tirduin .character .hp-row {
   display: flex;
   justify-content: center;
@@ -211,6 +254,58 @@
 
 .tirduin .character .resource-pip:hover {
   border-color: #f0ce6d;
+}
+
+.tirduin .character .death-roll-section {
+  margin-bottom: 10px;
+  padding: 10px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+}
+
+.tirduin .character .death-roll-section h3 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #aaa;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.tirduin .character .death-roll-container {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tirduin .character .death-roll-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.tirduin .character .death-roll-group label {
+  font-size: 11px;
+  color: #999;
+  font-weight: 600;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.tirduin .character .death-roll-group .resource-pips {
+  flex: 1;
+  justify-content: flex-start;
+}
+
+.tirduin .character .resource-pips--fear .resource-pip {
+  border-color: #6b3030;
+}
+
+.tirduin .character .resource-pips--fear .resource-pip.is-filled {
+  background: radial-gradient(circle at 35% 35%, #ffc4c4 0%, #d46a6a 45%, #6b1a1a 100%);
+  border-color: #c44a4a;
+  box-shadow: 0 0 6px rgba(212, 106, 106, 0.35);
 }
 
 @media (max-width: 900px) {
@@ -423,6 +518,139 @@
   font-size: 12px;
   text-align: center;
   margin: 0 6px;
+}
+
+/* Dotes en la character sheet. */
+.tirduin .character .character-features {
+  padding: 6px 0;
+}
+
+.tirduin .character .character-features-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #333;
+}
+
+.tirduin .character .character-features-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  color: #d7c497;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.tirduin .character .character-feature-add {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: #292116;
+  border: 1px solid #8a6a2b;
+  border-radius: 4px;
+  color: #e2c989;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.tirduin .character .character-feature-add:hover {
+  background: #3b2f1d;
+  color: #f0ddb0;
+  border-color: #ba9041;
+}
+
+.tirduin .character .character-features-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tirduin .character .character-feature-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  gap: 8px;
+  background: #1c1812;
+  border: 1px solid #4b3d22;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.tirduin .character .character-feature-main {
+  min-width: 0;
+}
+
+.tirduin .character .character-feature-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tirduin .character .character-feature-title-row h4 {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #f0dfb7;
+  font-weight: 700;
+}
+
+.tirduin .character .character-feature-meta-row {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tirduin .character .character-feature-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  color: #d9caab;
+  background: #2a2217;
+  border: 1px solid #5e4b2a;
+}
+
+.tirduin .character .character-feature-description {
+  margin: 8px 0 0;
+  font-size: 0.76rem;
+  color: #b7a57d;
+  line-height: 1.4;
+  overflow: hidden;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.tirduin .character .character-feature-controls {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.tirduin .character .character-feature-controls a {
+  color: #888;
+  text-decoration: none;
+}
+
+.tirduin .character .character-feature-controls a:hover {
+  color: #9ad;
+}
+
+.tirduin .character .character-features-empty {
+  color: #666;
+  font-style: italic;
+  font-size: 0.82rem;
+  text-align: center;
+  padding: 20px 0;
 }
 .tirduin .character .items-list .item {
   align-items: center;
