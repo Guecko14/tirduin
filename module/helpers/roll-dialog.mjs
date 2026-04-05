@@ -91,13 +91,24 @@ export async function promptRollConfirmation({ formula = '', rollData = {} } = {
           const edgeMode = selected || ROLL_EDGE_MODE.NONE;
           summaryEl.text(getRollFormulaPreview(formula, rollData, edgeMode));
         };
-            showBonus: true,
 
-        radios.on('change', refreshSummary);
+        radios.on('click', (event) => {
+          const target = event.currentTarget;
+          const wasChecked = target.dataset.wasChecked === 'true';
+          radios.each((_i, radio) => {
+            radio.dataset.wasChecked = 'false';
+          });
+          if (wasChecked) {
+            target.checked = false;
+          } else {
+            target.checked = true;
+            target.dataset.wasChecked = 'true';
+          }
+          refreshSummary();
+        });
         refreshSummary();
       },
       close: () => safeResolve(null),
-            showBonus: true,
     }).render(true);
   });
 }
@@ -208,7 +219,7 @@ export function getD20OutcomeText(roll) {
 
   const mood = (natural % 2 === 0) ? 'Esperanza' : 'Miedo';
   if (natural === 20) return `${mood} | CRITICO NATURAL`;
-  if (natural === 1) return `${mood} | Pifa`;
+  if (natural === 1) return `${mood} | Pifia`;
   return `Tirada con ${mood}`;
 }
 
@@ -255,7 +266,7 @@ export function getD20OutcomeTextWithOptions(roll, { includeMood = true } = {}) 
 
   if (!includeMood) {
     if (natural === 20) return 'CRITICO NATURAL';
-    if (natural === 1) return 'Pifa';
+    if (natural === 1) return 'Pifia';
     return '';
   }
 
@@ -342,7 +353,7 @@ export function buildRollFlavorHtml({
 
 /**
  * Build one unified chat card containing both weapon attack and damage rolls.
- * @param {{weaponName: string, edgeText?: string, edgeMode?: string, attackRoll: Roll, damageRoll: Roll, damageTypeLabel?: string, damageRoll2?: Roll|null, damageTypeLabel2?: string}} options
+ * @param {{weaponName: string, edgeText?: string, edgeMode?: string, attackRoll: Roll, damageRoll: Roll, damageTypeLabel?: string, damageRoll2?: Roll|null, damageTypeLabel2?: string, damageRollExtraEntries?: Array<{roll: Roll, typeLabel?: string}>, targetName?: string|null, targetAC?: number|null}} options
  * @returns {string}
  */
 export function buildWeaponAttackDamageFlavorHtml({
@@ -354,6 +365,7 @@ export function buildWeaponAttackDamageFlavorHtml({
   damageTypeLabel = '',
   damageRoll2 = null,
   damageTypeLabel2 = '',
+  damageRollExtraEntries = [],
   targetName = null,
   targetAC = null,
 } = {}) {
@@ -363,6 +375,7 @@ export function buildWeaponAttackDamageFlavorHtml({
   );
   const damageTitle = damageTypeLabel || 'Danio';
   const damageTitle2 = damageTypeLabel2 || 'Danio 2';
+  const extraEntries = Array.isArray(damageRollExtraEntries) ? damageRollExtraEntries : [];
 
   let attackOutcomeText = getD20OutcomeText(attackRoll);
   if (targetName !== null && targetAC !== null) {
@@ -393,6 +406,113 @@ export function buildWeaponAttackDamageFlavorHtml({
         showDiceBreakdown: true,
         showBonus: true,
       }) : ''}
+      ${extraEntries.map((entry, index) => buildRollFlavorHtml({
+        title: entry?.typeLabel
+          ? `Danio extra ${index + 1} (${entry.typeLabel})`
+          : `Danio extra ${index + 1}`,
+        roll: entry?.roll,
+        showDiceBreakdown: true,
+        showBonus: true,
+      })).join('')}
     </div>
   `;
+}
+
+/**
+ * Ask the user to confirm initiative with optional edge and bonus.
+ * @param {{formula?: string, rollData?: object}} options
+ * @returns {Promise<{edgeMode: string, bonus: number} | null>}
+ */
+export async function promptInitiativeConfirmation({ formula = '', rollData = {} } = {}) {
+  return new Promise((resolve) => {
+    let settled = false;
+
+    const safeResolve = (value) => {
+      if (settled) return;
+      settled = true;
+      resolve(value);
+    };
+
+    const getFormulaWithBonus = (edgeMode, bonus) => {
+      const withEdge = applyRollEdgeToFormula(formula, edgeMode);
+      const nBonus = Number(bonus) || 0;
+      return nBonus === 0 ? withEdge : `(${withEdge}) + (${nBonus})`;
+    };
+
+    const content = `
+      <form class="tirduin-roll-confirmation">
+        <p class="roll-summary" data-role="roll-summary"></p>
+        <div class="roll-edge-row">
+          <label class="roll-edge-option">
+            <input type="radio" name="tirduin-roll-edge" value="${ROLL_EDGE_MODE.ADVANTAGE}">
+            Ventaja
+          </label>
+          <label class="roll-edge-option">
+            <input type="radio" name="tirduin-roll-edge" value="${ROLL_EDGE_MODE.DISADVANTAGE}">
+            Desventaja
+          </label>
+        </div>
+        <div class="weapon-roll-inline-fields" style="display:grid;">
+          <label>
+            Bonif. iniciativa
+            <input type="number" name="tirduin-initiative-bonus" value="0" step="1">
+          </label>
+        </div>
+      </form>
+    `;
+
+    new Dialog({
+      title: 'Confirmar iniciativa',
+      content,
+      buttons: {
+        roll: {
+          icon: '<i class="fas fa-dice-d20"></i>',
+          label: 'Tirar',
+          callback: (html) => {
+            const edgeMode = html.find('input[name="tirduin-roll-edge"]:checked').val() || ROLL_EDGE_MODE.NONE;
+            const bonus = Number(html.find('input[name="tirduin-initiative-bonus"]').val()) || 0;
+            safeResolve({ edgeMode, bonus });
+          },
+        },
+        cancel: {
+          icon: '<i class="fas fa-times"></i>',
+          label: 'Cancelar',
+          callback: () => safeResolve(null),
+        },
+      },
+      default: 'roll',
+      classes: ['tirduin', 'tirduin-roll-dialog'],
+      render: (html) => {
+        const summaryEl = html.find('[data-role="roll-summary"]');
+        const radios = html.find('input[name="tirduin-roll-edge"]');
+        const bonusInput = html.find('input[name="tirduin-initiative-bonus"]');
+
+        const refreshSummary = () => {
+          const edgeMode = html.find('input[name="tirduin-roll-edge"]:checked').val() || ROLL_EDGE_MODE.NONE;
+          const bonus = Number(bonusInput.val()) || 0;
+          const resolved = getRollFormulaPreview(getFormulaWithBonus(edgeMode, bonus), rollData, ROLL_EDGE_MODE.NONE);
+          summaryEl.text(resolved);
+        };
+
+        radios.on('click', (event) => {
+          const target = event.currentTarget;
+          const wasChecked = target.dataset.wasChecked === 'true';
+          radios.each((_i, radio) => {
+            radio.dataset.wasChecked = 'false';
+          });
+          if (wasChecked) {
+            target.checked = false;
+          } else {
+            target.checked = true;
+            target.dataset.wasChecked = 'true';
+          }
+          refreshSummary();
+        });
+
+        bonusInput.on('input change', refreshSummary);
+        refreshSummary();
+      },
+      close: () => safeResolve(null),
+    }).render(true);
+  });
 }

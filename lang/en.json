@@ -139,10 +139,12 @@
       "Background": "Transfondo",
       "FatigueDeath": "Muerte",
       "HitPoints": "Puntos de Vida",
+      "SpeedExtra": "Velocidad extra",
       "TempHitPoints": "PV temporal",
       "TempShort": "Temp",
       "Abilities": "Atributos",
       "SavingThrows": "Salvaciones",
+      "InitiativeRoll": "Tirar iniciativa",
       "Of": "de",
       "ClassOptions": {
         "Combatiente": "Combatiente",
@@ -173,8 +175,10 @@
         "Origin": "Origen",
         "Level": "Nivel",
         "Description": "Descripción",
+        "Summary": "Resumen",
         "Add": "Nueva dote",
         "Edit": "Editar dote",
+        "PostSummary": "Publicar resumen",
         "Delete": "Eliminar dote",
         "Empty": "No hay dotes todavía. Usa Nueva dote para añadir una.",
         "Origins": {
@@ -190,7 +194,9 @@
       "Spell": {
         "SpellLVL": "Conjuros de Nivel {level}",
         "AddLVL": "Anadir Conjuro Nvl {level}",
+        "Summary": "Resumen",
         "Edit": "Editar conjuro",
+        "PostSummary": "Publicar resumen",
         "Delete": "Eliminar conjuro",
         "EmptyLevel": "No hay conjuros en nivel {level}.",
         "None": "Ninguno",
@@ -225,8 +231,8 @@
             "Reaction": "Reaccion"
           },
           "Cost": {
-            "Hope": "Esperanza (E)",
-            "Stress": "Estres (E)"
+            "Hope": "Esperanza",
+            "Stress": "Estres"
           },
           "Range": {
             "Melee": "Toque",
@@ -250,6 +256,12 @@
       "Temporary": "Temporary Effects",
       "Passive": "Passive Effects",
       "Inactive": "Inactive Effects"
+    },
+    "Chat": {
+      "RollInline": "Tirar",
+      "InvalidFormula": "La fórmula de tirada no es válida.",
+      "InlineRollFlavor": "Tirada de: {formula}",
+      "InlineRollFlavorWithDamage": "Tirada de: {formula} | Daño: {damage}"
     }
   },
 

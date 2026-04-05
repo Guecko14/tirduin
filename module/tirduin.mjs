@@ -9,6 +9,10 @@ import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
 import { TIRDUIN_RPS } from './helpers/config.mjs';
 import * as damageHelpers from './helpers/damage.mjs';
 import * as alteredStatesHelpers from './helpers/altered-states.mjs';
+import {
+  applyRollEdgeToFormula,
+  promptInitiativeConfirmation,
+} from './helpers/roll-dialog.mjs';
 // Import DataModel classes
 import * as models from './data/_module.mjs';
 
@@ -100,6 +104,7 @@ Handlebars.registerHelper('armorCategoryLabel', function (category) {
     media: 'Media',
     pesada: 'Pesada',
     escudo: 'Escudo',
+    extra: 'Extra',
   };
   return labels[category] || category;
 });
@@ -160,8 +165,11 @@ Hooks.once('ready', function () {
 
   const calculateArmorClassFromEquippedArmors = (actor) => {
     const equippedArmors = actor.items.filter((i) => i.type === 'armor' && i.system?.equipped);
-    const mainArmor = equippedArmors.find((i) => i.system?.category !== 'escudo');
+    const mainArmor = equippedArmors.find((i) => !['escudo', 'extra'].includes(i.system?.category));
     const shield = equippedArmors.find((i) => i.system?.category === 'escudo');
+    const extraBonuses = equippedArmors
+      .filter((i) => i.system?.category === 'extra' && !i.system?.broken)
+      .reduce((sum, i) => sum + (Number(i.system?.bonus) || 0), 0);
 
     const agility = Number(actor.system?.abilities?.agil?.value) || 0;
     let armorClass = mainArmor
@@ -171,6 +179,8 @@ Hooks.once('ready', function () {
     if (shield && !shield.system?.broken) {
       armorClass += Number(shield.system?.bonus) || 0;
     }
+
+    armorClass += extraBonuses;
 
     return armorClass;
   };
@@ -199,6 +209,78 @@ Hooks.once('ready', function () {
     const agilChanged = foundry.utils.hasProperty(changedData, 'system.abilities.agil.value');
     if (!agilChanged) return;
     await syncNpcArmorClass(actor);
+  });
+
+  // Intercept initiative rolls from Combat Encounter to ask for confirmation.
+  if (!Combat.prototype._tirduinInitiativePatched) {
+    const originalRollInitiative = Combat.prototype.rollInitiative;
+    Combat.prototype.rollInitiative = async function (ids, options = {}) {
+      if (options?.tirduinSkipPrompt) {
+        return originalRollInitiative.call(this, ids, options);
+      }
+
+      const idList = typeof ids === 'string' ? [ids] : Array.from(ids || []);
+      if (!idList.length) return originalRollInitiative.call(this, ids, options);
+
+      const firstCombatant = this.combatants.get(idList[0]);
+      const actor = firstCombatant?.actor || null;
+      const rollData = actor?.getRollData?.() || {};
+      const baseFormula = options?.formula || CONFIG.Combat?.initiative?.formula || '1d20 + @abilities.agil.mod';
+
+      const selection = await promptInitiativeConfirmation({ formula: baseFormula, rollData });
+      if (!selection) return this;
+
+      const edgeMode = selection.edgeMode || 'none';
+      const bonus = Number(selection.bonus) || 0;
+      let formula = applyRollEdgeToFormula(baseFormula, edgeMode);
+      if (bonus !== 0) formula = `(${formula}) + (${bonus})`;
+
+      return originalRollInitiative.call(this, ids, {
+        ...options,
+        formula,
+        tirduinSkipPrompt: true,
+      });
+    };
+
+    Combat.prototype._tirduinInitiativePatched = true;
+  }
+
+  // Botones de tirada embebidos en resúmenes de chat ([formula]).
+  Hooks.on('renderChatMessage', (_message, html) => {
+    html.on('click', '.tirduin-summary-roll', async (event) => {
+      event.preventDefault();
+
+      const button = event.currentTarget;
+      const formula = String(button.dataset.rollFormula || '').trim();
+      if (!formula) return;
+      const rollLabel = String(button.dataset.rollLabel || formula).trim();
+      const rollDamage = String(button.dataset.rollDamage || '').trim();
+
+      const actorId = String(button.dataset.actorId || '').trim();
+      const actor = actorId ? game.actors?.get(actorId) : null;
+      const rollData = actor?.getRollData?.() || {};
+
+      let roll;
+      try {
+        roll = new Roll(formula, rollData);
+        await roll.evaluate();
+      } catch (_error) {
+        ui.notifications?.warn(game.i18n.localize('TIRDUIN_RPS.Chat.InvalidFormula'));
+        return;
+      }
+
+      await roll.toMessage({
+        speaker: ChatMessage.getSpeaker(actor ? { actor } : {}),
+        flavor: rollDamage
+          ? game.i18n.format('TIRDUIN_RPS.Chat.InlineRollFlavorWithDamage', {
+              formula: rollLabel,
+              damage: rollDamage,
+            })
+          : game.i18n.format('TIRDUIN_RPS.Chat.InlineRollFlavor', { formula: rollLabel }),
+      }, {
+        rollMode: game.settings.get('core', 'rollMode'),
+      });
+    });
   });
 });
 

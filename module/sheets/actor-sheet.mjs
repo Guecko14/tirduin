@@ -11,6 +11,7 @@ import {
   getD20OutcomeText,
   getNaturalD20Result,
   getRollEdgeFlavorSuffix,
+  promptInitiativeConfirmation,
   promptRollConfirmation,
 } from '../helpers/roll-dialog.mjs';
 
@@ -396,6 +397,9 @@ export class TirduinRPSActorSheet extends ActorSheet {
       item.sheet.render(true);
     });
 
+    // Publica en chat un resumen estructurado de dotes y conjuros.
+    html.on('click', '.item-summary', this._onItemSummary.bind(this));
+
     // Click en una armadura del NPC: tira VD y aplica desgaste de RA.
     html.on('click', '.npc-armor-item', this._onArmorItemClick.bind(this));
 
@@ -491,6 +495,9 @@ export class TirduinRPSActorSheet extends ActorSheet {
     // Rollable abilities.
     html.on('click', '.rollable', this._onRoll.bind(this));
 
+    // Quick initiative button in actor header.
+    html.on('click', '.initiative-roll-btn', this._onInitiativeRollClick.bind(this));
+
     // Drag events for macros.
     if (this.actor.isOwner) {
       let handler = (ev) => this._onDragStart(ev);
@@ -569,6 +576,235 @@ export class TirduinRPSActorSheet extends ActorSheet {
     event.dataTransfer.setData('text/plain', JSON.stringify(dragData));
   }
 
+  _escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  _humanizeInlineFormula(formula = '') {
+    const source = String(formula || '').trim();
+    if (!source) return '';
+
+    // Show readable ability names instead of raw @paths.
+    return source.replace(/@abilities\.([a-zA-Z0-9_]+)\.value/g, (_m, abilityKey) => {
+      const key = String(abilityKey || '').toLowerCase();
+      const i18nKey = CONFIG.TIRDUIN_RPS?.abilities?.[key];
+      return i18nKey ? game.i18n.localize(i18nKey) : `@abilities.${key}.value`;
+    });
+  }
+
+  _resolveInlineDamageLabel(damageKey = '') {
+    const rawKey = String(damageKey || '').trim();
+    if (!rawKey) return '';
+
+    const normalize = (value) => String(value || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]/g, '');
+
+    const aliasMap = {
+      // slashing/piercing
+      corte: 'slashingPiercing',
+      cortante: 'slashingPiercing',
+      punzante: 'slashingPiercing',
+      slashing: 'slashingPiercing',
+      piercing: 'slashingPiercing',
+      slashpierce: 'slashingPiercing',
+      // bludgeoning
+      contundente: 'bludgeoning',
+      bludgeoning: 'bludgeoning',
+      golpe: 'bludgeoning',
+      // elemental/common
+      acido: 'acid',
+      acid: 'acid',
+      frio: 'cold',
+      cold: 'cold',
+      hielo: 'cold',
+      fuego: 'fire',
+      fire: 'fire',
+      electrico: 'lightning',
+      electricidad: 'lightning',
+      rayo: 'lightning',
+      lightning: 'lightning',
+      // other
+      sonico: 'sonic',
+      sonic: 'sonic',
+      psiquico: 'psychic',
+      psychic: 'psychic',
+      necrotico: 'necrotic',
+      necrotic: 'necrotic',
+      veneno: 'poison',
+      poison: 'poison',
+      aeter: 'aetherMagic',
+      aether: 'aetherMagic',
+      aethermagic: 'aetherMagic',
+      magiaaeter: 'aetherMagic',
+      magiaaether: 'aetherMagic',
+    };
+
+    const damageTypes = CONFIG.TIRDUIN_RPS?.damageTypes || {};
+    const normalized = normalize(rawKey);
+    const mappedKey = aliasMap[normalized] || rawKey;
+
+    // 1) Try canonical key (or alias result)
+    const directI18n = damageTypes[mappedKey] || damageTypes[String(mappedKey).toLowerCase()];
+    if (directI18n) return game.i18n.localize(directI18n);
+
+    // 2) Try matching localized labels entered by user (e.g. "Fuego").
+    for (const [typeKey, typeI18n] of Object.entries(damageTypes)) {
+      const localizedLabel = game.i18n.localize(typeI18n);
+      if (normalized === normalize(typeKey) || normalized === normalize(localizedLabel)) {
+        return localizedLabel;
+      }
+    }
+
+    return rawKey;
+  }
+
+  _renderSummaryTextWithRollButtons(text = '') {
+    const source = String(text || '');
+    if (!source.trim()) return '';
+
+    const rollLabel = game.i18n.localize('TIRDUIN_RPS.Chat.RollInline');
+    const actorId = this._escapeHtml(this.actor.id);
+    const regex = /\[([^\[\]]+)\]/g;
+    let lastIndex = 0;
+    let html = '';
+    let match;
+
+    while ((match = regex.exec(source)) !== null) {
+      const before = source.slice(lastIndex, match.index);
+      html += this._escapeHtml(before).replace(/\n/g, '<br>');
+
+      const token = String(match[1] || '').trim();
+      const [formulaPart, damagePart] = token.split('|').map((part) => String(part || '').trim());
+      const formula = formulaPart;
+      if (formula) {
+        const safeFormula = this._escapeHtml(formula);
+        const formulaLabel = this._humanizeInlineFormula(formula);
+        const damageLabel = this._resolveInlineDamageLabel(damagePart);
+        const buttonLabel = damageLabel
+          ? `${formulaLabel} · ${damageLabel}`
+          : formulaLabel;
+        const safeButtonLabel = this._escapeHtml(buttonLabel);
+        const safeFormulaLabel = this._escapeHtml(formulaLabel);
+        const safeDamageLabel = this._escapeHtml(damageLabel);
+        html += `<button type="button" class="tirduin-summary-roll" data-roll-formula="${safeFormula}" data-roll-label="${safeFormulaLabel}" data-roll-damage="${safeDamageLabel}" data-actor-id="${actorId}" title="${rollLabel}: ${safeButtonLabel}"><i class="fas fa-dice-d20"></i> ${safeButtonLabel}</button>`;
+      } else {
+        html += this._escapeHtml(match[0]);
+      }
+
+      lastIndex = regex.lastIndex;
+    }
+
+    const after = source.slice(lastIndex);
+    html += this._escapeHtml(after).replace(/\n/g, '<br>');
+    return html;
+  }
+
+  _buildFeatureSummaryBody(item) {
+    const origin = String(item.system?.origin || 'class');
+    const originLabel = origin === 'race'
+      ? game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Features.Origins.Race')
+      : origin === 'background'
+        ? game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Features.Origins.Background')
+        : game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Features.Origins.Class');
+    const level = Number(item.system?.level) || 1;
+    const description = this._renderSummaryTextWithRollButtons(item.system?.description || '');
+
+    return `
+      <div class="tirduin-item-summary-grid">
+        <div class="tirduin-item-summary-row"><span>${game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Features.Origin')}</span><strong>${this._escapeHtml(originLabel)}</strong></div>
+        <div class="tirduin-item-summary-row"><span>${game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Features.Level')}</span><strong>${level}</strong></div>
+      </div>
+      ${description ? `<div class="tirduin-item-summary-description"><h4>${game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Features.Description')}</h4><p>${description}</p></div>` : ''}
+    `;
+  }
+
+  _buildSpellSummaryBody(item) {
+    const spellType = item.system?.spellType === 'apt'
+      ? game.i18n.localize('TIRDUIN_RPS.Item.Spell.Options.Type.Apt')
+      : game.i18n.localize('TIRDUIN_RPS.Item.Spell.Options.Type.Conj');
+    const actionCost = item.system?.actionCost === '2'
+      ? game.i18n.localize('TIRDUIN_RPS.Item.Spell.Options.Action.Two')
+      : item.system?.actionCost === 'reaction'
+        ? game.i18n.localize('TIRDUIN_RPS.Item.Spell.Options.Action.Reaction')
+        : game.i18n.localize('TIRDUIN_RPS.Item.Spell.Options.Action.One');
+    const rangeType = item.system?.rangeType === 'melee'
+      ? game.i18n.localize('TIRDUIN_RPS.Item.Spell.Options.Range.Melee')
+      : `${Number(item.system?.rangeFeet) || 0} ${game.i18n.localize('TIRDUIN_RPS.Item.Spell.Units.Ft')}`;
+    const area = Number(item.system?.areaFeet) || 0;
+    const duration = item.system?.durationType === 'instant'
+      ? game.i18n.localize('TIRDUIN_RPS.Item.Spell.Options.Duration.Instant')
+      : item.system?.durationType === 'minutes'
+        ? `${Number(item.system?.durationValue) || 0} ${game.i18n.localize('TIRDUIN_RPS.Item.Spell.Options.Duration.Minutes')}`
+        : `${Number(item.system?.durationValue) || 0} ${game.i18n.localize('TIRDUIN_RPS.Item.Spell.Options.Duration.Turns')}`;
+    const verbal = !!item.system?.components?.verbal;
+    const somatic = !!item.system?.components?.somatic;
+    const components = verbal || somatic
+      ? `${verbal ? game.i18n.localize('TIRDUIN_RPS.Item.Spell.Abbr.Verbal') : ''}${verbal && somatic ? ' / ' : ''}${somatic ? game.i18n.localize('TIRDUIN_RPS.Item.Spell.Abbr.Somatic') : ''}`
+      : game.i18n.localize('TIRDUIN_RPS.Item.Spell.None');
+    const cost = `${Number(item.system?.costValue) || 0}`;
+    const description = this._renderSummaryTextWithRollButtons(item.system?.description || '');
+
+    return `
+      <div class="tirduin-item-summary-grid">
+        <div class="tirduin-item-summary-row"><span>${game.i18n.localize('TIRDUIN_RPS.Item.Spell.Fields.Type')}</span><strong>${this._escapeHtml(spellType)}</strong></div>
+        <div class="tirduin-item-summary-row"><span>${game.i18n.localize('TIRDUIN_RPS.Item.Spell.Fields.Level')}</span><strong>${Number(item.system?.spellLevel) || 1}</strong></div>
+        <div class="tirduin-item-summary-row"><span>${game.i18n.localize('TIRDUIN_RPS.Item.Spell.Fields.Action')}</span><strong>${this._escapeHtml(actionCost)}</strong></div>
+        <div class="tirduin-item-summary-row"><span>${game.i18n.localize('TIRDUIN_RPS.Item.Spell.Fields.Cost')}</span><strong>${this._escapeHtml(cost)}</strong></div>
+        <div class="tirduin-item-summary-row"><span>${game.i18n.localize('TIRDUIN_RPS.Item.Spell.Fields.Range')}</span><strong>${this._escapeHtml(rangeType)}</strong></div>
+        ${area > 0 ? `<div class="tirduin-item-summary-row"><span>${game.i18n.localize('TIRDUIN_RPS.Item.Spell.Fields.Area')}</span><strong>${area} ${game.i18n.localize('TIRDUIN_RPS.Item.Spell.Units.Ft')}</strong></div>` : ''}
+        <div class="tirduin-item-summary-row"><span>${game.i18n.localize('TIRDUIN_RPS.Item.Spell.Fields.Duration')}</span><strong>${this._escapeHtml(duration)}</strong></div>
+        <div class="tirduin-item-summary-row"><span>${game.i18n.localize('TIRDUIN_RPS.Item.Spell.Fields.Components')}</span><strong>${this._escapeHtml(components)}</strong></div>
+      </div>
+      ${description ? `<div class="tirduin-item-summary-description"><h4>${game.i18n.localize('TIRDUIN_RPS.Item.Spell.Fields.Description')}</h4><p>${description}</p></div>` : ''}
+    `;
+  }
+
+  _buildItemSummaryContent(item) {
+    const isSpell = item.type === 'spell';
+    const summaryLabel = isSpell
+      ? game.i18n.localize('TIRDUIN_RPS.Item.Spell.Summary')
+      : game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Features.Summary');
+    const typeLabel = game.i18n.localize(isSpell ? 'TYPES.Item.spell' : 'TYPES.Item.feature');
+    const body = isSpell ? this._buildSpellSummaryBody(item) : this._buildFeatureSummaryBody(item);
+
+    return `
+      <article class="tirduin-item-summary-card">
+        <header class="tirduin-item-summary-header">
+          <img src="${this._escapeHtml(item.img || Item.DEFAULT_ICON)}" width="26" height="26" alt="${this._escapeHtml(item.name)}" />
+          <div>
+            <div class="tirduin-item-summary-title">${this._escapeHtml(item.name)}</div>
+            <div class="tirduin-item-summary-subtitle">${this._escapeHtml(typeLabel)} · ${this._escapeHtml(summaryLabel)}</div>
+          </div>
+        </header>
+        ${body}
+      </article>
+    `;
+  }
+
+  async _onItemSummary(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const row = $(event.currentTarget).closest('[data-item-id]');
+    const item = this.actor.items.get(row.data('itemId'));
+    if (!item || !['feature', 'spell'].includes(item.type)) return;
+
+    const content = this._buildItemSummaryContent(item);
+    await ChatMessage.create(applyChatRollMode({
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      content,
+    }));
+  }
+
   /**
    * Handle clickable rolls.
    * @param {Event} event   The originating click event
@@ -615,6 +851,51 @@ export class TirduinRPSActorSheet extends ActorSheet {
       }));
       return roll;
     }
+  }
+
+  /**
+   * Roll initiative with confirmation (edge + bonus).
+   * If actor has a combatant in active combat, updates initiative there too.
+   * @param {Event} event
+   * @private
+   */
+  async _onInitiativeRollClick(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const actorRollData = this.actor.getRollData();
+    const baseFormula = CONFIG.Combat?.initiative?.formula || '1d20 + @abilities.agil.mod';
+    const selection = await promptInitiativeConfirmation({
+      formula: baseFormula,
+      rollData: actorRollData,
+    });
+    if (!selection) return null;
+
+    const edgeMode = selection.edgeMode || 'none';
+    const bonus = Number(selection.bonus) || 0;
+    let formula = applyRollEdgeToFormula(baseFormula, edgeMode);
+    if (bonus !== 0) formula = `(${formula}) + (${bonus})`;
+
+    const roll = new Roll(formula, actorRollData);
+    await roll.evaluate();
+
+    const combat = game.combat;
+    const combatant = combat?.combatants?.find((c) => c.actor?.id === this.actor.id) || null;
+    if (combat && combatant) {
+      await combat.setInitiative(combatant.id, roll.total);
+    }
+
+    await ChatMessage.create(applyChatRollMode({
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      content: buildRollFlavorHtml({
+        title: `${buildTypedRollTitle('ability', 'Iniciativa')}${getRollEdgeFlavorSuffix(edgeMode)}`,
+        roll,
+        showDiceBreakdown: true,
+        showBonus: true,
+      }),
+    }));
+
+    return roll;
   }
 
   /**
@@ -673,6 +954,10 @@ export class TirduinRPSActorSheet extends ActorSheet {
     const item = this.actor.items.get(itemId);
     if (!item || item.type !== 'armor') return;
 
+    if (item.system?.category === 'extra') {
+      return null;
+    }
+
     if (item.system?.broken) {
       ui.notifications?.warn(`${item.name} esta rota y no puede tirar VD.`);
       return null;
@@ -689,6 +974,8 @@ export class TirduinRPSActorSheet extends ActorSheet {
       content: buildRollFlavorHtml({
         title: buildTypedRollTitle('armor', `${item.name} VD`),
         roll,
+        showDiceBreakdown: true,
+        showBonus: true,
       }),
     }));
 
@@ -752,12 +1039,16 @@ export class TirduinRPSActorSheet extends ActorSheet {
 
     const abilityKey = selection.abilityKey;
     const edgeMode = selection.edgeMode;
+    const attackBonus = Number(selection.attackBonus) || 0;
+    const extraDamageEntries = Array.isArray(selection.extraDamageEntries)
+      ? selection.extraDamageEntries
+      : [];
     const fatigueRollPenalty = this.actor.type === 'character'
       ? (Number(this.actor.system?.attributes?.fatigue?.rollPenalty) || 0)
       : 0;
     const abilityValue = (Number(this.actor.system?.abilities?.[abilityKey]?.value) || 0) + fatigueRollPenalty;
 
-    const attackBaseFormula = `1d20 + (${abilityValue}) + (${proficiency})`;
+    const attackBaseFormula = `1d20 + (${abilityValue}) + (${proficiency}) + (${attackBonus})`;
     const attackFormula = applyRollEdgeToFormula(attackBaseFormula, edgeMode);
     const damageFormula = `${damageDie} + (${abilityValue})`;
     const damageFormula2 = damageDie2 || '';
@@ -768,15 +1059,33 @@ export class TirduinRPSActorSheet extends ActorSheet {
     const damageTypeLabel2 = damageTypeKey2
       ? game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[damageTypeKey2] || damageTypeKey2)
       : '';
-
     const attackRoll = new Roll(attackFormula, actorRollData);
     await attackRoll.evaluate();
     const damageRoll = new Roll(damageFormula, actorRollData);
     await damageRoll.evaluate();
     let damageRoll2 = null;
+    const damageRollExtraEntries = [];
     if (damageFormula2) {
       damageRoll2 = new Roll(damageFormula2, actorRollData);
       await damageRoll2.evaluate();
+    }
+    for (const entry of extraDamageEntries) {
+      const formula = String(entry?.formula || '').trim();
+      if (!formula) continue;
+
+      const typeKey = String(entry?.damageTypeKey || '').trim();
+      const typeLabel = typeKey
+        ? game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[typeKey] || typeKey)
+        : '';
+
+      try {
+        const roll = new Roll(formula, actorRollData);
+        await roll.evaluate();
+        damageRollExtraEntries.push({ roll, typeLabel });
+      } catch (_error) {
+        ui.notifications?.warn(`La fórmula de daño adicional no es válida: ${formula}`);
+        return null;
+      }
     }
 
     const targetToken = game.user?.targets?.first();
@@ -796,12 +1105,13 @@ export class TirduinRPSActorSheet extends ActorSheet {
         damageTypeLabel,
         damageRoll2,
         damageTypeLabel2,
+        damageRollExtraEntries,
         targetName,
         targetAC,
       }),
     }));
 
-    return { attackRoll, damageRoll, damageRoll2 };
+    return { attackRoll, damageRoll, damageRoll2, damageRollExtraEntries };
   }
 
   /**
@@ -918,6 +1228,8 @@ export class TirduinRPSActorSheet extends ActorSheet {
       title: `[Salvacion] ${targetToken.name} - ${saveLabel}`,
       roll: saveRoll,
       outcomeText: resultText,
+      showDiceBreakdown: true,
+      showBonus: true,
     });
 
     const damageCard = buildRollFlavorHtml({
@@ -960,9 +1272,9 @@ export class TirduinRPSActorSheet extends ActorSheet {
   }
 
   /**
-   * Prompt weapon attack options with attribute selector and edge radios.
+   * Prompt weapon attack options with attribute selector, edge radios and modifiers.
   * @param {{weaponName: string, damageDie: string, damageDie2?: string, proficiency: number, actorRollData: object}} options
-   * @returns {Promise<{abilityKey: 'vig'|'agil', edgeMode: string}|null>}
+   * @returns {Promise<{abilityKey: 'vig'|'agil', edgeMode: string, attackBonus: number, extraDamageEntries: Array<{formula: string, damageTypeKey: string}>}|null>}
    * @private
    */
   async _promptWeaponRollOptions({ weaponName, damageDie, damageDie2 = '', proficiency, actorRollData }) {
@@ -975,6 +1287,10 @@ export class TirduinRPSActorSheet extends ActorSheet {
         resolve(value);
       };
 
+      const damageTypeOptions = Object.entries(CONFIG.TIRDUIN_RPS?.damageTypes || {})
+        .map(([key, i18nKey]) => `<option value="${key}">${game.i18n.localize(i18nKey)}</option>`)
+        .join('');
+
       const content = `
         <form class="tirduin-roll-confirmation tirduin-weapon-roll-confirmation">
           <div class="roll-summary">
@@ -986,10 +1302,28 @@ export class TirduinRPSActorSheet extends ActorSheet {
               </select>
               <span class="weapon-roll-prof">Comp: +${proficiency}</span>
             </div>
-            <p class="weapon-roll-preview" data-role="weapon-attack-preview"></p>
-            <p class="weapon-roll-preview" data-role="weapon-damage-preview"></p>
+
+            <div class="weapon-roll-line">
+              <p class="weapon-roll-preview" data-role="weapon-attack-preview"></p>
+              <button type="button" class="weapon-roll-line-add" data-role="attack-bonus-toggle" title="Bonificador de ataque">+</button>
+            </div>
+            <div class="weapon-roll-inline-fields" data-role="attack-bonus-fields" style="display:none;">
+              <label>
+                Bonif. ataque
+                <input type="number" name="tirduin-attack-bonus" value="0" step="1">
+              </label>
+            </div>
+
+            <div class="weapon-roll-line">
+              <p class="weapon-roll-preview" data-role="weapon-damage-preview"></p>
+              <button type="button" class="weapon-roll-line-add" data-role="damage-bonus-add" title="Añadir daño adicional">+</button>
+            </div>
             <p class="weapon-roll-preview" data-role="weapon-damage2-preview"></p>
+
+            <div class="weapon-roll-damage-bonuses" data-role="damage-bonuses"></div>
+            <div class="weapon-roll-extra-previews" data-role="weapon-damage-extra-previews"></div>
           </div>
+
           <div class="roll-edge-row">
             <label class="roll-edge-option">
               <input type="radio" name="tirduin-roll-edge" value="advantage">
@@ -1013,7 +1347,21 @@ export class TirduinRPSActorSheet extends ActorSheet {
             callback: (html) => {
               const abilityKey = html.find('select[name="tirduin-weapon-ability"]').val() || 'vig';
               const edgeMode = html.find('input[name="tirduin-roll-edge"]:checked').val() || 'none';
-              safeResolve({ abilityKey, edgeMode });
+              const attackBonusEnabled = html.find('[data-role="attack-bonus-fields"]').is(':visible');
+              const attackBonus = attackBonusEnabled
+                ? (Number(html.find('input[name="tirduin-attack-bonus"]').val()) || 0)
+                : 0;
+
+              const extraDamageEntries = [];
+              html.find('.weapon-roll-damage-bonus-row').each((_index, element) => {
+                const row = $(element);
+                const formula = String(row.find('input[name="tirduin-extra-damage"]')?.val() || '').trim();
+                const damageTypeKey = String(row.find('select[name="tirduin-extra-damage-type"]')?.val() || '').trim();
+                if (!formula) return;
+                extraDamageEntries.push({ formula, damageTypeKey });
+              });
+
+              safeResolve({ abilityKey, edgeMode, attackBonus, extraDamageEntries });
             },
           },
           cancel: {
@@ -1027,19 +1375,42 @@ export class TirduinRPSActorSheet extends ActorSheet {
         render: (html) => {
           const abilitySelect = html.find('select[name="tirduin-weapon-ability"]');
           const edgeRadios = html.find('input[name="tirduin-roll-edge"]');
+          const attackBonusToggle = html.find('[data-role="attack-bonus-toggle"]');
+          const attackBonusFields = html.find('[data-role="attack-bonus-fields"]');
+          const attackBonusInput = html.find('input[name="tirduin-attack-bonus"]');
+          const addDamageBonusButton = html.find('[data-role="damage-bonus-add"]');
+          const damageBonusesContainer = html.find('[data-role="damage-bonuses"]');
           const attackPreview = html.find('[data-role="weapon-attack-preview"]');
           const damagePreview = html.find('[data-role="weapon-damage-preview"]');
           const damagePreview2 = html.find('[data-role="weapon-damage2-preview"]');
+          const extraPreviewsContainer = html.find('[data-role="weapon-damage-extra-previews"]');
+
+          const buildDamageBonusRow = () => `
+            <div class="weapon-roll-damage-bonus-row">
+              <input type="text" name="tirduin-extra-damage" value="" placeholder="Daño adicional (ej: 1d6+2)">
+              <select name="tirduin-extra-damage-type">
+                <option value="">Sin tipo</option>
+                ${damageTypeOptions}
+              </select>
+              <button type="button" class="weapon-roll-damage-bonus-remove" title="Quitar">−</button>
+            </div>
+          `;
 
           const refreshPreview = () => {
-            const abilityKey = abilitySelect.val() || 'vig';
-            const edgeMode = html.find('input[name="tirduin-roll-edge"]:checked').val() || 'none';
+            const abilityKey = String(abilitySelect.val() || 'vig');
+            const edgeMode = String(html.find('input[name="tirduin-roll-edge"]:checked').val() || 'none');
+            const attackBonusEnabled = attackBonusFields.is(':visible');
+            const attackBonus = attackBonusEnabled
+              ? (Number(attackBonusInput.val()) || 0)
+              : 0;
             const fatigueRollPenalty = this.actor.type === 'character'
               ? (Number(this.actor.system?.attributes?.fatigue?.rollPenalty) || 0)
               : 0;
             const abilityValue = (Number(this.actor.system?.abilities?.[abilityKey]?.value) || 0) + fatigueRollPenalty;
 
-            const attackBase = `1d20 + (${abilityValue}) + (${proficiency})`;
+            const attackBase = attackBonusEnabled
+              ? `1d20 + (${abilityValue}) + (${proficiency}) + (${attackBonus})`
+              : `1d20 + (${abilityValue}) + (${proficiency})`;
             const attackFormula = applyRollEdgeToFormula(attackBase, edgeMode);
             const damageFormula = `${damageDie} + (${abilityValue})`;
             const damageFormula2 = damageDie2 || '';
@@ -1058,18 +1429,75 @@ export class TirduinRPSActorSheet extends ActorSheet {
 
             if (!damageFormula2) {
               damagePreview2.text('');
-              return;
+            } else {
+              try {
+                damagePreview2.text(`Daño 2: ${new Roll(damageFormula2, actorRollData).formula}`);
+              } catch (_error) {
+                damagePreview2.text(`Daño 2: ${damageFormula2}`);
+              }
             }
 
-            try {
-              damagePreview2.text(`Daño 2: ${new Roll(damageFormula2, actorRollData).formula}`);
-            } catch (_error) {
-              damagePreview2.text(`Daño 2: ${damageFormula2}`);
-            }
+            extraPreviewsContainer.empty();
+            damageBonusesContainer.find('.weapon-roll-damage-bonus-row').each((_index, element) => {
+              const row = $(element);
+              const formula = String(row.find('input[name="tirduin-extra-damage"]').val() || '').trim();
+              const damageTypeKey = String(row.find('select[name="tirduin-extra-damage-type"]').val() || '').trim();
+              const damageTypeLabel = damageTypeKey
+                ? game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[damageTypeKey] || damageTypeKey)
+                : '';
+
+              if (!formula) return;
+
+              let previewText = `Daño extra${damageTypeLabel ? ` (${damageTypeLabel})` : ''}: ${formula}`;
+              try {
+                previewText = `Daño extra${damageTypeLabel ? ` (${damageTypeLabel})` : ''}: ${new Roll(formula, actorRollData).formula}`;
+              } catch (_error) {
+                previewText = `Daño extra inválido${damageTypeLabel ? ` (${damageTypeLabel})` : ''}: ${formula}`;
+              }
+
+              extraPreviewsContainer.append(`<p class="weapon-roll-preview">${previewText}</p>`);
+            });
           };
 
           abilitySelect.on('change', refreshPreview);
-          edgeRadios.on('change', refreshPreview);
+          edgeRadios.on('click', (event) => {
+            const target = event.currentTarget;
+            const wasChecked = target.dataset.wasChecked === 'true';
+            edgeRadios.each((_i, radio) => {
+              radio.dataset.wasChecked = 'false';
+            });
+            if (wasChecked) {
+              target.checked = false;
+            } else {
+              target.checked = true;
+              target.dataset.wasChecked = 'true';
+            }
+            refreshPreview();
+          });
+
+          attackBonusToggle.on('click', () => {
+            const willShow = attackBonusFields.css('display') === 'none';
+            attackBonusFields.css('display', willShow ? 'grid' : 'none');
+            if (!willShow) {
+              attackBonusInput.val(0);
+            }
+            refreshPreview();
+          });
+
+          attackBonusInput.on('input change', refreshPreview);
+
+          addDamageBonusButton.on('click', () => {
+            damageBonusesContainer.append(buildDamageBonusRow());
+            refreshPreview();
+          });
+
+          damageBonusesContainer.on('input change', 'input, select', refreshPreview);
+          damageBonusesContainer.on('click', '.weapon-roll-damage-bonus-remove', (event) => {
+            event.preventDefault();
+            $(event.currentTarget).closest('.weapon-roll-damage-bonus-row').remove();
+            refreshPreview();
+          });
+
           refreshPreview();
         },
         close: () => safeResolve(null),
@@ -1092,20 +1520,26 @@ export class TirduinRPSActorSheet extends ActorSheet {
     if (!armor || armor.type !== 'armor') return;
 
     const willEquip = !armor.system?.equipped;
-    const isShield = armor.system?.category === 'escudo';
+    const category = String(armor.system?.category || '');
+    const isShield = category === 'escudo';
+    const isExtra = category === 'extra';
     const updates = [];
 
     // Siempre actualiza el estado del item pulsado.
     updates.push(armor.update({ 'system.equipped': willEquip }));
 
-    // Si se equipa una armadura no-escudo, desequipa el resto de no-escudos.
-    // Si se equipa un escudo, desequipa el resto de escudos.
+    // Reglas de equipado:
+    // - Escudo: solo uno equipado.
+    // - Extra: acumulable, no desequipa otros.
+    // - Armadura base (no escudo/no extra): solo una equipada.
     for (const item of this.actor.items) {
       if (item.type !== 'armor' || item.id === armor.id) continue;
       if (!willEquip) continue;
       if (!item.system?.equipped) continue;
-      if (isShield && item.system?.category !== 'escudo') continue;
-      if (!isShield && item.system?.category === 'escudo') continue;
+      const itemCategory = String(item.system?.category || '');
+      if (isExtra) continue;
+      if (isShield && itemCategory !== 'escudo') continue;
+      if (!isShield && (itemCategory === 'escudo' || itemCategory === 'extra')) continue;
       updates.push(item.update({ 'system.equipped': false }));
     }
 
@@ -1147,8 +1581,11 @@ export class TirduinRPSActorSheet extends ActorSheet {
    */
   _calculateArmorClassFromEquippedArmors() {
     const equippedArmors = this.actor.items.filter((i) => i.type === 'armor' && i.system?.equipped);
-    const mainArmor = equippedArmors.find((i) => i.system?.category !== 'escudo');
+    const mainArmor = equippedArmors.find((i) => !['escudo', 'extra'].includes(i.system?.category));
     const shield = equippedArmors.find((i) => i.system?.category === 'escudo');
+    const extraBonuses = equippedArmors
+      .filter((i) => i.system?.category === 'extra' && !i.system?.broken)
+      .reduce((sum, i) => sum + (Number(i.system?.bonus) || 0), 0);
 
     let armorClass = mainArmor
       ? this._calculateArmorClassFromArmor(mainArmor.system, Boolean(mainArmor.system?.broken))
@@ -1157,6 +1594,8 @@ export class TirduinRPSActorSheet extends ActorSheet {
     if (shield && !shield.system?.broken) {
       armorClass += Number(shield.system?.bonus) || 0;
     }
+
+    armorClass += extraBonuses;
 
     return armorClass;
   }

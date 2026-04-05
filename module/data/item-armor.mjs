@@ -11,12 +11,12 @@ export default class TirduinRPSArmor extends TirduinRPSItemBase {
     const requiredInteger = { required: true, nullable: false, integer: true };
     const schema = super.defineSchema();
 
-    // Categoría de la armadura: sin armadura, ligera, media, pesada o escudo.
+    // Categoría de la armadura: sin armadura, ligera, media, pesada, escudo o extra.
     schema.category = new fields.StringField({
       required: true,
       blank: false,
       initial: 'ligera',
-      choices: ['sinArmadura', 'ligera', 'media', 'pesada', 'escudo'],
+      choices: ['sinArmadura', 'ligera', 'media', 'pesada', 'escudo', 'extra'],
     });
 
     // CA (Armor Class) que proporciona esta armadura cuando está intacta.

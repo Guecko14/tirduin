@@ -25,6 +25,11 @@
               onkeyup="if(value<1) value=1; if(value>10) value=10;"
               data-dtype="Number" />
           </div>
+
+          <button type="button" class="initiative-roll-btn"
+            title="{{localize "TIRDUIN_RPS.CharacterSheet.InitiativeRoll"}}">
+            <i class="fas fa-dice-d20"></i>
+          </button>
         </div>
 
         <div class="character-meta-row">
@@ -91,9 +96,17 @@
           <div class="npc-stat">
             <label for="system.attributes.speed.value">{{localize
               "TIRDUIN_RPS.attributes.speed.long"}}</label>
-            <input type="number" name="system.attributes.speed.value"
-              value="{{system.attributes.speed.value}}" min="0"
-              onkeyup="if(value<0) value=0" data-dtype="Number" readonly />
+            <div class="speed-row">
+              <input type="number" name="system.attributes.speed.value"
+                value="{{system.attributes.speed.value}}" min="0"
+                onkeyup="if(value<0) value=0" data-dtype="Number" readonly />
+              <span>+</span>
+              <input type="number" name="system.attributes.speed.extra"
+                value="{{system.attributes.speed.extra}}" min="0"
+                onkeyup="if(value<0) value=0" data-dtype="Number"
+                class="speed-extra-input"
+                title="{{localize "TIRDUIN_RPS.CharacterSheet.SpeedExtra"}}" />
+            </div>
           </div>
 
           <div class="npc-stat">
@@ -142,7 +155,7 @@
         {{/each}}
       </div>
     </div>
-    
+
     <div class="saving-throws">
       <h2>{{localize "TIRDUIN_RPS.CharacterSheet.SavingThrows"}}</h2>
       <div class="saving-throws-row">
