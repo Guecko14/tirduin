@@ -34,13 +34,17 @@ const buildFearCounterPipsHtml = (value) => {
   let html = '';
   for (let i = 1; i <= FEAR_COUNTER_MAX; i += 1) {
     const activeClass = i <= value ? 'is-active' : '';
+    const pipLabel = game.i18n.format('TIRDUIN_RPS.FearCounter.PipLabel', {
+      value: i,
+      max: FEAR_COUNTER_MAX,
+    });
     html += `
       <button
         type="button"
         class="tirduin-fear-pip ${activeClass}"
         data-value="${i}"
-        title="Miedo ${i}/${FEAR_COUNTER_MAX}"
-        aria-label="Miedo ${i}/${FEAR_COUNTER_MAX}"
+        title="${pipLabel}"
+        aria-label="${pipLabel}"
       ></button>
     `;
   }
@@ -49,7 +53,7 @@ const buildFearCounterPipsHtml = (value) => {
 
 const buildFearCounterDialogContent = (value) => `
   <div class="tirduin-fear-counter" data-role="fear-counter-root">
-    <p class="tirduin-fear-counter-label">Contador de miedo</p>
+    <p class="tirduin-fear-counter-label">${game.i18n.localize('TIRDUIN_RPS.FearCounter.Label')}</p>
     <p class="tirduin-fear-counter-value" data-role="fear-counter-value">${value}/${FEAR_COUNTER_MAX}</p>
     <div class="tirduin-fear-counter-pips" data-role="fear-counter-pips">
       ${buildFearCounterPipsHtml(value)}
@@ -96,7 +100,7 @@ const renderFearCounterDialog = () => {
 
   const value = getFearCounterValue();
   fearCounterDialog = new Dialog({
-    title: 'Miedo',
+    title: game.i18n.localize('TIRDUIN_RPS.FearCounter.Title'),
     content: buildFearCounterDialogContent(value),
     buttons: {},
     classes: ['tirduin', 'tirduin-fear-counter-dialog'],
@@ -144,8 +148,8 @@ Hooks.once('init', function () {
   };
 
   game.settings.register('tirduin', 'fearCounterValue', {
-    name: 'Fear Counter Value',
-    hint: 'Valor persistente del contador de miedo del GM.',
+    name: game.i18n.localize('TIRDUIN_RPS.FearCounter.SettingName'),
+    hint: game.i18n.localize('TIRDUIN_RPS.FearCounter.SettingHint'),
     scope: 'world',
     config: false,
     type: Number,
@@ -475,13 +479,13 @@ Hooks.once('ready', function () {
 
   const createLootTokenWithItem = async (dropData, item) => {
     if (!game.user?.isGM) {
-      ui.notifications?.warn('Solo el GM puede crear botines en el mapa.');
+      ui.notifications?.warn(game.i18n.localize('TIRDUIN_RPS.Loot.GMOnly'));
       return false;
     }
     if (!canvas?.scene) return false;
 
     // Loot containers are NPC actors flagged as loot to keep data-model compatibility.
-    const lootName = `Botin: ${item.name}`;
+    const lootName = game.i18n.format('TIRDUIN_RPS.Loot.Prefix', { name: item.name });
     const lootImg = item.img || 'icons/svg/chest.svg';
     const lootActor = await Actor.create({
       name: lootName,
@@ -531,7 +535,7 @@ Hooks.once('ready', function () {
     try {
       item = await Item.fromDropData(data);
     } catch (_error) {
-      ui.notifications?.warn('No se pudo leer el item soltado.');
+      ui.notifications?.warn(game.i18n.localize('TIRDUIN_RPS.Loot.DropReadError'));
       return false;
     }
     if (!item) return false;
@@ -541,9 +545,12 @@ Hooks.once('ready', function () {
       try {
         // Direct drop over token: push item into that actor inventory.
         await copyDroppedItemToActor(token.actor, item);
-        ui.notifications?.info(`${item.name} anadido a ${token.actor.name}.`);
+        ui.notifications?.info(game.i18n.format('TIRDUIN_RPS.Loot.AddToActor', {
+          item: item.name,
+          actor: token.actor.name,
+        }));
       } catch (_error) {
-        ui.notifications?.warn('No se pudo anadir el item al inventario del token.');
+        ui.notifications?.warn(game.i18n.localize('TIRDUIN_RPS.Loot.AddToActorError'));
       }
       return false;
     }
@@ -553,18 +560,25 @@ Hooks.once('ready', function () {
       if (nearbyLoot?.actor) {
         // Empty-ground drop with nearby loot: stack into nearest container.
         await copyDroppedItemToActor(nearbyLoot.actor, item);
-        ui.notifications?.info(`${item.name} anadido al botin cercano (${nearbyLoot.actor.name}).`);
+        ui.notifications?.info(game.i18n.format('TIRDUIN_RPS.Loot.AddToNearby', {
+          item: item.name,
+          actor: nearbyLoot.actor.name,
+        }));
         return false;
       }
 
       const created = await createLootTokenWithItem(data, item);
       if (created) {
-        ui.notifications?.info(`Botin creado en el mapa con ${item.name}.`);
+        ui.notifications?.info(game.i18n.format('TIRDUIN_RPS.Loot.CreatedOnMap', {
+          item: item.name,
+        }));
       }
     } catch (_error) {
       console.error('Tirduin | Error creando botin en mapa', _error);
       const detail = String(_error?.message || _error || '').trim();
-      ui.notifications?.warn(`No se pudo crear el botin en el mapa.${detail ? ` ${detail}` : ''}`);
+      ui.notifications?.warn(game.i18n.format('TIRDUIN_RPS.Loot.CreateFailed', {
+        detail: detail ? ` ${detail}` : '',
+      }));
     }
 
     return false;

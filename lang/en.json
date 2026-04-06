@@ -271,6 +271,103 @@
       "InvalidFormula": "La fórmula de tirada no es válida.",
       "InlineRollFlavor": "Tirada de: {formula}",
       "InlineRollFlavorWithDamage": "Tirada de: {formula} | Daño: {damage}"
+    },
+    "FearCounter": {
+      "Title": "Miedo",
+      "Label": "Contador de miedo",
+      "PipLabel": "Miedo {value}/{max}",
+      "SettingName": "Fear Counter Value",
+      "SettingHint": "Valor persistente del contador de miedo del GM."
+    },
+    "Loot": {
+      "Prefix": "Botin: {name}",
+      "GMOnly": "Solo el GM puede crear botines en el mapa.",
+      "DropReadError": "No se pudo leer el item soltado.",
+      "AddToActor": "{item} anadido a {actor}.",
+      "AddToActorError": "No se pudo anadir el item al inventario del token.",
+      "AddToNearby": "{item} anadido al botin cercano ({actor}).",
+      "CreatedOnMap": "Botin creado en el mapa con {item}.",
+      "CreateFailed": "No se pudo crear el botin en el mapa.{detail}"
+    },
+    "RollDialog": {
+      "Common": {
+        "Roll": "Tirar",
+        "Cancel": "Cancelar",
+        "Advantage": "Ventaja",
+        "Disadvantage": "Desventaja",
+        "Select": "Seleccionar"
+      },
+      "ConfirmRoll": {
+        "Title": "Confirmar tirada"
+      },
+      "ConfirmInitiative": {
+        "Title": "Confirmar iniciativa",
+        "Bonus": "Bonif. iniciativa"
+      },
+      "Weapon": {
+        "Title": "Ataque de arma: {weaponName}",
+        "Attribute": "Atributo",
+        "AbilityVigor": "Vigor",
+        "AbilityAgility": "Agilidad",
+        "Proficiency": "Comp: +{value}",
+        "AttackBonus": "Bonif. ataque",
+        "AttackBonusTitle": "Bonificador de ataque",
+        "AddExtraDamageTitle": "Añadir daño adicional",
+        "ExtraDamagePlaceholder": "Daño adicional (ej: 1d6+2)",
+        "NoType": "Sin tipo",
+        "Remove": "Quitar",
+        "AttackPreview": "Ataque: {formula}",
+        "DamagePreview": "Daño: {formula}",
+        "DamagePreview2": "Daño 2: {formula}",
+        "ExtraDamagePreview": "Daño extra{type}: {formula}",
+        "ExtraDamageInvalidPreview": "Daño extra inválido{type}: {formula}"
+      }
+    },
+    "Roll": {
+      "DefaultTitle": "Tirada",
+      "Type": {
+        "ability": "Habilidad",
+        "save": "Salvacion",
+        "item": "Objeto",
+        "feature": "Dote",
+        "spell": "Conjuro",
+        "fear": "Miedo",
+        "special": "Especial",
+        "weapon": "Arma",
+        "armor": "Armadura"
+      },
+      "Mood": {
+        "Hope": "Esperanza",
+        "Fear": "Miedo"
+      },
+      "Outcome": {
+        "CriticalNatural": "CRITICO NATURAL",
+        "Fumble": "Pifia",
+        "RollWithMood": "Tirada con {mood}",
+        "Hit": "IMPACTA",
+        "Miss": "FALLA",
+        "Critical": "CRITICO",
+        "FumbleUpper": "PIFIA",
+        "CriticalDice": "CRITICO: dados x2"
+      },
+      "Metric": {
+        "Bonus": "Bonificador: {value}",
+        "Total": "Total: {value}"
+      },
+      "Label": {
+        "Damage": "Danio",
+        "Damage2": "Danio 2",
+        "ExtraDamage": "Danio extra {index}",
+        "AttackSuffix": "Ataque",
+        "Initiative": "Iniciativa",
+        "DeathRoll": "Tirada de Muerte"
+      },
+      "Warning": {
+        "NoItemFormula": "{item} no tiene formula para tirar.",
+        "ArmorBroken": "{item} esta rota y no puede tirar VD.",
+        "WeaponNoDamageDie": "{item} no tiene dado de daño configurado.",
+        "InvalidExtraDamageFormula": "La fórmula de daño adicional no es válida: {formula}"
+      }
     }
   },
 

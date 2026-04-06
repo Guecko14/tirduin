@@ -859,7 +859,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     // Si no hay formula definida, no se intenta tirar.
     const formula = String(item.system?.formula || '').trim();
     if (!formula) {
-      ui.notifications?.warn(`${item.name} no tiene formula para tirar.`);
+      ui.notifications?.warn(game.i18n.format('TIRDUIN_RPS.Roll.Warning.NoItemFormula', { item: item.name }));
       return;
     }
 
@@ -949,7 +949,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     await ChatMessage.create(applyChatRollMode({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       content: buildRollFlavorHtml({
-        title: `${buildTypedRollTitle('ability', 'Iniciativa')}${getRollEdgeFlavorSuffix(edgeMode)}`,
+        title: `${buildTypedRollTitle('ability', game.i18n.localize('TIRDUIN_RPS.Roll.Label.Initiative'))}${getRollEdgeFlavorSuffix(edgeMode)}`,
         roll,
         showDiceBreakdown: true,
         showBonus: true,
@@ -993,7 +993,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
 
     const outcomeText = getD20OutcomeText(roll);
     const edgeText = getRollEdgeFlavorSuffix(edgeMode);
-    const title = buildTypedRollTitle('save', `Tirada de Muerte${edgeText}`);
+    const title = buildTypedRollTitle('save', `${game.i18n.localize('TIRDUIN_RPS.Roll.Label.DeathRoll')}${edgeText}`);
     const flavor = buildRollFlavorHtml({ title, roll, outcomeText, edgeMode });
     await ChatMessage.create(applyChatRollMode({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
@@ -1020,7 +1020,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     }
 
     if (item.system?.broken) {
-      ui.notifications?.warn(`${item.name} esta rota y no puede tirar VD.`);
+      ui.notifications?.warn(game.i18n.format('TIRDUIN_RPS.Roll.Warning.ArmorBroken', { item: item.name }));
       return null;
     }
 
@@ -1080,7 +1080,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
 
     const damageDie = String(weapon.system?.damageDie || '').trim();
     if (!damageDie) {
-      ui.notifications?.warn(`${weapon.name} no tiene dado de daño configurado.`);
+      ui.notifications?.warn(game.i18n.format('TIRDUIN_RPS.Roll.Warning.WeaponNoDamageDie', { item: weapon.name }));
       return null;
     }
     const damageDie2 = String(weapon.system?.damageDie2 || '').trim();
@@ -1163,7 +1163,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
         await roll.evaluate();
         damageRollExtraEntries.push({ roll, typeLabel });
       } catch (_error) {
-        ui.notifications?.warn(`La fórmula de daño adicional no es válida: ${formula}`);
+        ui.notifications?.warn(game.i18n.format('TIRDUIN_RPS.Roll.Warning.InvalidExtraDamageFormula', { formula }));
         return null;
       }
     }
@@ -1371,33 +1371,48 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
         .map(([key, i18nKey]) => `<option value="${key}">${game.i18n.localize(i18nKey)}</option>`)
         .join('');
       let customSelectDocNamespace = '';
+      const attributeLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Weapon.Attribute');
+      const vigorLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Weapon.AbilityVigor');
+      const agilityLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Weapon.AbilityAgility');
+      const proficiencyLabel = game.i18n.format('TIRDUIN_RPS.RollDialog.Weapon.Proficiency', { value: proficiency });
+      const attackBonusLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Weapon.AttackBonus');
+      const attackBonusTitle = game.i18n.localize('TIRDUIN_RPS.RollDialog.Weapon.AttackBonusTitle');
+      const addExtraDamageTitle = game.i18n.localize('TIRDUIN_RPS.RollDialog.Weapon.AddExtraDamageTitle');
+      const extraDamagePlaceholder = game.i18n.localize('TIRDUIN_RPS.RollDialog.Weapon.ExtraDamagePlaceholder');
+      const noTypeLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Weapon.NoType');
+      const removeLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Weapon.Remove');
+      const rollLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Common.Roll');
+      const cancelLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Common.Cancel');
+      const advantageLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Common.Advantage');
+      const disadvantageLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Common.Disadvantage');
+      const selectLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Common.Select');
 
       const content = `
         <form class="tirduin-roll-confirmation tirduin-weapon-roll-confirmation">
           <div class="roll-summary">
             <div class="weapon-roll-topline">
-              <span>Atributo</span>
+              <span>${attributeLabel}</span>
               <select name="tirduin-weapon-ability">
-                <option value="vig">Vigor</option>
-                <option value="agil">Agilidad</option>
+                <option value="vig">${vigorLabel}</option>
+                <option value="agil">${agilityLabel}</option>
               </select>
-              <span class="weapon-roll-prof">Comp: +${proficiency}</span>
+              <span class="weapon-roll-prof">${proficiencyLabel}</span>
             </div>
 
             <div class="weapon-roll-line">
               <p class="weapon-roll-preview" data-role="weapon-attack-preview"></p>
-              <button type="button" class="weapon-roll-line-add" data-role="attack-bonus-toggle" title="Bonificador de ataque">+</button>
+              <button type="button" class="weapon-roll-line-add" data-role="attack-bonus-toggle" title="${attackBonusTitle}">+</button>
             </div>
             <div class="weapon-roll-inline-fields" data-role="attack-bonus-fields" style="display:none;">
               <label>
-                Bonif. ataque
+                ${attackBonusLabel}
                 <input type="number" name="tirduin-attack-bonus" value="0" step="1">
               </label>
             </div>
 
             <div class="weapon-roll-line">
               <p class="weapon-roll-preview" data-role="weapon-damage-preview"></p>
-              <button type="button" class="weapon-roll-line-add" data-role="damage-bonus-add" title="Añadir daño adicional">+</button>
+              <button type="button" class="weapon-roll-line-add" data-role="damage-bonus-add" title="${addExtraDamageTitle}">+</button>
             </div>
             <p class="weapon-roll-preview" data-role="weapon-damage2-preview"></p>
 
@@ -1408,23 +1423,23 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
           <div class="roll-edge-row">
             <label class="roll-edge-option">
               <input type="radio" name="tirduin-roll-edge" value="advantage">
-              Ventaja
+              ${advantageLabel}
             </label>
             <label class="roll-edge-option">
               <input type="radio" name="tirduin-roll-edge" value="disadvantage">
-              Desventaja
+              ${disadvantageLabel}
             </label>
           </div>
         </form>
       `;
 
       new Dialog({
-        title: `Ataque de arma: ${weaponName}`,
+        title: game.i18n.format('TIRDUIN_RPS.RollDialog.Weapon.Title', { weaponName }),
         content,
         buttons: {
           roll: {
             icon: '<i class="fas fa-dice-d20"></i>',
-            label: 'Tirar',
+            label: rollLabel,
             callback: (html) => {
               const abilityKey = html.find('select[name="tirduin-weapon-ability"]').val() || 'vig';
               const edgeMode = html.find('input[name="tirduin-roll-edge"]:checked').val() || 'none';
@@ -1447,7 +1462,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
           },
           cancel: {
             icon: '<i class="fas fa-times"></i>',
-            label: 'Cancelar',
+            label: cancelLabel,
             callback: () => safeResolve(null),
           },
         },
@@ -1477,7 +1492,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
                 const selectedValue = String(select.val() ?? '');
                 const selectedOption = select.find('option:selected').first();
                 const label = String(selectedOption.text() || '').trim();
-                trigger.text(label || 'Seleccionar');
+                trigger.text(label || selectLabel);
 
                 menu.find('.tirduin-custom-select-option').each((_i, optionButton) => {
                   const btn = $(optionButton);
@@ -1545,12 +1560,12 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
 
           const buildDamageBonusRow = () => `
             <div class="weapon-roll-damage-bonus-row">
-              <input type="text" name="tirduin-extra-damage" value="" placeholder="Daño adicional (ej: 1d6+2)">
+              <input type="text" name="tirduin-extra-damage" value="" placeholder="${extraDamagePlaceholder}">
               <select name="tirduin-extra-damage-type">
-                <option value="">Sin tipo</option>
+                <option value="">${noTypeLabel}</option>
                 ${damageTypeOptions}
               </select>
-              <button type="button" class="weapon-roll-damage-bonus-remove" title="Quitar">−</button>
+              <button type="button" class="weapon-roll-damage-bonus-remove" title="${removeLabel}">−</button>
             </div>
           `;
 
@@ -1574,24 +1589,24 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
             const damageFormula2 = damageDie2 || '';
 
             try {
-              attackPreview.text(`Ataque: ${new Roll(attackFormula, actorRollData).formula}`);
+              attackPreview.text(game.i18n.format('TIRDUIN_RPS.RollDialog.Weapon.AttackPreview', { formula: new Roll(attackFormula, actorRollData).formula }));
             } catch (_error) {
-              attackPreview.text(`Ataque: ${attackFormula}`);
+              attackPreview.text(game.i18n.format('TIRDUIN_RPS.RollDialog.Weapon.AttackPreview', { formula: attackFormula }));
             }
 
             try {
-              damagePreview.text(`Daño: ${new Roll(damageFormula, actorRollData).formula}`);
+              damagePreview.text(game.i18n.format('TIRDUIN_RPS.RollDialog.Weapon.DamagePreview', { formula: new Roll(damageFormula, actorRollData).formula }));
             } catch (_error) {
-              damagePreview.text(`Daño: ${damageFormula}`);
+              damagePreview.text(game.i18n.format('TIRDUIN_RPS.RollDialog.Weapon.DamagePreview', { formula: damageFormula }));
             }
 
             if (!damageFormula2) {
               damagePreview2.text('');
             } else {
               try {
-                damagePreview2.text(`Daño 2: ${new Roll(damageFormula2, actorRollData).formula}`);
+                damagePreview2.text(game.i18n.format('TIRDUIN_RPS.RollDialog.Weapon.DamagePreview2', { formula: new Roll(damageFormula2, actorRollData).formula }));
               } catch (_error) {
-                damagePreview2.text(`Daño 2: ${damageFormula2}`);
+                damagePreview2.text(game.i18n.format('TIRDUIN_RPS.RollDialog.Weapon.DamagePreview2', { formula: damageFormula2 }));
               }
             }
 
@@ -1606,11 +1621,12 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
 
               if (!formula) return;
 
-              let previewText = `Daño extra${damageTypeLabel ? ` (${damageTypeLabel})` : ''}: ${formula}`;
+              const typeSuffix = damageTypeLabel ? ` (${damageTypeLabel})` : '';
+              let previewText = game.i18n.format('TIRDUIN_RPS.RollDialog.Weapon.ExtraDamagePreview', { type: typeSuffix, formula });
               try {
-                previewText = `Daño extra${damageTypeLabel ? ` (${damageTypeLabel})` : ''}: ${new Roll(formula, actorRollData).formula}`;
+                previewText = game.i18n.format('TIRDUIN_RPS.RollDialog.Weapon.ExtraDamagePreview', { type: typeSuffix, formula: new Roll(formula, actorRollData).formula });
               } catch (_error) {
-                previewText = `Daño extra inválido${damageTypeLabel ? ` (${damageTypeLabel})` : ''}: ${formula}`;
+                previewText = game.i18n.format('TIRDUIN_RPS.RollDialog.Weapon.ExtraDamageInvalidPreview', { type: typeSuffix, formula });
               }
 
               extraPreviewsContainer.append(`<p class="weapon-roll-preview">${previewText}</p>`);
