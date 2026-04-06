@@ -24,6 +24,8 @@
                     'pesada')}}selected{{/if}}>Pesada</option>
                 <option value="escudo" {{#if (eq system.category
                     'escudo')}}selected{{/if}}>Escudo</option>
+                <option value="extra" {{#if (eq system.category
+                    'extra')}}selected{{/if}}>Extra</option>
             </select>
         </div>
 
@@ -31,7 +33,8 @@
         VD --}}
         <div class="armor-row armor-row-defense">
 
-            {{#if (eq system.category 'escudo')}}
+            {{#if (or (eq system.category 'escudo') (eq system.category
+            'extra'))}}
             <div class="armor-field armor-field-compact armor-field-defense">
                 <label for="system.bonus">Bonif.</label>
                 <input name="system.bonus" type="number"
@@ -65,16 +68,19 @@
             </div>
             {{/if}}
 
+            {{#unless (eq system.category 'extra')}}
             <div class="armor-field armor-field-vd armor-field-defense">
                 <label for="system.vd"
                     title="Valor Defensivo: tirada de dados">VD</label>
                 <input name="system.vd" type="text" value="{{system.vd}}"
                     placeholder="1d6" />
             </div>
+            {{/unless}}
 
         </div>
 
         {{!-- Fila de Resistencia de Armadura (RA): máxima + actual --}}
+        {{#unless (eq system.category 'extra')}}
         <div class="armor-row armor-row-ra">
 
             <div class="armor-field">
@@ -92,10 +98,12 @@
             </div>
 
         </div>
+        {{/unless}}
 
         {{!-- Resistencia (R): valor numérico + tipo de daño (no aplica a
-        escudos) --}}
-        {{#unless (eq system.category 'escudo')}}
+        escudos ni extras) --}}
+        {{#unless (or (eq system.category 'escudo') (eq system.category
+        'extra'))}}
         <div class="armor-row armor-row-resistance">
 
             <div class="armor-field">
@@ -126,6 +134,7 @@
 
         {{!-- Fila de datos de equipamiento: Vigor, rota, sigilo y peso
         --}}
+        {{#unless (eq system.category 'extra')}}
         <div class="armor-row armor-row-equip">
 
             <div class="armor-field">
@@ -163,6 +172,7 @@
             </div>
 
         </div>
+        {{/unless}}
 
         {{!-- Descripción de la armadura --}}
         <div class="armor-field armor-field-description">

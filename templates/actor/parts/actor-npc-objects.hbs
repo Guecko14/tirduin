@@ -148,7 +148,8 @@
                 <span class="npc-armor-col-cat">{{armorCategoryLabel
                     armor.system.category}}</span>
                 <span class="npc-armor-col-ca">
-                    {{#if (eq armor.system.category 'escudo')}}
+                    {{#if (or (eq armor.system.category 'escudo') (eq
+                    armor.system.category 'extra'))}}
                     +{{armor.system.bonus}}
                     {{else}}
                     {{armor.system.ca}} ({{armor.system.maxAgility}})
@@ -156,25 +157,33 @@
                 </span>
                 <span
                     class="npc-armor-col-ca-broken">
-                    {{#if (eq armor.system.category 'escudo')}}
+                    {{#if (eq armor.system.category 'extra')}}
+
+                    {{else if (eq armor.system.category 'escudo')}}
 
                     {{else}}
                     {{armor.system.caBroken}}
                     ({{armor.system.maxAgilityBroken}})
                     {{/if}}
                 </span>
+                {{#if (eq armor.system.category 'extra')}}
+                <span class="npc-armor-col-vd"></span>
+                {{else}}
                 <span class="npc-armor-col-vd npc-armor-roll-vd"
                     title="Tirar VD y aplicar desgaste de RA">{{armor.system.vd}}</span>
+                {{/if}}
                 {{!-- Muestra RA actual / RA máxima para ver el desgaste de un
                 vistazo --}}
-                <span
-                    class="npc-armor-col-ra">{{armor.system.raCurrent}}/{{armor.system.ra}}</span>
+                <span class="npc-armor-col-ra">{{#if (eq armor.system.category
+                    'extra')}}{{else}}{{armor.system.raCurrent}}/{{armor.system.ra}}{{/if}}</span>
                 <span
                     class="npc-armor-col-resistance">{{#if (eq
                     armor.system.category
-                    'escudo')}}{{else}}{{armor.system.resistance.value}}{{/if}}</span>
+                    'escudo')}}{{else}}{{#if (eq armor.system.category
+                    'extra')}}{{else}}{{armor.system.resistance.value}}{{/if}}{{/if}}</span>
                 <span class="npc-armor-col-damage-type">
-                    {{#if (eq armor.system.category 'escudo')}}
+                    {{#if (or (eq armor.system.category 'escudo') (eq
+                    armor.system.category 'extra'))}}
 
                     {{else}}
                     {{#if armor.system.resistance.damageType}}
@@ -185,9 +194,13 @@
                     {{/if}}
                     {{/if}}
                 </span>
-                <span class="npc-armor-col-vigor">{{armor.system.vigor}}</span>
+                <span class="npc-armor-col-vigor">{{#if (eq
+                    armor.system.category
+                    'extra')}}{{else}}{{armor.system.vigor}}{{/if}}</span>
                 <span class="npc-armor-col-broken">
-                    {{#if armor.system.broken}}
+                    {{#if (eq armor.system.category 'extra')}}
+
+                    {{else if armor.system.broken}}
                     <i class="fas fa-shield-halved" title="Armadura rota"></i>
                     {{else}}
                     —
@@ -196,7 +209,8 @@
                 {{!-- Icono de escudo tachado si la armadura penaliza el sigilo
                 --}}
                 <span class="npc-armor-col-stealth">
-                    {{#if (eq armor.system.category 'escudo')}}
+                    {{#if (or (eq armor.system.category 'escudo') (eq
+                    armor.system.category 'extra'))}}
 
                     {{else}}
                     {{#if armor.system.stealth}}

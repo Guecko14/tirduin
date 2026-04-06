@@ -1,0 +1,168 @@
+.tirduin .loot-sheet {
+  padding: 10px;
+  font-family: "Signika", sans-serif;
+  color: #f2e5c8;
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(191, 144, 54, 0.2) 0%, rgba(0, 0, 0, 0) 50%),
+    radial-gradient(120% 90% at 100% 0%, rgba(123, 74, 22, 0.15) 0%, rgba(0, 0, 0, 0) 48%),
+    #12100d;
+}
+
+.tirduin .loot-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border: 1px solid #6f5120;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #2f2313 0%, #1a130b 100%);
+  box-shadow: inset 0 0 0 1px rgba(202, 150, 63, 0.15);
+}
+
+.tirduin .loot-banner-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid #9c7334;
+  background: #2a1d0f;
+  color: #e0b76a;
+}
+
+.tirduin .loot-banner-text h1 {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.1;
+  color: #f0d49a;
+}
+
+.tirduin .loot-banner-text p {
+  margin: 1px 0 0;
+  font-size: 0.75rem;
+  color: #c9ad7b;
+}
+
+.tirduin .loot-header {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.tirduin .loot-portrait {
+  flex: 0 0 100px;
+}
+
+.tirduin .loot-header-stats {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tirduin .loot-money-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tirduin .loot-stat {
+  background: #1a1611;
+  border: 1px solid #5a4320;
+  border-radius: 6px;
+  padding: 6px;
+  text-align: center;
+}
+
+.tirduin .loot-stat label {
+  display: block;
+  font-size: 12px;
+  color: #cfb58a;
+  margin-bottom: 2px;
+}
+
+.tirduin .loot-stat input {
+  width: 100%;
+  background: #0f0c09;
+  border: 1px solid #664f2a;
+  color: #f3e3bf;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.tirduin .loot-items-section {
+  background: #17130e;
+  border: 1px solid #4e3a1d;
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.tirduin .loot-items-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.tirduin .loot-item-create-buttons {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tirduin .loot-item-create-buttons a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #74572a;
+  border-radius: 4px;
+  padding: 3px 6px;
+  cursor: pointer;
+  color: #e5c485;
+  background: linear-gradient(180deg, #2c2112 0%, #1b140c 100%);
+}
+
+.tirduin .loot-item-create-buttons a:hover {
+  border-color: #bc8e46;
+  color: #f8e0b0;
+}
+
+.tirduin .loot-item-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tirduin .loot-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  background: #13100c;
+  border: 1px solid #49371d;
+  border-radius: 6px;
+  padding: 6px;
+}
+
+.tirduin .loot-item-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tirduin .loot-item-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tirduin .loot-empty {
+  margin: 0;
+  color: #b79d74;
+}

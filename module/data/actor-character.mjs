@@ -15,7 +15,8 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
         value: new fields.NumberField({ ...requiredInteger, initial: 10, min: 0 })
       }),
       speed: new fields.SchemaField({
-        value: new fields.NumberField({ ...requiredInteger, initial: 20, min: 0 })
+        value: new fields.NumberField({ ...requiredInteger, initial: 20, min: 0 }),
+        extra: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 })
       }),
       fatigue: new fields.SchemaField({
         value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0, max: 5 })
@@ -60,6 +61,12 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
         choices: ['combatiente', 'especialista', 'canalizador']
       }),
       background: new fields.StringField({ required: true, nullable: false, initial: '' }),
+      size: new fields.StringField({
+        required: true,
+        nullable: false,
+        initial: 'mediano',
+        choices: ['diminuto', 'pequeno', 'mediano', 'grande', 'enorme', 'gargantuesco']
+      }),
     });
 
     schema.money = new fields.SchemaField({
@@ -176,8 +183,22 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
     this.luck.value = Math.max(0, Math.min(3, Number(this.luck?.value) || 0));
     this.luck.max = 3;
 
-    // Character speed is derived from agility.
-    this.attributes.speed.value = Math.max(0, 20 + (5 * agil) + this.attributes.fatigue.speedPenalty);
+    // Character speed is derived from agility using the system progression table.
+    const speedByAgility = {
+      1: 25,
+      2: 30,
+      3: 35,
+      4: 35,
+      5: 40,
+    };
+    const baseSpeed = agil <= 0
+      ? 20
+      : agil >= 5
+        ? 40
+        : (speedByAgility[agil] ?? 20);
+    const extraSpeed = Math.max(0, Number(this.attributes?.speed?.extra) || 0);
+    this.attributes.speed.extra = extraSpeed;
+    this.attributes.speed.value = Math.max(0, baseSpeed + this.attributes.fatigue.speedPenalty + extraSpeed);
 
     this.saves = {
       fortaleza: {

@@ -1,96 +1,151 @@
-<form class='{{cssClass}}' autocomplete='off'>
-  <header class='sheet-header'>
-    <img
-      class='profile-img'
-      src='{{item.img}}'
-      data-edit='img'
-      title='{{item.name}}' />
-    <div class='header-fields'>
-      <label class='resource-label'>Nombre</label>
-      <h1 class='charname'><input
-          name='name'
-          type='text'
-          value='{{item.name}}'
-          placeholder='Name' /></h1>
-      <div class='grid grid-2col'>
-        <div class='resource'>
-          <label class='resource-label'>Cantidad</label>
-          <input
-            type='text'
-            name='system.quantity'
-            value='{{system.quantity}}'
-            data-dtype='Number' />
-        </div>
-        <div class='resource'>
-          <label class='resource-label'>Peso</label>
-          <input
-            type='number'
-            name='system.weight'
-            value='{{system.weight}}'
-            min='0'
-            step='0.1'
-            data-dtype='Number' />
-        </div>
-      </div>
+<form class="{{cssClass}} tirduin item-sheet-compact" autocomplete="off">
+  <style>
+    /* Base visual del editor compacto para items genericos. */
+    .item-sheet-compact {
+      padding: 10px;
+      color: #f2e5c8;
+      background:
+        radial-gradient(120% 90% at 0% 0%, rgba(191, 144, 54, 0.16) 0%, rgba(0, 0, 0, 0) 50%),
+        #12100d;
+    }
+
+    /* Cabecera: icono del item + nombre. */
+    .item-sheet-compact .item-compact-header {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr);
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: stretch;
+    }
+
+    .item-sheet-compact .item-compact-header .profile-img {
+      width: 72px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #664f2a;
+      background: #0f0c09;
+    }
+
+    /* Paneles reutilizables para agrupar bloques funcionales. */
+    .item-sheet-compact .item-panel {
+      background: #17130e;
+      border: 1px solid #4e3a1d;
+      border-radius: 8px;
+      padding: 8px;
+    }
+
+    /* Rejillas para cantidad/peso y para componentes de formula. */
+    .item-sheet-compact .item-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .item-sheet-compact .item-grid.item-grid-roll {
+      grid-template-columns: 86px 1fr 1fr;
+    }
+
+    .item-sheet-compact label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 2px;
+      color: #cfb58a;
+    }
+
+    /* Inputs y textareas con la misma estetica del tema botin. */
+    .item-sheet-compact input,
+    .item-sheet-compact textarea {
+      width: 100%;
+      background: #0f0c09;
+      border: 1px solid #664f2a;
+      color: #f3e3bf;
+      border-radius: 4px;
+      padding: 4px 6px;
+      box-sizing: border-box;
+    }
+
+    .item-sheet-compact .item-formula-preview {
+      margin: 0;
+      font-size: 0.82rem;
+      color: #e5c485;
+    }
+
+    /* Contenedor dedicado al bloque completo de formula. */
+    .item-sheet-compact .item-formula-panel {
+      margin-top: 8px;
+    }
+
+    .item-sheet-compact .item-formula-panel .item-grid-roll {
+      margin-bottom: 8px;
+    }
+
+    /* Zona de descripcion en texto plano. */
+    .item-sheet-compact .item-description {
+      margin-top: 8px;
+    }
+
+    .item-sheet-compact .item-description textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+  </style>
+
+  {{!-- Cabecera compacta del item. --}}
+  <header class="item-compact-header">
+    <img class="profile-img" src="{{item.img}}" data-edit="img"
+      title="{{item.name}}" />
+    <div class="item-panel">
+      <label for="name">Nombre</label>
+      <input name="name" type="text" value="{{item.name}}"
+        placeholder="Nombre del objeto" />
     </div>
   </header>
 
-  {{! Sheet Tab Navigation }}
-  <nav class='sheet-tabs tabs' data-group='primary'>
-    <a class='item' data-tab='description'>Descripción</a>
-    <a class='item' data-tab='attributes'>Atributos</a>
-  </nav>
-
-  {{! Sheet Body }}
-  <section class='sheet-body'>
-
-    {{! Description Tab }}
-    <div class='tab' data-group='primary' data-tab='description'>
-      {{! Editors must receive enriched text data from getData to properly
-      handle rolls }}
-      {{editor
-      enrichedDescription
-      target='system.description'
-      engine='prosemirror'
-      button=true
-      editable=editable
-      }}
+  {{!-- Cuerpo principal: datos basicos, descripcion y formula. --}}
+  <section class="item-panel">
+    {{!-- Datos de inventario. --}}
+    <div class="item-grid">
+      <div>
+        <label for="system.quantity">Cantidad</label>
+        <input type="number" name="system.quantity" value="{{system.quantity}}"
+          min="1" data-dtype="Number" />
+      </div>
+      <div>
+        <label for="system.weight">Peso</label>
+        <input type="number" name="system.weight" value="{{system.weight}}"
+          min="0" step="0.1" data-dtype="Number" />
+      </div>
     </div>
 
-    {{! Attributes Tab }}
-    <div class='tab attributes' data-group='primary' data-tab='attributes'>
-      {{! As you add new fields, add them in here! }}
-      <div class='resource'>
-        <label class='resource-label'>Roll Formula:</label>
-        <span>{{system.formula}}</span>
-        <div class='grid grid-4col'>
-          <div class='grid-span-1'>
-            <label class='resource-label'>Number of Dice</label>
-            <input
-              type='text'
-              name='system.roll.diceNum'
-              value='{{system.roll.diceNum}}'
-              data-dtype='Number' />
-          </div>
-          <div class='grid-span-1'>
-            <label class='resource-label'>Die Size</label>
-            <input
-              type='text'
-              name='system.roll.diceSize'
-              value='{{system.roll.diceSize}}'
-              data-dtype='String' />
-          </div>
-          <div class='grid-span-2'>
-            <label class='resource-label'>Roll Modifier</label>
-            <input
-              type='text'
-              name='system.roll.diceBonus'
-              value='{{system.roll.diceBonus}}'
-              data-dtype='String' />
-          </div>
-        </div>
+    {{!-- Campo de descripcion simple (sin editor por pestañas). --}}
+    <div class="item-description">
+      <label for="system.description">Descripcion</label>
+      <textarea name="system.description"
+        placeholder="Describe el objeto">{{system.description}}</textarea>
+    </div>
 
+    {{!-- Bloque completo de formula: componentes + resultado final. --}}
+    <div class="item-panel item-formula-panel">
+      <label>Formula</label>
+      <div class="item-grid item-grid-roll">
+        <div>
+          <label for="system.roll.diceNum">Dados</label>
+          <input type="number" name="system.roll.diceNum"
+            value="{{system.roll.diceNum}}" min="1" data-dtype="Number" />
+        </div>
+        <div>
+          <label for="system.roll.diceSize">Tamano dado</label>
+          <input type="text" name="system.roll.diceSize"
+            value="{{system.roll.diceSize}}" data-dtype="String" />
+        </div>
+        <div>
+          <label for="system.roll.diceBonus">Modificador</label>
+          <input type="text" name="system.roll.diceBonus"
+            value="{{system.roll.diceBonus}}" data-dtype="String" />
+        </div>
       </div>
+      <p class="item-formula-preview">{{system.formula}}</p>
     </div>
   </section>
 </form>

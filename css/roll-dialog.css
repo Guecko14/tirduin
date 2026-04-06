@@ -38,8 +38,12 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.24);
 }
 
 .tirduin-weapon-roll-confirmation .weapon-roll-topline select {
@@ -49,7 +53,12 @@
   border-radius: 4px;
   background: #0b0b0b;
   color: #f1f1f1;
-  padding: 0 6px;
+  padding: 0 24px 0 8px;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #d8d8d8 50%), linear-gradient(135deg, #d8d8d8 50%, transparent 50%);
+  background-position: calc(100% - 14px) 11px, calc(100% - 9px) 11px;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
 }
 
 .tirduin-weapon-roll-confirmation .weapon-roll-prof {
@@ -59,8 +68,244 @@
 
 .tirduin-weapon-roll-confirmation .weapon-roll-preview {
   margin: 0;
+  padding: 4px 6px;
+  text-align: left;
   font-size: 0.86rem;
   font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.tirduin-weapon-roll-confirmation .weapon-roll-line {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.tirduin-weapon-roll-confirmation .weapon-roll-line-add {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  background: rgba(46, 70, 38, 0.5);
+  color: #d7f1cd;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.tirduin-weapon-roll-confirmation .weapon-roll-line-add:hover {
+  background: rgba(66, 96, 53, 0.75);
+  border-color: rgba(190, 225, 174, 0.65);
+}
+
+.tirduin-weapon-roll-confirmation .weapon-roll-inline-fields {
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.32);
+}
+
+.tirduin-weapon-roll-confirmation .weapon-roll-inline-fields label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.76rem;
+  color: #dfdfdf;
+  font-weight: 700;
+}
+
+.tirduin-weapon-roll-confirmation .weapon-roll-inline-fields input,
+.tirduin-weapon-roll-confirmation .weapon-roll-inline-fields select {
+  height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  background: #0b0b0b;
+  color: #f1f1f1;
+  padding: 0 24px 0 8px;
+}
+
+.tirduin-weapon-roll-confirmation .weapon-roll-damage-bonuses {
+  display: grid;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.tirduin-weapon-roll-confirmation .weapon-roll-damage-bonus-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 6px;
+  align-items: center;
+}
+
+.tirduin-weapon-roll-confirmation .weapon-roll-damage-bonus-row input,
+.tirduin-weapon-roll-confirmation .weapon-roll-damage-bonus-row select {
+  height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  background: #0b0b0b;
+  color: #f1f1f1;
+  padding: 0 24px 0 8px;
+}
+
+.tirduin-weapon-roll-confirmation .weapon-roll-inline-fields select,
+.tirduin-weapon-roll-confirmation .weapon-roll-damage-bonus-row select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #d8d8d8 50%), linear-gradient(135deg, #d8d8d8 50%, transparent 50%);
+  background-position: calc(100% - 14px) 11px, calc(100% - 9px) 11px;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.tirduin-weapon-roll-confirmation .tirduin-native-select {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tirduin-weapon-roll-confirmation .tirduin-custom-select {
+  position: relative;
+  min-width: 110px;
+}
+
+.tirduin-weapon-roll-confirmation .weapon-roll-damage-bonus-row .tirduin-custom-select {
+  min-width: 0;
+}
+
+.tirduin-weapon-roll-confirmation .tirduin-custom-select-trigger {
+  width: 100%;
+  height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  background: #0b0b0b;
+  color: #f1f1f1;
+  padding: 0 24px 0 8px;
+  text-align: left;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+}
+
+.tirduin-weapon-roll-confirmation .tirduin-custom-select-trigger::before,
+.tirduin-weapon-roll-confirmation .tirduin-custom-select-trigger::after {
+  content: '';
+  position: absolute;
+  right: 10px;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+}
+
+.tirduin-weapon-roll-confirmation .tirduin-custom-select-trigger::before {
+  top: 9px;
+  border-bottom: 5px solid #d8d8d8;
+}
+
+.tirduin-weapon-roll-confirmation .tirduin-custom-select-trigger::after {
+  top: 15px;
+  border-top: 5px solid #d8d8d8;
+}
+
+.tirduin-weapon-roll-confirmation .tirduin-custom-select.is-open .tirduin-custom-select-trigger {
+  border-color: rgba(114, 168, 255, 0.65);
+  box-shadow: 0 0 0 1px rgba(114, 168, 255, 0.35);
+}
+
+.tirduin-weapon-roll-confirmation .tirduin-custom-select-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  z-index: 25;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 6px;
+  background: #101010;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.tirduin-weapon-roll-confirmation .tirduin-custom-select.is-open .tirduin-custom-select-menu {
+  display: grid;
+  gap: 2px;
+}
+
+.tirduin-weapon-roll-confirmation .tirduin-custom-select-option {
+  width: 100%;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #ececec;
+  text-align: left;
+  padding: 5px 8px;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.tirduin-weapon-roll-confirmation .tirduin-custom-select-option:hover {
+  background: rgba(66, 111, 190, 0.45);
+  color: #ffffff;
+}
+
+.tirduin-weapon-roll-confirmation .tirduin-custom-select-option.is-selected {
+  background: rgba(36, 88, 166, 0.72);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.tirduin-weapon-roll-confirmation .tirduin-custom-select-option:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.tirduin-weapon-roll-confirmation .tirduin-custom-select-option:disabled:hover {
+  background: transparent;
+}
+
+/* Force consistent dark theme in native select dropdown lists. */
+.window-app.dialog.tirduin-roll-dialog select {
+  color-scheme: dark;
+}
+
+.window-app.dialog.tirduin-roll-dialog select option,
+.window-app.dialog.tirduin-roll-dialog select optgroup {
+  background: #101010;
+  color: #ececec;
+}
+
+.window-app.dialog.tirduin-roll-dialog select option:checked {
+  background: #2458a6;
+  color: #ffffff;
+}
+
+.window-app.dialog.tirduin-roll-dialog select option:disabled {
+  color: rgba(236, 236, 236, 0.45);
+}
+
+.tirduin-weapon-roll-confirmation .weapon-roll-damage-bonus-remove {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  background: rgba(80, 20, 20, 0.45);
+  color: #f8d4d4;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
 }
 
 /* Fila de radios ventaja/desventaja en una sola línea centrada. */
@@ -95,6 +340,128 @@
 .window-app.dialog.tirduin-roll-dialog .dialog-buttons {
   margin-top: 8px;
   padding-top: 4px;
+}
+
+/* ================================================================
+   GM FEAR COUNTER DIALOG
+================================================================ */
+
+
+.window-app.tirduin-fear-counter-dialog,
+.application.tirduin-fear-counter-dialog {
+  min-width: 240px;
+}
+
+.window-app.tirduin-fear-counter-dialog .window-header,
+.application.tirduin-fear-counter-dialog .window-header {
+  background: linear-gradient(180deg, rgba(46, 37, 24, 0.95) 0%, rgba(31, 25, 17, 0.98) 100%);
+  border-bottom: 1px solid rgba(184, 141, 56, 0.5);
+}
+
+.window-app.tirduin-fear-counter-dialog .window-title,
+.application.tirduin-fear-counter-dialog .window-title {
+  color: #f2e8cf;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.window-app.tirduin-fear-counter-dialog .window-content,
+.application.tirduin-fear-counter-dialog .window-content {
+  background: #000000 !important;
+  background-image: none !important;
+  color: #ece2cc;
+  border-top: 1px solid rgba(255, 226, 164, 0.1);
+}
+
+.window-app.tirduin-fear-counter-dialog .dialog-content,
+.application.tirduin-fear-counter-dialog .dialog-content,
+.window-app.tirduin-fear-counter-dialog .window-content form,
+.application.tirduin-fear-counter-dialog .window-content form,
+.window-app.tirduin-fear-counter-dialog .tirduin-fear-counter,
+.application.tirduin-fear-counter-dialog .tirduin-fear-counter {
+  background: #000000 !important;
+  background-image: none !important;
+}
+
+.window-app.tirduin-fear-counter-dialog .dialog-content,
+.application.tirduin-fear-counter-dialog .dialog-content {
+  padding: 10px 10px 6px;
+}
+
+.window-app.tirduin-fear-counter-dialog .dialog-buttons,
+.application.tirduin-fear-counter-dialog .dialog-buttons {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 220, 150, 0.14);
+}
+
+.window-app.tirduin-fear-counter-dialog .dialog-buttons .dialog-button,
+.application.tirduin-fear-counter-dialog .dialog-buttons .dialog-button,
+.window-app.tirduin-fear-counter-dialog .dialog-buttons button,
+.application.tirduin-fear-counter-dialog .dialog-buttons button {
+  border: 1px solid rgba(255, 218, 143, 0.28);
+  border-radius: 5px;
+  background: linear-gradient(180deg, rgba(85, 63, 30, 0.72) 0%, rgba(58, 42, 20, 0.8) 100%);
+  color: #f4e7cb;
+  font-weight: 700;
+}
+
+.window-app.tirduin-fear-counter-dialog .dialog-buttons .dialog-button:hover,
+.application.tirduin-fear-counter-dialog .dialog-buttons .dialog-button:hover,
+.window-app.tirduin-fear-counter-dialog .dialog-buttons button:hover,
+.application.tirduin-fear-counter-dialog .dialog-buttons button:hover {
+  background: linear-gradient(180deg, rgba(109, 81, 41, 0.86) 0%, rgba(78, 56, 27, 0.9) 100%);
+  border-color: rgba(255, 218, 143, 0.5);
+}
+
+.tirduin-fear-counter {
+  display: grid;
+  gap: 8px;
+}
+
+.tirduin-fear-counter-label {
+  margin: 0;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #d9c59b;
+  text-align: center;
+}
+
+.tirduin-fear-counter-value {
+  margin: 0;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffe8b4;
+  text-shadow: 0 0 8px rgba(255, 201, 92, 0.28);
+}
+
+.tirduin-fear-counter-pips {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.tirduin-fear-pip {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(233, 206, 150, 0.34);
+  background: radial-gradient(circle at 35% 35%, rgba(255, 247, 230, 0.25) 0%, rgba(124, 103, 71, 0.5) 56%, rgba(72, 57, 37, 0.65) 100%);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.38);
+  cursor: pointer;
+}
+
+.tirduin-fear-pip:hover {
+  border-color: rgba(255, 214, 130, 0.92);
+  box-shadow: 0 0 0 1px rgba(255, 214, 130, 0.45), inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.tirduin-fear-pip.is-active {
+  border-color: rgba(234, 95, 95, 0.9);
+  background: radial-gradient(circle at 35% 30%, rgba(255, 224, 224, 0.92) 0%, rgba(191, 64, 64, 0.9) 52%, rgba(107, 18, 18, 0.95) 100%);
+  box-shadow: 0 0 8px rgba(212, 66, 66, 0.52), inset 0 0 0 1px rgba(0, 0, 0, 0.3);
 }
 
 /* ================================================================
@@ -221,12 +588,16 @@
 }
 
 .chat-message .tirduin-roll-total {
-  font-size: 0.92rem;
+  font-size: 1.18rem;
   font-weight: 900;
   color: #ffe5a1;
   letter-spacing: 0.01em;
   text-shadow: 0 0 6px rgba(255, 217, 128, 0.18);
   margin-bottom: 2px;
+  padding: 2px 8px;
+  border: 1px solid rgba(255, 223, 153, 0.35);
+  border-radius: 999px;
+  background: rgba(88, 62, 22, 0.25);
 }
 
 .chat-message .tirduin-roll-metrics {
@@ -249,14 +620,147 @@
 }
 
 .chat-message .tirduin-roll-outcome {
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   font-weight: 700;
   color: #ead7ad;
   line-height: 1.2;
 }
 
+.chat-message .tirduin-roll-outcome-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.chat-message .tirduin-roll-outcome-badge.is-critical {
+  color: #ffe5a1;
+  border-color: rgba(255, 214, 122, 0.6);
+  background: rgba(113, 72, 20, 0.45);
+}
+
+.chat-message .tirduin-roll-outcome-badge.is-fumble {
+  color: #ffd2d2;
+  border-color: rgba(221, 121, 121, 0.65);
+  background: rgba(110, 35, 35, 0.45);
+}
+
 .chat-message .tirduin-roll-flavor.is-esperanza .tirduin-roll-outcome {
   color: #b7e6d6;
+}
+
+/* ================================================================
+   ITEM SUMMARY CHAT CARD
+================================================================ */
+
+.chat-message .tirduin-item-summary-card {
+  margin: 0;
+  padding: 10px;
+  border: 1px solid #5c4b31;
+  border-left: 4px solid #b88d38;
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(35, 29, 20, 0.96) 0%, rgba(25, 21, 15, 0.98) 100%);
+  color: #f0e4c6;
+}
+
+.chat-message .tirduin-item-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.chat-message .tirduin-item-summary-header img {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+}
+
+.chat-message .tirduin-item-summary-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fff1cc;
+}
+
+.chat-message .tirduin-item-summary-subtitle {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #d4c29a;
+}
+
+.chat-message .tirduin-item-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 10px;
+  row-gap: 2px;
+  margin-bottom: 6px;
+}
+
+.chat-message .tirduin-item-summary-row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: baseline;
+  gap: 4px;
+  min-width: 0;
+}
+
+.chat-message .tirduin-item-summary-row span {
+  font-size: 0.72rem;
+  color: #cfbf98;
+  white-space: nowrap;
+}
+
+.chat-message .tirduin-item-summary-row strong {
+  font-size: 0.76rem;
+  color: #f5e9ca;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-message .tirduin-item-summary-description h4 {
+  margin: 8px 0 4px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #dbcaa1;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 6px;
+}
+
+.chat-message .tirduin-item-summary-description p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #f1e6cd;
+}
+
+.chat-message .tirduin-summary-roll {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 2px;
+  padding: 1px 7px;
+  border: 1px solid #7d5d2a;
+  border-radius: 999px;
+  background: rgba(62, 47, 24, 0.85);
+  color: #ffe3a3;
+  font-size: 0.72rem;
+  line-height: 1.3;
+  cursor: pointer;
+}
+
+.chat-message .tirduin-summary-roll:hover {
+  background: rgba(88, 66, 30, 0.95);
+  border-color: #bd9448;
 }
 
 .chat-message .tirduin-roll-flavor.is-miedo .tirduin-roll-outcome {
