@@ -16,6 +16,117 @@ import {
 // Import DataModel classes
 import * as models from './data/_module.mjs';
 
+const FEAR_COUNTER_MAX = 13;
+let fearCounterDialog = null;
+
+const clampFearCounterValue = (value) => {
+  const numeric = Number(value);
+  const safe = Number.isFinite(numeric) ? numeric : 0;
+  return Math.min(FEAR_COUNTER_MAX, Math.max(0, safe));
+};
+
+const getFearCounterValue = () => {
+  const stored = game.settings.get('tirduin', 'fearCounterValue');
+  return clampFearCounterValue(stored);
+};
+
+const buildFearCounterPipsHtml = (value) => {
+  let html = '';
+  for (let i = 1; i <= FEAR_COUNTER_MAX; i += 1) {
+    const activeClass = i <= value ? 'is-active' : '';
+    html += `
+      <button
+        type="button"
+        class="tirduin-fear-pip ${activeClass}"
+        data-value="${i}"
+        title="Miedo ${i}/${FEAR_COUNTER_MAX}"
+        aria-label="Miedo ${i}/${FEAR_COUNTER_MAX}"
+      ></button>
+    `;
+  }
+  return html;
+};
+
+const buildFearCounterDialogContent = (value) => `
+  <div class="tirduin-fear-counter" data-role="fear-counter-root">
+    <p class="tirduin-fear-counter-label">Contador de miedo</p>
+    <p class="tirduin-fear-counter-value" data-role="fear-counter-value">${value}/${FEAR_COUNTER_MAX}</p>
+    <div class="tirduin-fear-counter-pips" data-role="fear-counter-pips">
+      ${buildFearCounterPipsHtml(value)}
+    </div>
+  </div>
+`;
+
+const applyFearCounterForcedStyles = (html) => {
+  const appRoot = html.closest('.app, .window-app, .application');
+  const targets = appRoot.length ? appRoot : html;
+
+  targets.find('.window-content, .dialog-content, form, .tirduin-fear-counter').css({
+    background: '#000000',
+    'background-image': 'none',
+  });
+};
+
+const refreshFearCounterDialog = () => {
+  if (!fearCounterDialog?.rendered || !fearCounterDialog.element) return;
+  applyFearCounterForcedStyles(fearCounterDialog.element);
+
+  const value = getFearCounterValue();
+  fearCounterDialog.element.find('[data-role="fear-counter-value"]').text(`${value}/${FEAR_COUNTER_MAX}`);
+  fearCounterDialog.element.find('.tirduin-fear-pip').each((_index, element) => {
+    const pip = $(element);
+    const pipValue = Number(pip.data('value')) || 0;
+    pip.toggleClass('is-active', pipValue <= value);
+  });
+};
+
+const setFearCounterValue = async (value) => {
+  const clamped = clampFearCounterValue(value);
+  if (clamped === getFearCounterValue()) return;
+  await game.settings.set('tirduin', 'fearCounterValue', clamped);
+};
+
+const renderFearCounterDialog = () => {
+  if (!game.user?.isGM) return;
+  if (fearCounterDialog?.rendered) {
+    fearCounterDialog.bringToTop();
+    refreshFearCounterDialog();
+    return;
+  }
+
+  const value = getFearCounterValue();
+  fearCounterDialog = new Dialog({
+    title: 'Miedo',
+    content: buildFearCounterDialogContent(value),
+    buttons: {},
+    classes: ['tirduin', 'tirduin-fear-counter-dialog'],
+    render: (html) => {
+      applyFearCounterForcedStyles(html);
+
+      html.on('click', '.tirduin-fear-pip', async (event) => {
+        event.preventDefault();
+        const target = event.currentTarget;
+        const selected = Number(target.dataset.value) || 0;
+        const current = getFearCounterValue();
+        const next = selected === current ? Math.max(0, current - 1) : selected;
+        await setFearCounterValue(next);
+      });
+      refreshFearCounterDialog();
+    },
+    close: () => {
+      fearCounterDialog = null;
+    },
+  }, {
+    width: 260,
+    height: 'auto',
+    resizable: false,
+    top: 80,
+    left: 80,
+  });
+
+  fearCounterDialog.render(true, { focus: false });
+};
+
 /* -------------------------------------------- */
 /*  Init Hook                                   */
 /* -------------------------------------------- */
@@ -29,7 +140,20 @@ Hooks.once('init', function () {
     damage: damageHelpers,
     alteredStates: alteredStatesHelpers,
     rollItemMacro,
+    renderFearCounterDialog,
   };
+
+  game.settings.register('tirduin', 'fearCounterValue', {
+    name: 'Fear Counter Value',
+    hint: 'Valor persistente del contador de miedo del GM.',
+    scope: 'world',
+    config: false,
+    type: Number,
+    default: 0,
+    onChange: () => {
+      refreshFearCounterDialog();
+    },
+  });
 
   // Add custom constants for configuration.
   CONFIG.TIRDUIN_RPS = TIRDUIN_RPS;
@@ -51,7 +175,7 @@ Hooks.once('init', function () {
   // with the Character/NPC as part of super.defineSchema()
   CONFIG.Actor.dataModels = {
     character: models.TirduinRPSCharacter,
-    npc: models.TirduinRPSNPC
+    npc: models.TirduinRPSNPC,
   }
   CONFIG.Item.documentClass = TirduinRPSItem;
   CONFIG.Item.dataModels = {
@@ -73,19 +197,39 @@ Hooks.once('init', function () {
   CONFIG.ActiveEffect.legacyTransferral = false;
 
   // Register sheet application classes
-  Actors.unregisterSheet('core', ActorSheet);
-  Actors.registerSheet('tirduin', TirduinRPSActorSheet, {
+  const ActorSheetBase = foundry.appv1?.sheets?.ActorSheet || ActorSheet;
+  const ItemSheetBase = foundry.appv1?.sheets?.ItemSheet || ItemSheet;
+  const ActorSheets = foundry.documents?.collections?.Actors || Actors;
+  const ItemSheets = foundry.documents?.collections?.Items || Items;
+
+  ActorSheets.unregisterSheet('core', ActorSheetBase);
+  ActorSheets.registerSheet('tirduin', TirduinRPSActorSheet, {
     makeDefault: true,
     label: 'TIRDUIN_RPS.SheetLabels.Actor',
   });
-  Items.unregisterSheet('core', ItemSheet);
-  Items.registerSheet('tirduin', TirduinRPSItemSheet, {
+  ItemSheets.unregisterSheet('core', ItemSheetBase);
+  ItemSheets.registerSheet('tirduin', TirduinRPSItemSheet, {
     makeDefault: true,
     label: 'TIRDUIN_RPS.SheetLabels.Item',
   });
 
   // Preload Handlebars templates.
   return preloadHandlebarsTemplates();
+});
+
+// Characters should default to linked token data in Token Configuration.
+Hooks.on('preCreateActor', (actor, data) => {
+  if (actor.type !== 'character') return;
+
+  const explicitActorLink = foundry.utils.hasProperty(data, 'prototypeToken.actorLink');
+  if (explicitActorLink) return;
+
+  actor.updateSource({
+    prototypeToken: {
+      ...(actor.prototypeToken?.toObject?.() || {}),
+      actorLink: true,
+    },
+  });
 });
 
 /* -------------------------------------------- */
@@ -152,6 +296,50 @@ Handlebars.registerHelper('damageTypeAbbr', function (damageType) {
 /* -------------------------------------------- */
 
 Hooks.once('ready', function () {
+  if (game.user?.isGM) {
+    renderFearCounterDialog();
+  }
+
+  const tokenSizeByActorSize = {
+    diminuto: 0.5,
+    pequeno: 0.75,
+    mediano: 1,
+    grande: 2,
+    enorme: 3,
+    gargantuesco: 4,
+  };
+
+  const getTokenSizeUnits = (actor) => {
+    const sizeKey = String(actor?.system?.details?.size || 'mediano');
+    return tokenSizeByActorSize[sizeKey] ?? 1;
+  };
+
+  const syncActorTokenSize = async (actor) => {
+    if (!actor || !['npc', 'character'].includes(actor.type)) return;
+
+    const tokenUnits = getTokenSizeUnits(actor);
+
+    const prototypeWidth = Number(actor.prototypeToken?.width) || 1;
+    const prototypeHeight = Number(actor.prototypeToken?.height) || 1;
+    if (prototypeWidth !== tokenUnits || prototypeHeight !== tokenUnits) {
+      await actor.update({
+        'prototypeToken.width': tokenUnits,
+        'prototypeToken.height': tokenUnits,
+      });
+    }
+
+    const activeTokens = actor.getActiveTokens(true) || [];
+    const tokenUpdates = [];
+    for (const token of activeTokens) {
+      const tokenWidth = Number(token.document?.width) || 1;
+      const tokenHeight = Number(token.document?.height) || 1;
+      if (tokenWidth === tokenUnits && tokenHeight === tokenUnits) continue;
+      tokenUpdates.push(token.document.update({ width: tokenUnits, height: tokenUnits }));
+    }
+
+    if (tokenUpdates.length) await Promise.all(tokenUpdates);
+  };
+
   const calculateArmorClassFromArmor = (actor, armorSystem, isBroken = false) => {
     const agility = Number(actor.system?.abilities?.agil?.value) || 0;
     const caBase = isBroken
@@ -192,8 +380,195 @@ Hooks.once('ready', function () {
     await actor.update({ 'system.attributes.armorClass.value': armorClass });
   };
 
+  /* -------------------------------------------- */
+  /*  Loot Drag & Drop Helpers                    */
+  /* -------------------------------------------- */
+
+  const getTokenAtPoint = (x, y) => {
+    // Resolve topmost token hit under the drop point in canvas pixels.
+    const tokens = canvas?.tokens?.placeables || [];
+    const gridSize = Number(canvas?.grid?.size) || 100;
+
+    for (let i = tokens.length - 1; i >= 0; i -= 1) {
+      const token = tokens[i];
+      const doc = token?.document;
+      if (!doc) continue;
+
+      const left = Number(doc.x) || 0;
+      const top = Number(doc.y) || 0;
+      const width = (Number(doc.width) || 1) * gridSize;
+      const height = (Number(doc.height) || 1) * gridSize;
+      const inside = x >= left && x < (left + width) && y >= top && y < (top + height);
+      if (inside) return token;
+    }
+
+    return null;
+  };
+
+  const getSnappedCanvasPoint = (x, y) => {
+    // Grid snapping API changed between core versions, so keep a compatibility chain.
+    if (canvas?.grid?.getSnappedPoint) {
+      try {
+        return canvas.grid.getSnappedPoint(
+          { x, y },
+          { mode: CONST.GRID_SNAPPING_MODES.CENTER }
+        );
+      } catch (_error) {
+        // Fallback for API differences across core versions.
+      }
+    }
+    if (canvas?.grid?.getSnappedPosition) {
+      try {
+        const snapped = canvas.grid.getSnappedPosition(x, y, 1);
+        return { x: snapped?.x ?? x, y: snapped?.y ?? y };
+      } catch (_error) {
+        // Ignore and return raw point below.
+      }
+    }
+    return { x, y };
+  };
+
+  const copyDroppedItemToActor = async (actor, item) => {
+    if (!actor || !item) return false;
+
+    // Create a detached clone so drops never mutate source compendium/world items.
+    const itemData = foundry.utils.deepClone(item.toObject());
+    delete itemData._id;
+    await actor.createEmbeddedDocuments('Item', [itemData]);
+    return true;
+  };
+
+  const isLootActor = (actor) => {
+    if (!actor) return false;
+    if (actor.type === 'loot') return true;
+    if (Boolean(actor.getFlag?.('tirduin', 'lootContainer'))) return true;
+    return String(actor.name || '').toLowerCase().startsWith('botin:');
+  };
+
+  const findNearbyLootToken = (x, y) => {
+    // Merge drops into an existing nearby loot container before creating new tokens.
+    const tokens = canvas?.tokens?.placeables || [];
+    const gridSize = Number(canvas?.grid?.size) || 100;
+    const searchRadius = gridSize * 3;
+
+    let nearest = null;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+
+    for (const token of tokens) {
+      const actor = token?.actor;
+      if (!isLootActor(actor)) continue;
+
+      const tokenDoc = token.document;
+      const tokenCenterX = (Number(tokenDoc?.x) || 0) + ((Number(tokenDoc?.width) || 1) * gridSize) / 2;
+      const tokenCenterY = (Number(tokenDoc?.y) || 0) + ((Number(tokenDoc?.height) || 1) * gridSize) / 2;
+      const dx = tokenCenterX - x;
+      const dy = tokenCenterY - y;
+      const distance = Math.hypot(dx, dy);
+
+      if (distance > searchRadius || distance >= nearestDistance) continue;
+      nearest = token;
+      nearestDistance = distance;
+    }
+
+    return nearest;
+  };
+
+  const createLootTokenWithItem = async (dropData, item) => {
+    if (!game.user?.isGM) {
+      ui.notifications?.warn('Solo el GM puede crear botines en el mapa.');
+      return false;
+    }
+    if (!canvas?.scene) return false;
+
+    // Loot containers are NPC actors flagged as loot to keep data-model compatibility.
+    const lootName = `Botin: ${item.name}`;
+    const lootImg = item.img || 'icons/svg/chest.svg';
+    const lootActor = await Actor.create({
+      name: lootName,
+      type: 'npc',
+      img: lootImg,
+      flags: {
+        tirduin: {
+          lootContainer: true,
+        },
+      },
+      prototypeToken: {
+        actorLink: false,
+        name: lootName,
+        img: lootImg,
+      },
+    });
+
+    const itemData = foundry.utils.deepClone(item.toObject());
+    delete itemData._id;
+    await lootActor.createEmbeddedDocuments('Item', [itemData]);
+
+    const snapped = getSnappedCanvasPoint(Number(dropData.x) || 0, Number(dropData.y) || 0);
+    const tokenDocument = await lootActor.getTokenDocument({
+      name: lootName,
+      actorLink: false,
+      x: snapped.x,
+      y: snapped.y,
+      width: 1,
+      height: 1,
+    });
+    await tokenDocument.constructor.create(tokenDocument.toObject(), { parent: canvas.scene });
+
+    return true;
+  };
+
   // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to
   Hooks.on('hotbarDrop', (bar, data, slot) => createItemMacro(data, slot));
+
+  // Flujo principal de drop en canvas:
+  // 1) Si cae sobre token, se copia al inventario de ese actor.
+  // 2) Si cae en vacio, intenta apilar en botin cercano.
+  // 3) Si no existe botin cercano, crea uno nuevo en el mapa.
+  Hooks.on('dropCanvasData', async (_canvas, data) => {
+    if (data?.type !== 'Item') return true;
+
+    let item;
+    try {
+      item = await Item.fromDropData(data);
+    } catch (_error) {
+      ui.notifications?.warn('No se pudo leer el item soltado.');
+      return false;
+    }
+    if (!item) return false;
+
+    const token = getTokenAtPoint(Number(data.x) || 0, Number(data.y) || 0);
+    if (token?.actor) {
+      try {
+        // Direct drop over token: push item into that actor inventory.
+        await copyDroppedItemToActor(token.actor, item);
+        ui.notifications?.info(`${item.name} anadido a ${token.actor.name}.`);
+      } catch (_error) {
+        ui.notifications?.warn('No se pudo anadir el item al inventario del token.');
+      }
+      return false;
+    }
+
+    try {
+      const nearbyLoot = findNearbyLootToken(Number(data.x) || 0, Number(data.y) || 0);
+      if (nearbyLoot?.actor) {
+        // Empty-ground drop with nearby loot: stack into nearest container.
+        await copyDroppedItemToActor(nearbyLoot.actor, item);
+        ui.notifications?.info(`${item.name} anadido al botin cercano (${nearbyLoot.actor.name}).`);
+        return false;
+      }
+
+      const created = await createLootTokenWithItem(data, item);
+      if (created) {
+        ui.notifications?.info(`Botin creado en el mapa con ${item.name}.`);
+      }
+    } catch (_error) {
+      console.error('Tirduin | Error creando botin en mapa', _error);
+      const detail = String(_error?.message || _error || '').trim();
+      ui.notifications?.warn(`No se pudo crear el botin en el mapa.${detail ? ` ${detail}` : ''}`);
+    }
+
+    return false;
+  });
 
   // Mantiene sincronizada la CA del NPC al editar/cerrar una armadura equipada.
   Hooks.on('updateItem', async (item) => {
@@ -206,9 +581,16 @@ Hooks.once('ready', function () {
   // Si cambia Agilidad del NPC, la CA se recalcula automaticamente.
   Hooks.on('updateActor', async (actor, changedData) => {
     if (!actor || !['npc', 'character'].includes(actor.type)) return;
+
     const agilChanged = foundry.utils.hasProperty(changedData, 'system.abilities.agil.value');
-    if (!agilChanged) return;
-    await syncNpcArmorClass(actor);
+    if (agilChanged) {
+      await syncNpcArmorClass(actor);
+    }
+
+    const sizeChanged = foundry.utils.hasProperty(changedData, 'system.details.size');
+    if (sizeChanged) {
+      await syncActorTokenSize(actor);
+    }
   });
 
   // Intercept initiative rolls from Combat Encounter to ask for confirmation.
@@ -246,8 +628,7 @@ Hooks.once('ready', function () {
   }
 
   // Botones de tirada embebidos en resúmenes de chat ([formula]).
-  Hooks.on('renderChatMessage', (_message, html) => {
-    html.on('click', '.tirduin-summary-roll', async (event) => {
+  const handleInlineSummaryRollClick = async (event) => {
       event.preventDefault();
 
       const button = event.currentTarget;
@@ -280,6 +661,11 @@ Hooks.once('ready', function () {
       }, {
         rollMode: game.settings.get('core', 'rollMode'),
       });
+  };
+
+  Hooks.on('renderChatMessageHTML', (_message, element) => {
+    element.querySelectorAll('.tirduin-summary-roll').forEach((button) => {
+      button.addEventListener('click', handleInlineSummaryRollClick);
     });
   });
 });

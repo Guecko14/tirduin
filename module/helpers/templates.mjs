@@ -4,7 +4,8 @@
  * @return {Promise}
  */
 export const preloadHandlebarsTemplates = async function () {
-  return loadTemplates([
+  const load = foundry.applications?.handlebars?.loadTemplates || loadTemplates;
+  return load([
     // Actor partials.
     'systems/tirduin/templates/actor/parts/actor-features.hbs',
     'systems/tirduin/templates/actor/parts/actor-items.hbs',

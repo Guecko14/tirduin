@@ -61,6 +61,12 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
         choices: ['combatiente', 'especialista', 'canalizador']
       }),
       background: new fields.StringField({ required: true, nullable: false, initial: '' }),
+      size: new fields.StringField({
+        required: true,
+        nullable: false,
+        initial: 'mediano',
+        choices: ['diminuto', 'pequeno', 'mediano', 'grande', 'enorme', 'gargantuesco']
+      }),
     });
 
     schema.money = new fields.SchemaField({

@@ -15,10 +15,37 @@
       <div class="npc-header-stats">
 
         <div class="npc-name-wrap">
-          <div class="npc-stat npc-name">
-            <label for="name">Nombre</label>
-            <input name="name" type="text" value="{{actor.name}}"
-              placeholder="Nombre" />
+          <div class="npc-identity-fields">
+            <div class="npc-stat npc-name">
+              <label for="name">Nombre</label>
+              <input name="name" type="text" value="{{actor.name}}"
+                placeholder="Nombre" />
+            </div>
+            <div class="npc-stat npc-size-field">
+              <label for="system.details.size">{{localize
+                "TIRDUIN_RPS.CharacterSheet.Size"}}</label>
+              <select name="system.details.size">
+                <option value="diminuto" {{#if (eq system.details.size
+                  'diminuto')}}selected{{/if}}>{{localize
+                  "TIRDUIN_RPS.CharacterSheet.SizeOptions.Diminuto"}}</option>
+                <option value="pequeno" {{#if (eq system.details.size
+                  'pequeno')}}selected{{/if}}>{{localize
+                  "TIRDUIN_RPS.CharacterSheet.SizeOptions.Pequeno"}}</option>
+                <option value="mediano" {{#if (eq system.details.size
+                  'mediano')}}selected{{/if}}>{{localize
+                  "TIRDUIN_RPS.CharacterSheet.SizeOptions.Mediano"}}</option>
+                <option value="grande" {{#if (eq system.details.size
+                  'grande')}}selected{{/if}}>{{localize
+                  "TIRDUIN_RPS.CharacterSheet.SizeOptions.Grande"}}</option>
+                <option value="enorme" {{#if (eq system.details.size
+                  'enorme')}}selected{{/if}}>{{localize
+                  "TIRDUIN_RPS.CharacterSheet.SizeOptions.Enorme"}}</option>
+                <option value="gargantuesco" {{#if (eq
+                  system.details.size
+                  'gargantuesco')}}selected{{/if}}>{{localize
+                  "TIRDUIN_RPS.CharacterSheet.SizeOptions.Gargantuesco"}}</option>
+              </select>
+            </div>
           </div>
           <button type="button" class="initiative-roll-btn"
             title="{{localize "TIRDUIN_RPS.CharacterSheet.InitiativeRoll"}}">

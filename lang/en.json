@@ -137,6 +137,7 @@
       "Race": "Raza",
       "Class": "Clase",
       "Background": "Transfondo",
+      "Size": "Tamaño",
       "FatigueDeath": "Muerte",
       "HitPoints": "Puntos de Vida",
       "SpeedExtra": "Velocidad extra",
@@ -150,6 +151,14 @@
         "Combatiente": "Combatiente",
         "Especialista": "Especialista",
         "Canalizador": "Canalizador"
+      },
+      "SizeOptions": {
+        "Diminuto": "Diminuto",
+        "Pequeno": "Pequeño",
+        "Mediano": "Mediano",
+        "Grande": "Grande",
+        "Enorme": "Enorme",
+        "Gargantuesco": "Gargantuesco"
       },
       "Saves": {
         "Fortaleza": "Fortaleza",
@@ -268,7 +277,8 @@
   "TYPES": {
     "Actor": {
       "character": "Personaje",
-      "npc": "NPC"
+      "npc": "NPC",
+      "loot": "Botin"
     },
     "Item": {
       "item": "Objeto",

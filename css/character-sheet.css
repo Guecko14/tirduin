@@ -28,7 +28,7 @@
 
 .tirduin .character .character-identity-row {
   display: grid;
-  grid-template-columns: minmax(0, 4fr) 120px 52px;
+  grid-template-columns: minmax(0, 4fr) 120px 150px 52px;
   gap: 8px;
   margin-bottom: 6px;
   align-items: stretch;
@@ -63,7 +63,8 @@
 }
 
 .tirduin .character .character-name-field,
-.tirduin .character .character-level-field {
+.tirduin .character .character-level-field,
+.tirduin .character .character-size-field {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -73,8 +74,13 @@
   padding: 6px;
 }
 
+.tirduin .character .character-size-field {
+  padding: 6px;
+}
+
 .tirduin .character .character-identity-row .npc-name input,
-.tirduin .character .character-identity-row .character-level-field input {
+.tirduin .character .character-identity-row .character-level-field input,
+.tirduin .character .character-identity-row .character-size-field select {
   height: 32px;
   box-sizing: border-box;
   margin-bottom: 0;
@@ -391,7 +397,8 @@
 
 @media (max-width: 900px) {
   .tirduin .character .character-identity-row {
-    grid-template-columns: minmax(0, 1fr) 96px;
+    grid-template-columns: minmax(0, 1fr) 86px 112px 48px;
+    gap: 6px;
   }
 
   .tirduin .character .character-meta-row {

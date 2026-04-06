@@ -19,7 +19,9 @@ import {
  * Extend the basic ActorSheet with some very simple modifications
  * @extends {ActorSheet}
  */
-export class TirduinRPSActorSheet extends ActorSheet {
+const BaseActorSheet = foundry.appv1?.sheets?.ActorSheet || ActorSheet;
+
+export class TirduinRPSActorSheet extends BaseActorSheet {
   /** @override */
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
@@ -38,6 +40,9 @@ export class TirduinRPSActorSheet extends ActorSheet {
 
   /** @override */
   get template() {
+    if (this.actor.getFlag?.('tirduin', 'lootContainer')) {
+      return 'systems/tirduin/templates/actor/actor-loot-sheet.hbs';
+    }
     return `systems/tirduin/templates/actor/actor-${this.actor.type}-sheet.hbs`;
   }
 
@@ -45,6 +50,8 @@ export class TirduinRPSActorSheet extends ActorSheet {
 
   /** @override */
   async getData() {
+      const isLootContainer = Boolean(this.actor.getFlag?.('tirduin', 'lootContainer'));
+
     // Construye el contexto comun que consumen las plantillas de actor.
     const context = super.getData();
 
@@ -101,6 +108,17 @@ export class TirduinRPSActorSheet extends ActorSheet {
     // Prepare NPC data and items.
     if (actorData.type == 'npc') {
       this._prepareItems(context);
+    }
+
+    // Loot sheet: listado plano de objetos para contenedor de botin.
+    if (isLootContainer) {
+      const lootItems = Array.isArray(context.items) ? context.items : [];
+      for (const item of lootItems) {
+        item.img = item.img || Item.DEFAULT_ICON;
+        const suggestedIcon = this._getSuggestedItemIcon(item);
+        if (item.img === Item.DEFAULT_ICON && suggestedIcon) item.img = suggestedIcon;
+      }
+      context.lootItems = lootItems;
     }
 
     // Normaliza las skills para que NPC y Character puedan usar el mismo partial.
@@ -278,6 +296,12 @@ export class TirduinRPSActorSheet extends ActorSheet {
       10: [],
     };
 
+    // En personajes, la pestaña de conjuros solo debe mostrar niveles
+    // disponibles hasta su nivel actual.
+    const maxCharacterSpellLevel = this.actor.type === 'character'
+      ? Math.max(1, Math.min(10, Number(context.system?.attributes?.level?.value) || 1))
+      : 10;
+
     // Iterate through items, allocating to containers
     for (let i of context.items) {
       i.img = i.img || Item.DEFAULT_ICON;
@@ -351,7 +375,15 @@ export class TirduinRPSActorSheet extends ActorSheet {
       extra: slotsExtra,
     };
 
-    context.spells = spells;
+    if (this.actor.type === 'character') {
+      const visibleSpells = {};
+      for (let level = 1; level <= maxCharacterSpellLevel; level += 1) {
+        visibleSpells[level] = spells[level] || [];
+      }
+      context.spells = visibleSpells;
+    } else {
+      context.spells = spells;
+    }
   }
 
   /* -------------------------------------------- */
@@ -399,6 +431,9 @@ export class TirduinRPSActorSheet extends ActorSheet {
 
     // Publica en chat un resumen estructurado de dotes y conjuros.
     html.on('click', '.item-summary', this._onItemSummary.bind(this));
+
+    // En botin: click en fila de item lanza su tirada por formula.
+    html.on('click', '.loot-item-row', this._onLootItemRoll.bind(this));
 
     // Click en una armadura del NPC: tira VD y aplica desgaste de RA.
     html.on('click', '.npc-armor-item', this._onArmorItemClick.bind(this));
@@ -806,6 +841,32 @@ export class TirduinRPSActorSheet extends ActorSheet {
   }
 
   /**
+   * Loot sheet behavior:
+   * click en fila de item -> lanzar formula del item.
+   * Los controles de edicion/borrado quedan excluidos del click de tirada.
+   */
+  async _onLootItemRoll(event) {
+    // Evita tirar si el click fue sobre acciones de control.
+    const clickedControl = event.target.closest('.loot-item-controls, .item-edit, .item-delete');
+    if (clickedControl) return;
+
+    const row = event.currentTarget;
+    const itemId = row?.dataset?.itemId;
+    // Solo los items genericos del botin usan esta tirada directa.
+    const item = this.actor.items.get(itemId);
+    if (!item || item.type !== 'item') return;
+
+    // Si no hay formula definida, no se intenta tirar.
+    const formula = String(item.system?.formula || '').trim();
+    if (!formula) {
+      ui.notifications?.warn(`${item.name} no tiene formula para tirar.`);
+      return;
+    }
+
+    await item.roll();
+  }
+
+  /**
    * Handle clickable rolls.
    * @param {Event} event   The originating click event
    * @private
@@ -1059,14 +1120,30 @@ export class TirduinRPSActorSheet extends ActorSheet {
     const damageTypeLabel2 = damageTypeKey2
       ? game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[damageTypeKey2] || damageTypeKey2)
       : '';
+
+    // Critico: duplica solo los dados del daño (incluyendo extras),
+    // sin duplicar modificadores estaticos como atributos.
+    const duplicateDiceTermsInFormula = (formula = '') => String(formula).replace(
+      /(\d*)d(\d+)/gi,
+      (_match, count, faces) => `${(Number(count) || 1) * 2}d${faces}`
+    );
+
     const attackRoll = new Roll(attackFormula, actorRollData);
     await attackRoll.evaluate();
-    const damageRoll = new Roll(damageFormula, actorRollData);
+    const isCritical = getNaturalD20Result(attackRoll) === 20;
+    const resolvedDamageFormula = isCritical
+      ? duplicateDiceTermsInFormula(damageFormula)
+      : damageFormula;
+    const resolvedDamageFormula2 = (isCritical && damageFormula2)
+      ? duplicateDiceTermsInFormula(damageFormula2)
+      : damageFormula2;
+
+    const damageRoll = new Roll(resolvedDamageFormula, actorRollData);
     await damageRoll.evaluate();
     let damageRoll2 = null;
     const damageRollExtraEntries = [];
-    if (damageFormula2) {
-      damageRoll2 = new Roll(damageFormula2, actorRollData);
+    if (resolvedDamageFormula2) {
+      damageRoll2 = new Roll(resolvedDamageFormula2, actorRollData);
       await damageRoll2.evaluate();
     }
     for (const entry of extraDamageEntries) {
@@ -1077,9 +1154,12 @@ export class TirduinRPSActorSheet extends ActorSheet {
       const typeLabel = typeKey
         ? game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[typeKey] || typeKey)
         : '';
+      const resolvedExtraFormula = isCritical
+        ? duplicateDiceTermsInFormula(formula)
+        : formula;
 
       try {
-        const roll = new Roll(formula, actorRollData);
+        const roll = new Roll(resolvedExtraFormula, actorRollData);
         await roll.evaluate();
         damageRollExtraEntries.push({ roll, typeLabel });
       } catch (_error) {
@@ -1290,6 +1370,7 @@ export class TirduinRPSActorSheet extends ActorSheet {
       const damageTypeOptions = Object.entries(CONFIG.TIRDUIN_RPS?.damageTypes || {})
         .map(([key, i18nKey]) => `<option value="${key}">${game.i18n.localize(i18nKey)}</option>`)
         .join('');
+      let customSelectDocNamespace = '';
 
       const content = `
         <form class="tirduin-roll-confirmation tirduin-weapon-roll-confirmation">
@@ -1373,6 +1454,83 @@ export class TirduinRPSActorSheet extends ActorSheet {
         default: 'roll',
         classes: ['tirduin', 'tirduin-roll-dialog'],
         render: (html) => {
+          customSelectDocNamespace = `.tirduinWeaponSelect-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+
+          const closeAllCustomSelects = () => {
+            html.find('.tirduin-custom-select.is-open').removeClass('is-open');
+          };
+
+          const initializeCustomSelects = (scope) => {
+            scope.find('select').each((_index, element) => {
+              const select = $(element);
+              if (select.data('tirduinCustomSelectReady')) return;
+              select.data('tirduinCustomSelectReady', true);
+
+              const wrapper = $('<div class="tirduin-custom-select"></div>');
+              select.addClass('tirduin-native-select').wrap(wrapper);
+
+              const host = select.parent();
+              const trigger = $('<button type="button" class="tirduin-custom-select-trigger"></button>');
+              const menu = $('<div class="tirduin-custom-select-menu"></div>');
+
+              const syncFromSelect = () => {
+                const selectedValue = String(select.val() ?? '');
+                const selectedOption = select.find('option:selected').first();
+                const label = String(selectedOption.text() || '').trim();
+                trigger.text(label || 'Seleccionar');
+
+                menu.find('.tirduin-custom-select-option').each((_i, optionButton) => {
+                  const btn = $(optionButton);
+                  btn.toggleClass('is-selected', String(btn.data('value') ?? '') === selectedValue);
+                });
+              };
+
+              select.find('option').each((_optIndex, optionEl) => {
+                const option = $(optionEl);
+                const value = String(option.attr('value') || '');
+                const optionButton = $('<button type="button" class="tirduin-custom-select-option"></button>');
+                optionButton.text(String(option.text() || '').trim());
+                optionButton.attr('data-value', value);
+
+                if (option.prop('disabled')) {
+                  optionButton.prop('disabled', true);
+                }
+
+                menu.append(optionButton);
+              });
+
+              host.append(trigger, menu);
+              syncFromSelect();
+
+              trigger.on('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                const willOpen = !host.hasClass('is-open');
+                closeAllCustomSelects();
+                if (willOpen) host.addClass('is-open');
+              });
+
+              menu.on('click', '.tirduin-custom-select-option', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                const button = $(event.currentTarget);
+                if (button.prop('disabled')) return;
+
+                const value = String(button.data('value') ?? '');
+                select.val(value).trigger('change');
+                host.removeClass('is-open');
+                syncFromSelect();
+              });
+
+              select.on('change', syncFromSelect);
+            });
+          };
+
+          $(document).on(`click${customSelectDocNamespace}`, (event) => {
+            if ($(event.target).closest('.tirduin-custom-select').length) return;
+            closeAllCustomSelects();
+          });
+
           const abilitySelect = html.find('select[name="tirduin-weapon-ability"]');
           const edgeRadios = html.find('input[name="tirduin-roll-edge"]');
           const attackBonusToggle = html.find('[data-role="attack-bonus-toggle"]');
@@ -1488,6 +1646,7 @@ export class TirduinRPSActorSheet extends ActorSheet {
 
           addDamageBonusButton.on('click', () => {
             damageBonusesContainer.append(buildDamageBonusRow());
+            initializeCustomSelects(damageBonusesContainer);
             refreshPreview();
           });
 
@@ -1498,9 +1657,15 @@ export class TirduinRPSActorSheet extends ActorSheet {
             refreshPreview();
           });
 
+          initializeCustomSelects(html);
           refreshPreview();
         },
-        close: () => safeResolve(null),
+        close: () => {
+          if (customSelectDocNamespace) {
+            $(document).off(customSelectDocNamespace);
+          }
+          safeResolve(null);
+        },
       }).render(true);
     });
   }

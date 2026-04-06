@@ -19,6 +19,15 @@ export default class TirduinRPSNPC extends TirduinRPSActorBase {
       }),
     });
 
+    schema.details = new fields.SchemaField({
+      size: new fields.StringField({
+        required: true,
+        nullable: false,
+        initial: 'mediano',
+        choices: ['diminuto', 'pequeno', 'mediano', 'grande', 'enorme', 'gargantuesco']
+      }),
+    });
+
     schema.money = new fields.SchemaField({
       gold: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
       silver: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),

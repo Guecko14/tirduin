@@ -377,6 +377,10 @@ export function buildWeaponAttackDamageFlavorHtml({
   const damageTitle2 = damageTypeLabel2 || 'Danio 2';
   const extraEntries = Array.isArray(damageRollExtraEntries) ? damageRollExtraEntries : [];
 
+  const naturalAttack = getNaturalD20Result(attackRoll);
+  const isCritical = naturalAttack === 20;
+  const isFumble = naturalAttack === 1;
+
   let attackOutcomeText = getD20OutcomeText(attackRoll);
   if (targetName !== null && targetAC !== null) {
     const hit = (Number(attackRoll.total) || 0) >= Number(targetAC);
@@ -384,6 +388,12 @@ export function buildWeaponAttackDamageFlavorHtml({
     attackOutcomeText = [attackOutcomeText, `${hitLabel} a ${targetName}`]
       .filter(Boolean)
       .join(' | ');
+  }
+
+  if (isCritical) {
+    attackOutcomeText = `${attackOutcomeText ? `${attackOutcomeText} | ` : ''}<span class="tirduin-roll-outcome-badge is-critical">CRITICO</span>`;
+  } else if (isFumble) {
+    attackOutcomeText = `${attackOutcomeText ? `${attackOutcomeText} | ` : ''}<span class="tirduin-roll-outcome-badge is-fumble">PIFIA</span>`;
   }
 
   return `
@@ -397,6 +407,7 @@ export function buildWeaponAttackDamageFlavorHtml({
       ${buildRollFlavorHtml({
         title: damageTitle,
         roll: damageRoll,
+        outcomeText: isCritical ? '<span class="tirduin-roll-outcome-badge is-critical">CRITICO: dados x2</span>' : '',
         showDiceBreakdown: true,
         showBonus: true,
       })}

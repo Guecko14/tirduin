@@ -75,7 +75,18 @@
   margin-bottom: 6px;
 }
 
+.tirduin .npc-identity-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px;
+  align-items: stretch;
+  gap: 8px;
+}
+
 .tirduin .npc-name-wrap .npc-name {
+  margin-bottom: 0;
+}
+
+.tirduin .npc-name-wrap .npc-size-field {
   margin-bottom: 0;
 }
 
@@ -138,6 +149,16 @@
   color: #fff;
   text-align: center;
   border-radius: 4px;
+}
+
+.tirduin .npc-stat select {
+  width: 100%;
+  background: #111;
+  border: 1px solid #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 4px;
+  height: 30px;
 }
 
 .tirduin .hp-row {
