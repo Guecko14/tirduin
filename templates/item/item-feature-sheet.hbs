@@ -1,11 +1,19 @@
 <form class="{{cssClass}} special-item-sheet" autocomplete="off">
 
   <section class="special-sheet-panel">
-    <div class="special-field special-field-name">
-      <label for="name">{{localize
-        "TIRDUIN_RPS.CharacterSheet.Features.Name"}}</label>
-      <input name="name" type="text" value="{{item.name}}"
-        placeholder="{{localize "TIRDUIN_RPS.CharacterSheet.Features.Name"}}" />
+    <div class="special-header-row">
+      <img
+        class="special-image-picker"
+        src="{{item.img}}"
+        data-edit="img"
+        title="{{item.name}}" />
+
+      <div class="special-field special-field-name">
+        <label for="name">{{localize
+          "TIRDUIN_RPS.CharacterSheet.Features.Name"}}</label>
+        <input name="name" type="text" value="{{item.name}}"
+          placeholder="{{localize "TIRDUIN_RPS.CharacterSheet.Features.Name"}}" />
+      </div>
     </div>
 
     <div class="fear-sheet-grid">
