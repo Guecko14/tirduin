@@ -1,6 +1,6 @@
-import TirduinRPSActorBase from "./base-actor.mjs";
+import TirduinRPSNPC from "./actor-npc.mjs";
 
-export default class TirduinRPSLoot extends TirduinRPSActorBase {
+export default class TirduinRPSLoot extends TirduinRPSNPC {
 
   static defineSchema() {
     const fields = foundry.data.fields;

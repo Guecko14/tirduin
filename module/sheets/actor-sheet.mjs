@@ -50,7 +50,8 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
 
   /** @override */
   async getData() {
-      const isLootContainer = Boolean(this.actor.getFlag?.('tirduin', 'lootContainer'));
+    const isLootContainer = this.actor.type === 'loot'
+      || Boolean(this.actor.getFlag?.('tirduin', 'lootContainer'));
 
     // Construye el contexto comun que consumen las plantillas de actor.
     const context = super.getData();
@@ -183,7 +184,12 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
         const abilityKey = abilityMapping[key] || '-';
         const abilityVal = Number(this.actor.system?.abilities?.[abilityKey.toLowerCase()]?.value) || 0;
 
-        const label = skill.label || CONFIG.TIRDUIN_RPS.skills?.[key] || key;
+        const configuredLabelKey = CONFIG.TIRDUIN_RPS.skills?.[key];
+        const configuredLabel = configuredLabelKey ? game.i18n.localize(configuredLabelKey) : key;
+        const rawLabel = skill.label || configuredLabel;
+        const label = String(rawLabel).startsWith('TIRDUIN_RPS.')
+          ? game.i18n.localize(rawLabel)
+          : rawLabel;
         const labelShort = label.length > 18 ? `${label.slice(0, 15)}…` : label;
         return {
           key,
@@ -259,6 +265,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     if (type === 'spell') return 'icons/svg/book.svg';
     if (type === 'weapon') return 'icons/svg/sword.svg';
     if (type === 'armor') return 'icons/svg/shield.svg';
+    if (type === 'fear') return 'icons/svg/skull.svg';
     if (type === 'feature' && category === 'fear') return 'icons/svg/skull.svg';
     if (type === 'feature' && category === 'special') return 'icons/svg/aura.svg';
     if (type === 'feature' && category === 'magicAction') return 'icons/svg/explosion.svg';
@@ -316,8 +323,8 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
         npcGenericObjects.push(i);
         currentSlots += Number(i.system?.weight) || 0;
       }
-      // Las acciones de miedo son features marcadas con category=fear.
-      else if (i.type === 'feature' && i.system.category === 'fear') {
+      // Las acciones de miedo pueden existir como feature(category=fear) o como item type=fear.
+      else if ((i.type === 'feature' && i.system.category === 'fear') || i.type === 'fear') {
         fearActions.push(i);
       }
       // Las entradas especiales del NPC usan feature con category=special.

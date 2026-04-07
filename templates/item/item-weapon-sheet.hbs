@@ -3,11 +3,19 @@
     {{!-- Panel principal de edición del arma --}}
     <section class="weapon-sheet-panel">
 
-        {{!-- Nombre del arma --}}
-        <div class="weapon-field weapon-field-name">
-            <label for="name">Nombre</label>
-            <input name="name" type="text" value="{{item.name}}"
-                placeholder="Nombre del arma" />
+        {{!-- Cabecera con imagen editable y nombre del arma --}}
+        <div class="weapon-header-row">
+            <img
+                class="weapon-image-picker"
+                src="{{item.img}}"
+                data-edit="img"
+                title="{{item.name}}" />
+
+            <div class="weapon-field weapon-field-name">
+                <label for="name">Nombre</label>
+                <input name="name" type="text" value="{{item.name}}"
+                    placeholder="Nombre del arma" />
+            </div>
         </div>
 
         {{!-- Fila de selectores: categoría y subcategoría --}}

@@ -180,7 +180,9 @@ Hooks.once('init', function () {
   CONFIG.Actor.dataModels = {
     character: models.TirduinRPSCharacter,
     npc: models.TirduinRPSNPC,
+    loot: models.TirduinRPSLoot,
   }
+  CONFIG.Actor.types = Object.keys(CONFIG.Actor.dataModels);
   CONFIG.Item.documentClass = TirduinRPSItem;
   CONFIG.Item.dataModels = {
     item: models.TirduinRPSItem,
@@ -255,16 +257,6 @@ Hooks.on('preCreateActor', (actor, data) => {
   actor.updateSource({
     prototypeToken: update,
   });
-});
-
-// Scenes should default to grid size of 5 ft and Fog of War exploration mode to "none".
-Hooks.on('preCreateScene', (scene, data) => {
-  if (!data.grid) data.grid = {};
-  if (!data.fog) data.fog = {};
-  
-  data.grid.distance = 5;
-  data.grid.units = 'ft';
-  data.fog.explorationMode = 'none';
 });
 
 /* -------------------------------------------- */
@@ -353,43 +345,6 @@ Hooks.once('ready', function () {
       } catch (_error) {
         // Ignore if the core setting key changes across versions.
       }
-    }
-  }
-
-  // Force Foundry core Automatic Token Rotation setting to disabled.
-  if (game.user) {
-    try {
-      // Known core key in current Foundry builds.
-      const directCurrent = game.settings.get('core', 'tokenDragPreview');
-      if (directCurrent !== false) {
-        game.settings.set('core', 'tokenDragPreview', false).catch(() => {});
-      }
-
-      // Fallback by metadata in case key changes in future versions.
-      const allSettings = Array.from(game.settings.settings.values());
-      const candidates = allSettings.filter((setting) => {
-        if (setting?.namespace !== 'core') return false;
-        if (setting?.type !== Boolean) return false;
-
-        const key = String(setting?.key || '').toLowerCase();
-        const name = String(game.i18n.localize(setting?.name || '') || '').toLowerCase();
-        const hint = String(game.i18n.localize(setting?.hint || '') || '').toLowerCase();
-
-        const keyLooksLikeRotation = key.includes('token') && key.includes('rotation');
-        const textLooksLikeAutoRotation = name.includes('automatic token rotation')
-          || name.includes('token rotation')
-          || hint.includes('automatic token rotation');
-
-        return keyLooksLikeRotation || textLooksLikeAutoRotation;
-      });
-
-      for (const setting of candidates) {
-        const current = game.settings.get(setting.namespace, setting.key);
-        if (current === false) continue;
-        game.settings.set(setting.namespace, setting.key, false).catch(() => {});
-      }
-    } catch (_error) {
-      // Ignore if core setting metadata changes across versions.
     }
   }
 
@@ -538,6 +493,31 @@ Hooks.once('ready', function () {
     return String(actor.name || '').toLowerCase().startsWith('botin:');
   };
 
+  const getLootOwnershipLevel = () => {
+    return Number(CONST?.DOCUMENT_OWNERSHIP_LEVELS?.OWNER)
+      || Number(CONST?.ENTITY_PERMISSIONS?.OWNER)
+      || 3;
+  };
+
+  const getNeutralDisposition = () => {
+    return Number(CONST?.TOKEN_DISPOSITIONS?.NEUTRAL) || 0;
+  };
+
+  const ensureLootActorAccess = async (actor) => {
+    if (!game.user?.isGM || !isLootActor(actor)) return;
+
+    const ownerLevel = getLootOwnershipLevel();
+    const currentDefault = Number(actor?.ownership?.default);
+    if (currentDefault === ownerLevel) return;
+
+    await actor.update({
+      ownership: {
+        ...(actor.ownership || {}),
+        default: ownerLevel,
+      },
+    });
+  };
+
   const findNearbyLootToken = (x, y) => {
     // Merge drops into an existing nearby loot container before creating new tokens.
     const tokens = canvas?.tokens?.placeables || [];
@@ -580,6 +560,9 @@ Hooks.once('ready', function () {
       name: lootName,
       type: 'npc',
       img: lootImg,
+      ownership: {
+        default: getLootOwnershipLevel(),
+      },
       flags: {
         tirduin: {
           lootContainer: true,
@@ -589,6 +572,7 @@ Hooks.once('ready', function () {
         actorLink: false,
         name: lootName,
         img: lootImg,
+        disposition: getNeutralDisposition(),
       },
     });
 
@@ -600,6 +584,7 @@ Hooks.once('ready', function () {
     const tokenDocument = await lootActor.getTokenDocument({
       name: lootName,
       actorLink: false,
+      disposition: getNeutralDisposition(),
       x: snapped.x,
       y: snapped.y,
       width: 1,
@@ -609,6 +594,52 @@ Hooks.once('ready', function () {
 
     return true;
   };
+
+  // Ensure existing loot containers are accessible to all players.
+  if (game.user?.isGM) {
+    for (const actor of game.actors ?? []) {
+      if (!isLootActor(actor)) continue;
+      ensureLootActorAccess(actor).catch(() => {});
+    }
+  }
+
+  // Players can open loot from tokens, but loot actors stay hidden in Actor Directory.
+  const hideLootActorsFromDirectory = (html) => {
+    const entries = html.find('.directory-item.document.actor, .directory-item.actor, li.directory-item');
+    for (const element of entries) {
+      const actorId = element?.dataset?.documentId
+        || element?.dataset?.entryId
+        || element?.dataset?.actorId
+        || String(element?.dataset?.uuid || '').split('.').pop();
+      if (!actorId) continue;
+
+      const actor = game.actors?.get(actorId);
+      if (!isLootActor(actor)) continue;
+      element.remove();
+    }
+  };
+
+  Hooks.on('renderActorDirectory', (_app, html) => {
+    if (game.user?.isGM) return;
+    hideLootActorsFromDirectory(html);
+  });
+
+  if (!game.user?.isGM && ui?.actors?.element) {
+    hideLootActorsFromDirectory(ui.actors.element);
+  }
+
+  // Players should open loot containers directly from token double-click on canvas.
+  Hooks.on('clickToken2', (token) => {
+    if (!token?.actor || !isLootActor(token.actor)) return;
+
+    const ownerLevel = getLootOwnershipLevel();
+    const hasAccess = token.actor.testUserPermission?.(game.user, ownerLevel)
+      || token.actor.isOwner;
+    if (!hasAccess) return;
+
+    token.actor.sheet?.render(true);
+    return false;
+  });
 
   // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to
   Hooks.on('hotbarDrop', (bar, data, slot) => createItemMacro(data, slot));

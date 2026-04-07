@@ -141,6 +141,26 @@
   overflow-y: auto;
 }
 
+.special-item-sheet .special-header-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.special-item-sheet .special-image-picker {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 1px solid #6a5530;
+  background: #0f0d0a;
+}
+
+.special-item-sheet .special-header-row .special-field-name {
+  flex: 1;
+}
+
 .special-item-sheet .fear-sheet-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

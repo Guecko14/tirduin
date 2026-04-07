@@ -336,6 +336,26 @@
   gap: 10px;
 }
 
+.weapon-header-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.weapon-image-picker {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: #0f0f0f;
+}
+
+.weapon-header-row .weapon-field-name {
+  flex: 1;
+}
+
 .weapon-row {
   display: flex;
   gap: 10px;
@@ -426,6 +446,26 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.armor-header-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.armor-image-picker {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: #0f0f0f;
+}
+
+.armor-header-row .armor-field-name {
+  flex: 1;
 }
 
 .armor-row {

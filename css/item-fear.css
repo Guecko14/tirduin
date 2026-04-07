@@ -162,6 +162,26 @@
   gap: 10px;
 }
 
+.fear-item-sheet .fear-header-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.fear-item-sheet .fear-image-picker {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 1px solid #6b2f2f;
+  background: #0d0d0d;
+}
+
+.fear-item-sheet .fear-header-row .fear-sheet-grid {
+  flex: 1;
+}
+
 .fear-item-sheet .fear-field {
   display: flex;
   flex-direction: column;
