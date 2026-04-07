@@ -11,7 +11,7 @@
   "url": "https://github.com/Guecko14/tirduin.git",
   "license": "LICENSE.txt",
   "readme": "README.md",
-  "bugs": "Replace this with a link to file issues or tickets",
+  "bugs": "https://github.com/Guecko14/tirduin/issues",
   "changelog": "CHANGELOG.md",
   "media": [
     {
@@ -20,10 +20,10 @@
       "thumbnail": "systems/tirduin/assets/anvil-impact.png"
     }
   ],
-  "version": "0.2.1",
+  "version": "0.2.2",
   "compatibility": {
-    "minimum": 13,
-    "verified": "13.359"
+    "minimum": 14,
+    "verified": "14.359"
   },
   "esmodules": ["module/tirduin.mjs"],
   "styles": [

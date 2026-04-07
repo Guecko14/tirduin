@@ -236,6 +236,16 @@ Hooks.on('preCreateActor', (actor, data) => {
   });
 });
 
+// Scenes should default to grid size of 5 ft and Fog of War exploration mode to "none".
+Hooks.on('preCreateScene', (scene, data) => {
+  if (!data.grid) data.grid = {};
+  if (!data.fog) data.fog = {};
+  
+  data.grid.distance = 5;
+  data.grid.units = 'ft';
+  data.fog.explorationMode = 'none';
+});
+
 /* -------------------------------------------- */
 /*  Handlebars Helpers                          */
 /* -------------------------------------------- */
