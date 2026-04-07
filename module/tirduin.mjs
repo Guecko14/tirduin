@@ -221,18 +221,39 @@ Hooks.once('init', function () {
   return preloadHandlebarsTemplates();
 });
 
-// Characters should default to linked token data in Token Configuration.
+// New actors default token options in Token Configuration.
 Hooks.on('preCreateActor', (actor, data) => {
-  if (actor.type !== 'character') return;
+  if (!['character', 'npc'].includes(actor.type)) return;
 
   const explicitActorLink = foundry.utils.hasProperty(data, 'prototypeToken.actorLink');
-  if (explicitActorLink) return;
+  const explicitVision = foundry.utils.hasProperty(data, 'prototypeToken.sight.enabled')
+    || foundry.utils.hasProperty(data, 'prototypeToken.vision');
+
+  // Keep previous behavior for character linked tokens and add default token vision.
+  const shouldSetActorLink = actor.type === 'character' && !explicitActorLink;
+  const shouldSetVision = !explicitVision;
+  if (!shouldSetActorLink && !shouldSetVision) return;
+
+  const currentPrototype = actor.prototypeToken?.toObject?.() || {};
+  const update = {
+    ...currentPrototype,
+  };
+
+  if (shouldSetActorLink) {
+    update.actorLink = true;
+  }
+
+  if (shouldSetVision) {
+    update.sight = {
+      ...(currentPrototype.sight || {}),
+      enabled: true,
+    };
+    // Legacy field compatibility used by some modules/UI.
+    update.vision = true;
+  }
 
   actor.updateSource({
-    prototypeToken: {
-      ...(actor.prototypeToken?.toObject?.() || {}),
-      actorLink: true,
-    },
+    prototypeToken: update,
   });
 });
 
@@ -302,6 +323,64 @@ Handlebars.registerHelper('damageTypeAbbr', function (damageType) {
 Hooks.once('ready', function () {
   if (game.user?.isGM) {
     renderFearCounterDialog();
+  }
+
+  // Force Foundry core Grid Diagonals setting to Alternative (1/2/1).
+  if (game.user?.isGM) {
+    const diagonalModes = CONST?.GRID_DIAGONALS || {};
+    const modeEntry = Object.entries(diagonalModes).find(([key]) => {
+      const normalized = String(key).toUpperCase();
+      return normalized.includes('ALTERNATE') || normalized.includes('ALTERNATING') || normalized.includes('ALT');
+    });
+    const alternateMode = modeEntry?.[1];
+
+    if (alternateMode !== undefined) {
+      try {
+        const current = game.settings.get('core', 'gridDiagonals');
+        if (current !== alternateMode) {
+          game.settings.set('core', 'gridDiagonals', alternateMode).catch(() => {});
+        }
+      } catch (_error) {
+        // Ignore if the core setting key changes across versions.
+      }
+    }
+  }
+
+  // Force Foundry core Automatic Token Rotation setting to disabled.
+  if (game.user) {
+    try {
+      // Known core key in current Foundry builds.
+      const directCurrent = game.settings.get('core', 'tokenDragPreview');
+      if (directCurrent !== false) {
+        game.settings.set('core', 'tokenDragPreview', false).catch(() => {});
+      }
+
+      // Fallback by metadata in case key changes in future versions.
+      const allSettings = Array.from(game.settings.settings.values());
+      const candidates = allSettings.filter((setting) => {
+        if (setting?.namespace !== 'core') return false;
+        if (setting?.type !== Boolean) return false;
+
+        const key = String(setting?.key || '').toLowerCase();
+        const name = String(game.i18n.localize(setting?.name || '') || '').toLowerCase();
+        const hint = String(game.i18n.localize(setting?.hint || '') || '').toLowerCase();
+
+        const keyLooksLikeRotation = key.includes('token') && key.includes('rotation');
+        const textLooksLikeAutoRotation = name.includes('automatic token rotation')
+          || name.includes('token rotation')
+          || hint.includes('automatic token rotation');
+
+        return keyLooksLikeRotation || textLooksLikeAutoRotation;
+      });
+
+      for (const setting of candidates) {
+        const current = game.settings.get(setting.namespace, setting.key);
+        if (current === false) continue;
+        game.settings.set(setting.namespace, setting.key, false).catch(() => {});
+      }
+    } catch (_error) {
+      // Ignore if core setting metadata changes across versions.
+    }
   }
 
   const tokenSizeByActorSize = {
