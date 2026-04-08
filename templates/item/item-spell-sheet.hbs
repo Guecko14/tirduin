@@ -115,10 +115,10 @@
         </div>
       </div>
 
-      <div class="fear-field fear-field-cost">
+      <div class="fear-field fear-field-cost spell-duration-field">
         <label for="system.durationType">{{localize
           "TIRDUIN_RPS.Item.Spell.Fields.Duration"}}</label>
-        <div class="fear-sheet-grid">
+        <div class="spell-duration-inline">
           <select name="system.durationType">
             <option value="instant" {{#if (eq system.durationType
               "instant")}}selected{{/if}}>{{localize
@@ -130,7 +130,8 @@
               "minutes")}}selected{{/if}}>{{localize
               "TIRDUIN_RPS.Item.Spell.Options.Duration.Minutes"}}</option>
           </select>
-          <input name="system.durationValue" type="number"
+          <input class="spell-duration-value" name="system.durationValue"
+            type="number"
             value="{{system.durationValue}}"
             min="0" data-dtype="Number" />
         </div>

@@ -98,6 +98,29 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
       return obj;
     }, {}));
 
+    const spellDomains = Object.keys(CONFIG.TIRDUIN_RPS.spellDomains || {});
+    schema.spellcasting = new fields.SchemaField({
+      primaryDomain: new fields.StringField({
+        required: false,
+        nullable: false,
+        blank: true,
+        initial: '',
+        choices: ['', ...spellDomains]
+      }),
+      secondaryDomain: new fields.StringField({
+        required: false,
+        nullable: false,
+        blank: true,
+        initial: '',
+        choices: ['', ...spellDomains]
+      }),
+      domainBenefit: new fields.StringField({ required: true, nullable: false, blank: true, initial: '' }),
+      proficiency: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0, max: 5 }),
+      attackExtra: new fields.NumberField({ ...requiredInteger, initial: 0 }),
+      dcExtra: new fields.NumberField({ ...requiredInteger, initial: 0 }),
+      attackBonus: new fields.NumberField({ ...requiredInteger, initial: 0 })
+    });
+
     return schema;
   }
 

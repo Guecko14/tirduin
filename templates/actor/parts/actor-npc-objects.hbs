@@ -82,8 +82,8 @@
                     ({{damageTypeAbbr weapon.system.damageType2}})
                     {{/if}}
                 </span>
-                <span class="npc-weapon-col-range">{{weapon.system.range}}
-                    ft</span>
+                <span
+                    class="npc-weapon-col-range">{{weapon.system.range}}</span>
                 <span class="npc-weapon-col-grip">{{weapon.system.grip}}M</span>
                 <div class="npc-object-controls npc-weapon-col-controls">
                     <a
@@ -134,7 +134,6 @@
                 <span class="npc-armor-col-vd">VD</span>
                 <span class="npc-armor-col-ra">RA</span>
                 <span class="npc-armor-col-resistance">R</span>
-                <span class="npc-armor-col-damage-type">Tipo R</span>
                 <span class="npc-armor-col-vigor">V</span>
                 <span class="npc-armor-col-broken">Rota</span>
                 <span class="npc-armor-col-stealth">Sigilo</span>
@@ -180,20 +179,8 @@
                     class="npc-armor-col-resistance">{{#if (eq
                     armor.system.category
                     'escudo')}}{{else}}{{#if (eq armor.system.category
-                    'extra')}}{{else}}{{armor.system.resistance.value}}{{/if}}{{/if}}</span>
-                <span class="npc-armor-col-damage-type">
-                    {{#if (or (eq armor.system.category 'escudo') (eq
-                    armor.system.category 'extra'))}}
-
-                    {{else}}
-                    {{#if armor.system.resistance.damageType}}
-                    {{localize (lookup @root.config.damageTypes
-                    armor.system.resistance.damageType)}}
-                    {{else}}
-
-                    {{/if}}
-                    {{/if}}
-                </span>
+                    'extra')}}{{else}}{{armorResistanceSummary
+                    armor.system}}{{/if}}{{/if}}</span>
                 <span class="npc-armor-col-vigor">{{#if (eq
                     armor.system.category
                     'extra')}}{{else}}{{armor.system.vigor}}{{/if}}</span>

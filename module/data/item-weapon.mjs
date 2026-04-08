@@ -91,13 +91,11 @@ export default class TirduinRPSWeapon extends TirduinRPSItemBase {
       ],
     });
 
-    // Alcance del arma en pies. 0 indica arma cuerpo a cuerpo sin alcance especial.
-    schema.range = new fields.NumberField({
+    // Alcance del arma en formato libre (ej. "5 ft", "Toque", "20/60").
+    schema.range = new fields.StringField({
       required: true,
-      nullable: false,
-      integer: true,
-      initial: 5,
-      min: 0,
+      blank: false,
+      initial: '5 ft',
     });
 
     // Garras necesarias para empuñar el arma: "1" (una mano) o "2" (dos manos).

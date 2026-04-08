@@ -202,6 +202,26 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
         };
     });
 
+    if (this.actor.type === 'character') {
+      const spellcastingClassAbility = {
+        combatiente: 'inst',
+        especialista: 'pre',
+        canalizador: 'ment'
+      };
+      const className = context.system?.details?.className || 'combatiente';
+      const abilityKey = spellcastingClassAbility[className] || 'inst';
+      const abilityValue = Number(context.system?.abilities?.[abilityKey]?.value) || 0;
+      const proficiency = Math.max(0, Math.min(5, Number(context.system?.spellcasting?.proficiency) || 0));
+      const attackExtra = Number(context.system?.spellcasting?.attackExtra) || 0;
+      const dcExtra = Number(context.system?.spellcasting?.dcExtra) || 0;
+
+      context.system.spellcasting = context.system.spellcasting || {};
+      context.system.spellcasting.attackBonusComputed = proficiency + abilityValue + attackExtra;
+      context.system.spellcasting.dcComputed = 10 + abilityValue + proficiency + dcExtra;
+      context.system.spellcasting.attackAbility = abilityKey;
+      context.system.spellcasting.attackAbilityLabel = game.i18n.localize(CONFIG.TIRDUIN_RPS.abilities[abilityKey]) || abilityKey;
+    }
+
     // Enriquecer la biografia permite reutilizar el editor rico en la sheet.
     context.enrichedBiography = await foundry.applications.ux.TextEditor.implementation.enrichHTML(
       this.actor.system.biography,
@@ -267,6 +287,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     if (type === 'armor') return 'icons/svg/shield.svg';
     if (type === 'fear') return 'icons/svg/skull.svg';
     if (type === 'feature' && category === 'fear') return 'icons/svg/skull.svg';
+    if (type === 'feature' && category === 'note') return 'icons/svg/book.svg';
     if (type === 'feature' && category === 'special') return 'icons/svg/aura.svg';
     if (type === 'feature' && category === 'magicAction') return 'icons/svg/explosion.svg';
     if (type === 'feature') return 'icons/svg/upgrade.svg';
@@ -283,6 +304,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     const gear = [];
     const features = [];
     const fearActions = [];
+    const notesActions = [];
     const specialActions = [];
     const magicActions = [];
     // Objetos del NPC: genéricos, armas y armaduras separados para el tab de Objetos.
@@ -327,6 +349,10 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       else if ((i.type === 'feature' && i.system.category === 'fear') || i.type === 'fear') {
         fearActions.push(i);
       }
+      // Notas del personaje: features marcadas con category=note.
+      else if (i.type === 'feature' && i.system.category === 'note') {
+        notesActions.push(i);
+      }
       // Las entradas especiales del NPC usan feature con category=special.
       else if (i.type === 'feature' && i.system.category === 'special') {
         specialActions.push(i);
@@ -362,6 +388,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     context.gear = gear;
     context.features = features;
     context.fearActions = fearActions;
+    context.notesActions = notesActions;
     context.specialActions = specialActions;
     context.npcMagicActions = magicActions;
     // Colecciones para el tab de Objetos del NPC.
@@ -571,6 +598,8 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     // Da nombres utiles por defecto segun la categoria del item creado.
     const name = data.category === 'fear'
       ? 'Nueva accion de miedo'
+      : data.category === 'note'
+        ? game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Notes.Add')
       : data.category === 'special'
         ? 'Nueva habilidad especial'
       : data.category === 'magicAction'
@@ -652,11 +681,12 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
 
     const aliasMap = {
       // slashing/piercing
-      corte: 'slashingPiercing',
-      cortante: 'slashingPiercing',
-      punzante: 'slashingPiercing',
-      slashing: 'slashingPiercing',
-      piercing: 'slashingPiercing',
+      corte: 'slashing',
+      cortante: 'slashing',
+      punzante: 'piercing',
+      perforante: 'piercing',
+      slashing: 'slashing',
+      piercing: 'piercing',
       slashpierce: 'slashingPiercing',
       // bludgeoning
       contundente: 'bludgeoning',

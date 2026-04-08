@@ -749,6 +749,92 @@
   padding: 6px 0;
 }
 
+.tirduin .character .character-spellcasting-panel {
+  border: 1px solid #3f3522;
+  border-radius: 6px;
+  padding: 10px;
+  background: #19160f;
+}
+
+.tirduin .character .character-spellcasting-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tirduin .character .character-spellcasting-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tirduin .character .character-spellcasting-field--wide {
+  grid-column: 1 / -1;
+}
+
+.tirduin .character .character-spellcasting-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tirduin .character .character-spellcasting-field label {
+  font-size: 0.74rem;
+  color: #d7c497;
+  font-weight: 700;
+}
+
+.tirduin .character .character-spellcasting-field input {
+  width: 100%;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  background: #000;
+  color: #fff;
+  padding: 0 6px;
+  font-size: 0.75rem;
+  box-sizing: border-box;
+}
+
+.tirduin .character .character-spellcasting-field select.sheet-skill-select {
+  width: 100%;
+  height: 30px;
+  border-radius: 4px;
+}
+
+.tirduin .character .character-spellcasting-field input[readonly] {
+  background: #111;
+  color: #b8d7ff;
+  font-weight: 700;
+}
+
+.tirduin .character .character-spellcasting-note {
+  margin: 8px 0 0;
+  font-size: 0.74rem;
+  color: #b7a57d;
+}
+
+@media (max-width: 900px) {
+  .tirduin .character .character-spellcasting-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .tirduin .character .character-spellcasting-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tirduin .character .character-spellcasting-row {
+    grid-template-columns: 1fr;
+  }
+
+  .tirduin .character .character-spellcasting-field--wide {
+    grid-column: auto;
+  }
+}
+
 .tirduin .character .character-spell-level {
   border: 1px solid #333;
   border-radius: 6px;

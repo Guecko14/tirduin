@@ -14,6 +14,7 @@ export const preloadHandlebarsTemplates = async function () {
     'systems/tirduin/templates/actor/parts/actor-skills.hbs',
     'systems/tirduin/templates/actor/parts/actor-fear.hbs',
     'systems/tirduin/templates/actor/parts/actor-special.hbs',
+    'systems/tirduin/templates/actor/parts/actor-notes.hbs',
     // Tab de objetos del NPC: genéricos, armas y armaduras.
     'systems/tirduin/templates/actor/parts/actor-npc-objects.hbs',
     // Tab de acciones del NPC.
