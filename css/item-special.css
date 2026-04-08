@@ -175,7 +175,7 @@
 
 .special-item-sheet .spell-components {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
 }
 
@@ -189,6 +189,7 @@
   color: #d9caab;
   background: #2a2217;
   border: 1px solid #5e4b2a;
+  white-space: nowrap;
 }
 
 .special-item-sheet .spell-component-chip input[type="checkbox"] {
@@ -224,6 +225,25 @@
   padding: 6px 8px;
   font-size: 1rem;
   font-weight: 700;
+}
+
+.special-item-sheet .spell-duration-value {
+  width: 72px;
+  flex: 0 0 72px;
+}
+
+.special-item-sheet .spell-duration-field {
+  margin-left: 8px;
+}
+
+.special-item-sheet .spell-duration-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.special-item-sheet .spell-duration-inline select {
+  flex: 1;
 }
 
 .special-item-sheet select {

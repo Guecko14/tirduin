@@ -1,4 +1,102 @@
 <section class="character-spells">
+  <div class="character-spellcasting-panel">
+    <div class="character-spellcasting-grid">
+      <div class="character-spellcasting-field">
+        <label for="system.spellcasting.primaryDomain">{{localize
+          "TIRDUIN_RPS.CharacterSheet.Spells.PrimaryDomain"}}</label>
+        <select name="system.spellcasting.primaryDomain"
+          class="sheet-skill-select">
+          <option value>{{localize
+            "TIRDUIN_RPS.CharacterSheet.Spells.NoDomain"}}</option>
+          {{#each @root.config.spellDomains as |domainLabel domainKey|}}
+          <option value="{{domainKey}}" {{#if (eq
+            @root.system.spellcasting.primaryDomain
+            domainKey)}}selected{{/if}}>{{localize domainLabel}}</option>
+          {{/each}}
+        </select>
+      </div>
+
+      <div class="character-spellcasting-field">
+        <label for="system.spellcasting.secondaryDomain">{{localize
+          "TIRDUIN_RPS.CharacterSheet.Spells.SecondaryDomain"}}</label>
+        <select name="system.spellcasting.secondaryDomain"
+          class="sheet-skill-select">
+          <option value>{{localize
+            "TIRDUIN_RPS.CharacterSheet.Spells.NoDomain"}}</option>
+          {{#each @root.config.spellDomains as |domainLabel domainKey|}}
+          <option value="{{domainKey}}" {{#if (eq
+            @root.system.spellcasting.secondaryDomain
+            domainKey)}}selected{{/if}}>{{localize domainLabel}}</option>
+          {{/each}}
+        </select>
+      </div>
+
+      <div class="character-spellcasting-field">
+        <label for="system.spellcasting.proficiency">{{localize
+          "TIRDUIN_RPS.CharacterSheet.Spells.Proficiency"}}</label>
+        <select name="system.spellcasting.proficiency"
+          class="sheet-skill-select">
+          <option value="0" {{#if (eq @root.system.spellcasting.proficiency
+            0)}}selected{{/if}}>—</option>
+          <option value="1" {{#if (eq @root.system.spellcasting.proficiency
+            1)}}selected{{/if}}>Basica</option>
+          <option value="2" {{#if (eq @root.system.spellcasting.proficiency
+            2)}}selected{{/if}}>Intermedia</option>
+          <option value="3" {{#if (eq @root.system.spellcasting.proficiency
+            3)}}selected{{/if}}>Avanzada</option>
+          <option value="4" {{#if (eq @root.system.spellcasting.proficiency
+            4)}}selected{{/if}}>Experta</option>
+          <option value="5" {{#if (eq @root.system.spellcasting.proficiency
+            5)}}selected{{/if}}>Maestra</option>
+        </select>
+      </div>
+
+      <div
+        class="character-spellcasting-field character-spellcasting-field--wide">
+        <label for="system.spellcasting.domainBenefit">{{localize
+          "TIRDUIN_RPS.CharacterSheet.Spells.DomainBenefit"}}</label>
+        <input type="text" name="system.spellcasting.domainBenefit"
+          value="{{@root.system.spellcasting.domainBenefit}}" />
+      </div>
+
+      <div
+        class="character-spellcasting-row character-spellcasting-field--wide">
+        <div class="character-spellcasting-field">
+          <label for="system.spellcasting.attackBonus">{{localize
+            "TIRDUIN_RPS.CharacterSheet.Spells.AttackBonus"}}</label>
+          <input type="number"
+            value="{{@root.system.spellcasting.attackBonusComputed}}"
+            readonly />
+        </div>
+
+        <div class="character-spellcasting-field">
+          <label for="system.spellcasting.attackExtra">{{localize
+            "TIRDUIN_RPS.CharacterSheet.Spells.AttackExtra"}}</label>
+          <input type="number" name="system.spellcasting.attackExtra"
+            value="{{@root.system.spellcasting.attackExtra}}"
+            data-dtype="Number" />
+        </div>
+      </div>
+
+      <div
+        class="character-spellcasting-row character-spellcasting-field--wide">
+        <div class="character-spellcasting-field">
+          <label for="system.spellcasting.dcComputed">{{localize
+            "TIRDUIN_RPS.CharacterSheet.Spells.SpellDC"}}</label>
+          <input type="number"
+            value="{{@root.system.spellcasting.dcComputed}}" readonly />
+        </div>
+
+        <div class="character-spellcasting-field">
+          <label for="system.spellcasting.dcExtra">{{localize
+            "TIRDUIN_RPS.CharacterSheet.Spells.DCExtra"}}</label>
+          <input type="number" name="system.spellcasting.dcExtra"
+            value="{{@root.system.spellcasting.dcExtra}}" data-dtype="Number" />
+        </div>
+      </div>
+    </div>
+  </div>
+
   {{#each spells as |spells spellLevel|}}
   <div class="character-spell-level">
     <div class="character-spells-header">

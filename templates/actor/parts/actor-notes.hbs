@@ -1,0 +1,42 @@
+<div class="special-actions">
+
+    <div class="special-actions-header">
+        <h2>{{localize "TIRDUIN_RPS.CharacterSheet.Notes.Title"}}</h2>
+        <a class="item-create special-add-btn" data-type="feature"
+            data-category="note"
+            title="{{localize "TIRDUIN_RPS.CharacterSheet.Notes.Add"}}">
+            <i class="fas fa-plus"></i> {{localize
+            "TIRDUIN_RPS.CharacterSheet.Notes.Add"}}
+        </a>
+    </div>
+
+    {{#if notesActions.length}}
+    <ul class="special-list">
+        {{#each notesActions as |note|}}
+        <li class="special-item" data-item-id="{{note._id}}">
+
+            <div class="special-item-main">
+                <span class="special-name">{{note.name}}</span>
+                <div class="special-controls">
+                    <a class="item-edit special-edit"
+                        title="{{localize "TIRDUIN_RPS.CharacterSheet.Notes.Edit"}}"><i
+                            class="fas fa-edit"></i></a>
+                    <a class="item-delete special-delete"
+                        title="{{localize "TIRDUIN_RPS.CharacterSheet.Notes.Delete"}}"><i
+                            class="fas fa-trash"></i></a>
+                </div>
+            </div>
+
+            {{#if note.system.description}}
+            <div class="special-desc">{{note.system.description}}</div>
+            {{/if}}
+
+        </li>
+        {{/each}}
+    </ul>
+    {{else}}
+    <p class="special-empty">{{localize
+        "TIRDUIN_RPS.CharacterSheet.Notes.Empty"}}</p>
+    {{/if}}
+
+</div>

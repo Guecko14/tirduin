@@ -50,6 +50,25 @@ TIRDUIN_RPS.skills = {
 };
 
 /**
+ * Spell domains catalog used by spell-related selects.
+ * @type {Object<string, string>}
+ */
+TIRDUIN_RPS.spellDomains = {
+  conocimiento: 'TIRDUIN_RPS.Item.Spell.Domains.conocimiento',
+  piromancia: 'TIRDUIN_RPS.Item.Spell.Domains.piromancia',
+  naturaleza: 'TIRDUIN_RPS.Item.Spell.Domains.naturaleza',
+  tirador: 'TIRDUIN_RPS.Item.Spell.Domains.tirador',
+  espiritus: 'TIRDUIN_RPS.Item.Spell.Domains.espiritus',
+  sombra: 'TIRDUIN_RPS.Item.Spell.Domains.sombra',
+  valor: 'TIRDUIN_RPS.Item.Spell.Domains.valor',
+  filo: 'TIRDUIN_RPS.Item.Spell.Domains.filo',
+  arte: 'TIRDUIN_RPS.Item.Spell.Domains.arte',
+  guerra: 'TIRDUIN_RPS.Item.Spell.Domains.guerra',
+  oscuridad: 'TIRDUIN_RPS.Item.Spell.Domains.oscuridad',
+  muerte: 'TIRDUIN_RPS.Item.Spell.Domains.muerte',
+};
+
+/**
  * Generic grouped damage types for items, spells, effects and states.
  * Keep this centralized so every screen references the same vocabulary.
  * @type {Object<string, string>}
@@ -66,6 +85,8 @@ TIRDUIN_RPS.damageTypeGroups = {
  */
 TIRDUIN_RPS.damageTypes = {
   slashingPiercing: 'TIRDUIN_RPS.Damage.Type.slashingPiercing',
+  slashing: 'TIRDUIN_RPS.Damage.Type.slashing',
+  piercing: 'TIRDUIN_RPS.Damage.Type.piercing',
   bludgeoning: 'TIRDUIN_RPS.Damage.Type.bludgeoning',
   acid: 'TIRDUIN_RPS.Damage.Type.acid',
   cold: 'TIRDUIN_RPS.Damage.Type.cold',
@@ -83,7 +104,7 @@ TIRDUIN_RPS.damageTypes = {
  * @type {Object<string, string[]>}
  */
 TIRDUIN_RPS.damageTypesByGroup = {
-  physical: ['slashingPiercing', 'bludgeoning'],
+  physical: ['slashingPiercing', 'slashing', 'piercing', 'bludgeoning'],
   elemental: ['acid', 'cold', 'fire', 'lightning'],
   uncategorized: ['sonic', 'psychic', 'necrotic', 'poison', 'aetherMagic'],
 };

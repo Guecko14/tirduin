@@ -137,7 +137,117 @@
                 </select>
             </div>
 
+            <div class="armor-field armor-field-resistance-add">
+                <label>&nbsp;</label>
+                <button type="button" class="armor-add-resistance"
+                    title="Añadir otra resistencia">
+                    +
+                </button>
+            </div>
+
         </div>
+
+        {{#if system.resistance2.enabled}}
+        <div class="armor-row armor-row-resistance armor-row-resistance-extra">
+            <div class="armor-field">
+                <label for="system.resistance2.value">R2 (valor)</label>
+                <input name="system.resistance2.value" type="number"
+                    value="{{system.resistance2.value}}" min="0" />
+            </div>
+
+            <div class="armor-field">
+                <label for="system.resistance2.damageType">R2 (tipo
+                    daño)</label>
+                <select name="system.resistance2.damageType">
+                    <option value>— Ninguno —</option>
+                    {{#each config.damageTypes as |label key|}}
+                    <option value="{{key}}"
+                        {{#if (eq ../system.resistance2.damageType
+                        key)}}selected{{/if}}>
+                        {{localize label}}
+                    </option>
+                    {{/each}}
+                </select>
+            </div>
+
+            <div class="armor-field armor-field-resistance-add">
+                <label>&nbsp;</label>
+                <button type="button" class="armor-remove-resistance"
+                    data-slot="2"
+                    title="Quitar resistencia R2">
+                    −
+                </button>
+            </div>
+        </div>
+        {{/if}}
+
+        {{#if system.resistance3.enabled}}
+        <div class="armor-row armor-row-resistance armor-row-resistance-extra">
+            <div class="armor-field">
+                <label for="system.resistance3.value">R3 (valor)</label>
+                <input name="system.resistance3.value" type="number"
+                    value="{{system.resistance3.value}}" min="0" />
+            </div>
+
+            <div class="armor-field">
+                <label for="system.resistance3.damageType">R3 (tipo
+                    daño)</label>
+                <select name="system.resistance3.damageType">
+                    <option value>— Ninguno —</option>
+                    {{#each config.damageTypes as |label key|}}
+                    <option value="{{key}}"
+                        {{#if (eq ../system.resistance3.damageType
+                        key)}}selected{{/if}}>
+                        {{localize label}}
+                    </option>
+                    {{/each}}
+                </select>
+            </div>
+
+            <div class="armor-field armor-field-resistance-add">
+                <label>&nbsp;</label>
+                <button type="button" class="armor-remove-resistance"
+                    data-slot="3"
+                    title="Quitar resistencia R3">
+                    −
+                </button>
+            </div>
+        </div>
+        {{/if}}
+
+        {{#if system.resistance4.enabled}}
+        <div class="armor-row armor-row-resistance armor-row-resistance-extra">
+            <div class="armor-field">
+                <label for="system.resistance4.value">R4 (valor)</label>
+                <input name="system.resistance4.value" type="number"
+                    value="{{system.resistance4.value}}" min="0" />
+            </div>
+
+            <div class="armor-field">
+                <label for="system.resistance4.damageType">R4 (tipo
+                    daño)</label>
+                <select name="system.resistance4.damageType">
+                    <option value>— Ninguno —</option>
+                    {{#each config.damageTypes as |label key|}}
+                    <option value="{{key}}"
+                        {{#if (eq ../system.resistance4.damageType
+                        key)}}selected{{/if}}>
+                        {{localize label}}
+                    </option>
+                    {{/each}}
+                </select>
+            </div>
+
+            <div class="armor-field armor-field-resistance-add">
+                <label>&nbsp;</label>
+                <button type="button" class="armor-remove-resistance"
+                    data-slot="4"
+                    title="Quitar resistencia R4">
+                    −
+                </button>
+            </div>
+        </div>
+        {{/if}}
         {{/unless}}
 
         {{!-- Fila de datos de equipamiento: Vigor, rota, sigilo y peso

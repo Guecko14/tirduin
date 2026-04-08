@@ -37,6 +37,10 @@ export class TirduinRPSItemSheet extends BaseItemSheet {
     if (this.item.type === 'feature' && this.item.system.category === 'special') {
       return `${path}/item-special-sheet.hbs`;
     }
+    // Las notas del personaje reutilizan la misma sheet simplificada.
+    if (this.item.type === 'feature' && this.item.system.category === 'note') {
+      return `${path}/item-special-sheet.hbs`;
+    }
     // Acciones mágicas del NPC: feature con editor específico.
     if (this.item.type === 'feature' && this.item.system.category === 'magicAction') {
       return `${path}/item-magic-action-sheet.hbs`;
@@ -99,6 +103,39 @@ export class TirduinRPSItemSheet extends BaseItemSheet {
 
     // Everything below here is only needed if the sheet is editable
     if (!this.isEditable) return;
+
+    // En armaduras, permite añadir hasta 3 resistencias extra (R2-R4).
+    html.on('click', '.armor-add-resistance', async (ev) => {
+      ev.preventDefault();
+      if (this.item.type !== 'armor') return;
+
+      const paths = [
+        'system.resistance2.enabled',
+        'system.resistance3.enabled',
+        'system.resistance4.enabled',
+      ];
+
+      const nextPath = paths.find((path) => !foundry.utils.getProperty(this.item, path));
+      if (!nextPath) return;
+
+      await this.item.update({ [nextPath]: true });
+    });
+
+    html.on('click', '.armor-remove-resistance', async (ev) => {
+      ev.preventDefault();
+      if (this.item.type !== 'armor') return;
+
+      const slot = Number(ev.currentTarget?.dataset?.slot) || 0;
+      if (![2, 3, 4].includes(slot)) return;
+
+      const update = {
+        [`system.resistance${slot}.enabled`]: false,
+        [`system.resistance${slot}.value`]: 0,
+        [`system.resistance${slot}.damageType`]: '',
+      };
+
+      await this.item.update(update);
+    });
 
     // Roll handlers, click handlers, etc. would go here.
 

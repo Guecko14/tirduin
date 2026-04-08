@@ -219,6 +219,27 @@ Hooks.once('init', function () {
     label: 'TIRDUIN_RPS.SheetLabels.Item',
   });
 
+  // Suprime el error benigno de Foundry v14 donde el marcador de fase AE
+  // (#prepareDataCycle, campo privado inaccesible) no se resetea entre el
+  // update optimista local y la confirmación del servidor, ambos disparando
+  // prepareData sobre el mismo objeto Actor en la misma macro-tarea.
+  if (typeof Hooks.onError === 'function') {
+    const _originalHooksOnError = Hooks.onError.bind(Hooks);
+    Hooks.onError = function tirduinOnError(location, err, options) {
+      if (
+        typeof err?.message === 'string' &&
+        err.message.includes('ActiveEffect application phase') &&
+        err.message.includes('already completed')
+      ) {
+        // Error conocido y benigno: Foundry v14 intenta aplicar una fase AE
+        // que ya se completó en el ciclo optimista previo. Los efectos se
+        // aplicaron correctamente en el primer ciclo; el actor funciona bien.
+        return;
+      }
+      return _originalHooksOnError(location, err, options);
+    };
+  }
+
   // Preload Handlebars templates.
   return preloadHandlebarsTemplates();
 });
@@ -304,6 +325,8 @@ Handlebars.registerHelper('isTrue', function (value) {
 Handlebars.registerHelper('damageTypeAbbr', function (damageType) {
   const labels = {
     slashingPiercing: 'C/P',
+    slashing: 'COR',
+    piercing: 'PER',
     bludgeoning: 'CON',
     acid: 'ACI',
     cold: 'FRI',
@@ -316,6 +339,30 @@ Handlebars.registerHelper('damageTypeAbbr', function (damageType) {
     aetherMagic: 'AET',
   };
   return labels[damageType] || '—';
+});
+
+Handlebars.registerHelper('armorResistanceSummary', function (armorSystem) {
+  const damageTypeAbbr = Handlebars.helpers?.damageTypeAbbr;
+  const parts = [];
+
+  const appendResistance = (resistance, enabled = true) => {
+    if (!enabled) return;
+    const value = Number(resistance?.value) || 0;
+    const damageType = String(resistance?.damageType || '').trim();
+    if (value <= 0 || !damageType) return;
+
+    const abbr = typeof damageTypeAbbr === 'function'
+      ? String(damageTypeAbbr(damageType))
+      : '—';
+    parts.push(`${value}${abbr}`);
+  };
+
+  appendResistance(armorSystem?.resistance, true);
+  appendResistance(armorSystem?.resistance2, Boolean(armorSystem?.resistance2?.enabled));
+  appendResistance(armorSystem?.resistance3, Boolean(armorSystem?.resistance3?.enabled));
+  appendResistance(armorSystem?.resistance4, Boolean(armorSystem?.resistance4?.enabled));
+
+  return parts.join(' ');
 });
 
 /* -------------------------------------------- */
@@ -425,7 +472,32 @@ Hooks.once('ready', function () {
     if (!actor || !['npc', 'character'].includes(actor.type)) return;
     const armorClass = calculateArmorClassFromEquippedArmors(actor);
     if (Number(actor.system?.attributes?.armorClass?.value) === armorClass) return;
-    await actor.update({ 'system.attributes.armorClass.value': armorClass });
+    await actor.update(
+      { 'system.attributes.armorClass.value': armorClass },
+      { tirduinSkipArmorSync: true }
+    );
+  };
+
+  const pendingArmorSyncs = new Map();
+  const scheduleArmorClassSync = (actor) => {
+    if (!actor?.id) return;
+
+    const existingTimeout = pendingArmorSyncs.get(actor.id);
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+    }
+
+    // Ejecuta fuera del ciclo actual para evitar updates anidados durante prepareData.
+    const timeoutId = setTimeout(async () => {
+      pendingArmorSyncs.delete(actor.id);
+      try {
+        await syncNpcArmorClass(actor);
+      } catch (_error) {
+        // Ignora errores de sincronización para no romper updates del actor.
+      }
+    }, 0);
+
+    pendingArmorSyncs.set(actor.id, timeoutId);
   };
 
   /* -------------------------------------------- */
@@ -709,20 +781,27 @@ Hooks.once('ready', function () {
     if (item.type !== 'armor') return;
 
     const actor = item.parent;
-    await syncNpcArmorClass(actor);
+    scheduleArmorClassSync(actor);
   });
 
   // Si cambia Agilidad del NPC, la CA se recalcula automaticamente.
-  Hooks.on('updateActor', async (actor, changedData) => {
+  Hooks.on('updateActor', async (actor, changedData, options) => {
     if (!actor || !['npc', 'character'].includes(actor.type)) return;
+    if (options?.tirduinSkipArmorSync) return;
 
-    const agilChanged = foundry.utils.hasProperty(changedData, 'system.abilities.agil.value');
+    // Compara con valor numérico para evitar falsos positivos por coerción de
+    // tipo string→number que el FormApplication de Foundry v1 introduce al
+    // enviar todos los campos del formulario con cada cambio.
+    const newAgilRaw = foundry.utils.getProperty(changedData, 'system.abilities.agil.value');
+    const agilChanged = newAgilRaw !== undefined
+      && Number(newAgilRaw) !== Number(actor._source?.system?.abilities?.agil?.value);
     if (agilChanged) {
-      await syncNpcArmorClass(actor);
+      scheduleArmorClassSync(actor);
     }
 
     const sizeChanged = foundry.utils.hasProperty(changedData, 'system.details.size');
     if (sizeChanged) {
+      // Igual que con CA: guard para no encadenar ciclos de preparación.
       await syncActorTokenSize(actor);
     }
   });

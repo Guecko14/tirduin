@@ -84,6 +84,25 @@ export default class TirduinRPSArmor extends TirduinRPSItemBase {
       damageType: new fields.StringField({ required: false, blank: true, initial: '' }),
     });
 
+    // Resistencias adicionales opcionales configurables desde la sheet.
+    schema.resistance2 = new fields.SchemaField({
+      enabled: new fields.BooleanField({ initial: false }),
+      value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+      damageType: new fields.StringField({ required: false, blank: true, initial: '' }),
+    });
+
+    schema.resistance3 = new fields.SchemaField({
+      enabled: new fields.BooleanField({ initial: false }),
+      value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+      damageType: new fields.StringField({ required: false, blank: true, initial: '' }),
+    });
+
+    schema.resistance4 = new fields.SchemaField({
+      enabled: new fields.BooleanField({ initial: false }),
+      value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+      damageType: new fields.StringField({ required: false, blank: true, initial: '' }),
+    });
+
     // V (Vigor): valor mínimo de Vigor necesario para poder equipar la armadura.
     schema.vigor = new fields.NumberField({
       ...requiredInteger,
@@ -116,11 +135,29 @@ export default class TirduinRPSArmor extends TirduinRPSItemBase {
     const currentRa = Math.max(0, Math.min(Number(this.raCurrent) || 0, maxRa));
     const maxAgility = Math.max(-5, Math.min(5, Number(this.maxAgility) || 0));
     const maxAgilityBroken = Math.max(-5, Math.min(5, Number(this.maxAgilityBroken) || 0));
+    const normalizeResistance = (resistance) => ({
+      ...resistance,
+      value: Math.max(0, Number(resistance?.value) || 0),
+      damageType: String(resistance?.damageType || ''),
+    });
 
     this.ra = maxRa;
     this.raCurrent = currentRa;
     this.maxAgility = maxAgility;
     this.maxAgilityBroken = maxAgilityBroken;
+    this.resistance = normalizeResistance(this.resistance);
+    this.resistance2 = {
+      ...normalizeResistance(this.resistance2),
+      enabled: Boolean(this.resistance2?.enabled),
+    };
+    this.resistance3 = {
+      ...normalizeResistance(this.resistance3),
+      enabled: Boolean(this.resistance3?.enabled),
+    };
+    this.resistance4 = {
+      ...normalizeResistance(this.resistance4),
+      enabled: Boolean(this.resistance4?.enabled),
+    };
 
     // Al alcanzar el maximo de RA, la armadura se marca automaticamente como rota.
     if (maxRa > 0 && currentRa >= maxRa) {

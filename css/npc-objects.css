@@ -289,8 +289,7 @@
 .npc-armor-col-ca-broken { flex: 0 0 50px; font-size: 0.7rem; color: #c0a07e; text-align: center; }
 .npc-armor-col-vd        { flex: 0 0 40px; font-size: 0.75rem; color: #9ad; text-align: center; }
 .npc-armor-col-ra        { flex: 0 0 56px; font-size: 0.75rem; color: #bbb; text-align: center; }
-.npc-armor-col-resistance { flex: 0 0 28px; font-size: 0.75rem; color: #bbb; text-align: center; }
-.npc-armor-col-damage-type { flex: 0 0 68px; font-size: 0.67rem; color: #bbb; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.npc-armor-col-resistance { flex: 0 0 98px; font-size: 0.69rem; color: #bbb; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .npc-armor-col-vigor     { flex: 0 0 28px; font-size: 0.75rem; color: #bbb; text-align: center; }
 .npc-armor-col-broken    { flex: 0 0 42px; font-size: 0.75rem; color: #c77; text-align: center; }
 .npc-armor-col-stealth   { flex: 0 0 44px; font-size: 0.75rem; color: #888; text-align: center; }
@@ -510,6 +509,55 @@
 .armor-field-vd input {
   text-align: center;
   padding: 4px 2px;
+}
+.armor-field-resistance-add {
+  flex: 0 0 34px;
+  min-width: 34px;
+  justify-content: flex-end;
+}
+
+.armor-add-resistance {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid rgba(154, 173, 221, 0.5);
+  background: #182333;
+  color: #d6e7ff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.armor-add-resistance:hover {
+  border-color: #9ad;
+  background: #223246;
+}
+
+.armor-remove-resistance {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid rgba(210, 110, 110, 0.55);
+  background: #321d1d;
+  color: #ffd3d3;
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.armor-remove-resistance:hover {
+  border-color: #e67a7a;
+  background: #452525;
+}
+
+.armor-row-resistance-extra {
+  margin-top: -2px;
+}
+
+.armor-row-resistance-extra .armor-field label {
+  color: #8fa5c7;
 }
 .armor-field label {
   font-size: 0.72rem;

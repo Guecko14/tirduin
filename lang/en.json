@@ -58,6 +58,8 @@
       },
       "Type": {
         "slashingPiercing": "Cortante/Perforante",
+        "slashing": "Cortante",
+        "piercing": "Perforante",
         "bludgeoning": "Contundente",
         "acid": "Ácido",
         "cold": "Frío",
@@ -177,7 +179,26 @@
         "Skills": "Habilidades",
         "Features": "Dotes",
         "Items": "Objetos",
-        "Spells": "Conjuros"
+        "Spells": "Conjuros",
+        "Notes": "Notas"
+      },
+      "Notes": {
+        "Title": "Notas",
+        "Add": "Nueva nota",
+        "Edit": "Editar nota",
+        "Delete": "Eliminar nota",
+        "Empty": "No hay notas todavía. Usa Nueva nota para añadir una."
+      },
+      "Spells": {
+        "PrimaryDomain": "Dominio principal",
+        "SecondaryDomain": "Dominio secundario",
+        "NoDomain": "Sin dominio",
+        "DomainBenefit": "Beneficio de dominio",
+        "Proficiency": "Competencia",
+        "AttackBonus": "Bonif. Atac. Conjuros",
+        "AttackExtra": "Extra Bonif. Atac.",
+        "SpellDC": "CD de Conjuros",
+        "DCExtra": "Extra CD"
       },
       "Features": {
         "Name": "Nombre",
@@ -256,6 +277,20 @@
             "Turns": "Turnos",
             "Minutes": "Minutos"
           }
+        },
+        "Domains": {
+          "conocimiento": "Conocimiento",
+          "piromancia": "Piromancia",
+          "naturaleza": "Naturaleza",
+          "tirador": "Tirador",
+          "espiritus": "Espíritus",
+          "sombra": "Sombra",
+          "valor": "Valor",
+          "filo": "Filo",
+          "arte": "Arte",
+          "guerra": "Guerra",
+          "oscuridad": "Oscuridad",
+          "muerte": "Muerte"
         }
       }
     },

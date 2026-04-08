@@ -327,6 +327,8 @@
           "TIRDUIN_RPS.CharacterSheet.Tabs.Items"}}</a>
         <a class="item" data-tab="spells">{{localize
           "TIRDUIN_RPS.CharacterSheet.Tabs.Spells"}}</a>
+        <a class="item" data-tab="notes">{{localize
+          "TIRDUIN_RPS.CharacterSheet.Tabs.Notes"}}</a>
       </nav>
 
       <div class="tabs-content">
@@ -346,6 +348,10 @@
 
         <div class="tab spells" data-group="primary" data-tab="spells">
           {{> "systems/tirduin/templates/actor/parts/actor-spells.hbs"}}
+        </div>
+
+        <div class="tab notes" data-group="primary" data-tab="notes">
+          {{> "systems/tirduin/templates/actor/parts/actor-notes.hbs"}}
         </div>
       </div>
     </div>
