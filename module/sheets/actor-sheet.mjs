@@ -1123,6 +1123,13 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     const damageDie2 = String(weapon.system?.damageDie2 || '').trim();
     const damageTypeKey = String(weapon.system?.damageType || '').trim();
     const damageTypeKey2 = String(weapon.system?.damageType2 || '').trim();
+    const isRangedWeapon = String(weapon.system?.subcategory || '') === 'distancia';
+    const currentProjectiles = Math.max(0, Number(weapon.system?.projectiles) || 0);
+
+    if (isRangedWeapon && currentProjectiles <= 0) {
+      ui.notifications?.warn(game.i18n.format('TIRDUIN_RPS.Roll.Warning.WeaponNoProjectiles', { item: weapon.name }));
+      return null;
+    }
 
     const proficiency = Number(weapon.system?.proficiency) || 0;
     const actorRollData = this.actor.getRollData();
@@ -1227,6 +1234,11 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
         targetAC,
       }),
     }));
+
+    if (isRangedWeapon) {
+      const nextProjectiles = Math.max(0, currentProjectiles - 1);
+      await weapon.update({ 'system.projectiles': nextProjectiles });
+    }
 
     return { attackRoll, damageRoll, damageRoll2, damageRollExtraEntries };
   }

@@ -48,19 +48,6 @@ export default class TirduinRPSWeapon extends TirduinRPSItemBase {
       required: true,
       blank: false,
       initial: 'slashingPiercing',
-      choices: [
-        'slashingPiercing',
-        'bludgeoning',
-        'acid',
-        'cold',
-        'fire',
-        'lightning',
-        'sonic',
-        'psychic',
-        'necrotic',
-        'poison',
-        'aetherMagic',
-      ],
     });
 
     // Segundo dado de daño opcional para armas con doble componente.
@@ -75,20 +62,6 @@ export default class TirduinRPSWeapon extends TirduinRPSItemBase {
       required: false,
       blank: true,
       initial: '',
-      choices: [
-        '',
-        'slashingPiercing',
-        'bludgeoning',
-        'acid',
-        'cold',
-        'fire',
-        'lightning',
-        'sonic',
-        'psychic',
-        'necrotic',
-        'poison',
-        'aetherMagic',
-      ],
     });
 
     // Alcance del arma en formato libre (ej. "5 ft", "Toque", "20/60").
@@ -96,6 +69,15 @@ export default class TirduinRPSWeapon extends TirduinRPSItemBase {
       required: true,
       blank: false,
       initial: '5 ft',
+    });
+
+    // Munición/proyectiles restantes para armas a distancia.
+    schema.projectiles = new fields.NumberField({
+      required: true,
+      nullable: false,
+      integer: true,
+      initial: 0,
+      min: 0,
     });
 
     // Garras necesarias para empuñar el arma: "1" (una mano) o "2" (dos manos).

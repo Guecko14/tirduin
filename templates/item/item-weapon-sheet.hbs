@@ -96,6 +96,15 @@
                     placeholder="5 ft / Toque / 20/60" />
             </div>
 
+            {{#if (eq system.subcategory 'distancia')}}
+            <div class="weapon-field">
+                <label for="system.projectiles">Proyectiles</label>
+                <input name="system.projectiles" type="number"
+                    value="{{system.projectiles}}" min="0" step="1"
+                    data-dtype="Number" />
+            </div>
+            {{/if}}
+
             <div class="weapon-field">
                 <label for="system.grip">Grip</label>
                 <select name="system.grip">

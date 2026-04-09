@@ -142,26 +142,30 @@ export function getRollEdgeFlavorSuffix(edgeMode = ROLL_EDGE_MODE.NONE) {
 /**
  * Apply Foundry chat roll visibility rules to a manually created chat message.
  * @param {object} chatData
- * @param {string} rollMode
+ * @param {string|null} mode
  * @returns {object}
  */
-export function applyChatRollMode(chatData, rollMode = game.settings.get('core', 'rollMode')) {
-  const messageData = {
-    ...chatData,
-    rollMode,
-  };
-
-  if (typeof ChatMessage?.applyRollMode === 'function') {
-    ChatMessage.applyRollMode(messageData, rollMode);
-    return messageData;
+export function applyChatRollMode(chatData, mode = null) {
+  let resolvedMode = mode;
+  if (!resolvedMode) {
+    try {
+      // Foundry v14+ setting name.
+      resolvedMode = game.settings.get('core', 'messageMode');
+    } catch (_error) {
+      resolvedMode = 'public';
+    }
   }
 
-  if (rollMode === 'gmroll') {
-    messageData.whisper = ChatMessage.getWhisperRecipients('GM').map((user) => user.id);
-  } else if (rollMode === 'blindroll') {
-    messageData.whisper = ChatMessage.getWhisperRecipients('GM').map((user) => user.id);
+  const normalizedMode = String(resolvedMode || 'public').toLowerCase();
+  const messageData = { ...chatData };
+  const gmRecipients = ChatMessage.getWhisperRecipients('GM').map((user) => user.id);
+
+  if (['gmroll', 'private', 'gm', 'whisper'].includes(normalizedMode)) {
+    messageData.whisper = gmRecipients;
+  } else if (['blindroll', 'blind'].includes(normalizedMode)) {
+    messageData.whisper = gmRecipients;
     messageData.blind = true;
-  } else if (rollMode === 'selfroll') {
+  } else if (['selfroll', 'self'].includes(normalizedMode)) {
     messageData.whisper = [game.user.id];
   }
 

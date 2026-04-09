@@ -26,8 +26,12 @@ const clampFearCounterValue = (value) => {
 };
 
 const getFearCounterValue = () => {
-  const stored = game.settings.get('tirduin', 'fearCounterValue');
-  return clampFearCounterValue(stored);
+  try {
+    const stored = game.settings.get('tirduin', 'fearCounterValue');
+    return clampFearCounterValue(stored);
+  } catch (_error) {
+    return 0;
+  }
 };
 
 const buildFearCounterPipsHtml = (value) => {
@@ -86,8 +90,12 @@ const refreshFearCounterDialog = () => {
 
 const setFearCounterValue = async (value) => {
   const clamped = clampFearCounterValue(value);
-  if (clamped === getFearCounterValue()) return;
-  await game.settings.set('tirduin', 'fearCounterValue', clamped);
+  try {
+    if (clamped === getFearCounterValue()) return;
+    await game.settings.set('tirduin', 'fearCounterValue', clamped);
+  } catch (_error) {
+    // Ignore when setting is unavailable during startup failures.
+  }
 };
 
 const renderFearCounterDialog = () => {
@@ -136,6 +144,20 @@ const renderFearCounterDialog = () => {
 /* -------------------------------------------- */
 
 Hooks.once('init', function () {
+  // Foundry exposes a compatibility warning mode; set it to SILENT so
+  // deprecation warnings from V1 Application APIs do not spam the console.
+  try {
+    const compatibilityMode = CONST?.COMPATIBILITY_MODES?.SILENT;
+    if (compatibilityMode !== undefined) {
+      if (CONFIG?.compatibility) CONFIG.compatibility.mode = compatibilityMode;
+      if (Object.prototype.hasOwnProperty.call(CONFIG || {}, 'compatibilityMode')) {
+        CONFIG.compatibilityMode = compatibilityMode;
+      }
+    }
+  } catch (_error) {
+    // Ignore if compatibility mode API differs across core versions.
+  }
+
   // Add utility classes to the global game object so that they're more easily
   // accessible in global contexts.
   game.tirduin = {
@@ -226,16 +248,24 @@ Hooks.once('init', function () {
   if (typeof Hooks.onError === 'function') {
     const _originalHooksOnError = Hooks.onError.bind(Hooks);
     Hooks.onError = function tirduinOnError(location, err, options) {
+      const message = String(err?.message || '');
       if (
-        typeof err?.message === 'string' &&
-        err.message.includes('ActiveEffect application phase') &&
-        err.message.includes('already completed')
+        message.includes('ActiveEffect application phase') &&
+        message.includes('already completed')
       ) {
         // Error conocido y benigno: Foundry v14 intenta aplicar una fase AE
         // que ya se completó en el ciclo optimista previo. Los efectos se
         // aplicaron correctamente en el primer ciclo; el actor funciona bien.
         return;
       }
+
+      if (message.includes("Cannot set properties of undefined (setting 'initial')")) {
+        // Error observado en actores sintéticos al aplicar Active Effects en
+        // v14 durante inicialización de escena. Se maneja de forma defensiva
+        // en la subclase de Actor para evitar cortar el ciclo de preparación.
+        return;
+      }
+
       return _originalHooksOnError(location, err, options);
     };
   }
