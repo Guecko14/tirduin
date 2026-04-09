@@ -383,16 +383,16 @@
         "Miss": "FALLA",
         "Critical": "CRITICO",
         "FumbleUpper": "PIFIA",
-        "CriticalDice": "CRITICO: dados x2"
+        "CriticalDice": "CRITICO"
       },
       "Metric": {
         "Bonus": "Bonificador: {value}",
         "Total": "Total: {value}"
       },
       "Label": {
-        "Damage": "Danio",
-        "Damage2": "Danio 2",
-        "ExtraDamage": "Danio extra {index}",
+        "Damage": "Daño",
+        "Damage2": "Daño 2",
+        "ExtraDamage": "Daño extra {index}",
         "AttackSuffix": "Ataque",
         "Initiative": "Iniciativa",
         "DeathRoll": "Tirada de Muerte"
@@ -401,6 +401,7 @@
         "NoItemFormula": "{item} no tiene formula para tirar.",
         "ArmorBroken": "{item} esta rota y no puede tirar VD.",
         "WeaponNoDamageDie": "{item} no tiene dado de daño configurado.",
+        "WeaponNoProjectiles": "{item} no tiene proyectiles disponibles.",
         "InvalidExtraDamageFormula": "La fórmula de daño adicional no es válida: {formula}"
       }
     }
