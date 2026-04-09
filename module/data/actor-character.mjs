@@ -267,6 +267,27 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
       dcPenalty: Number(this.attributes?.fatigue?.dcPenalty) || 0,
     };
 
+    const spellcastingClassAbility = {
+      combatiente: 'inst',
+      especialista: 'pre',
+      canalizador: 'ment'
+    };
+    const className = this.details?.className || 'combatiente';
+    const abilityKey = spellcastingClassAbility[className] || 'inst';
+    const spellAbilityValue = (Number(this.abilities?.[abilityKey]?.value) || 0) + fatigueRollPenalty;
+    const spellProficiency = Math.max(0, Math.min(5, Number(this.spellcasting?.proficiency) || 0));
+    const spellAttackExtra = Number(this.spellcasting?.attackExtra) || 0;
+    const spellDcExtra = Number(this.spellcasting?.dcExtra) || 0;
+
+    data.spellcasting = {
+      attackBonus: spellAbilityValue + spellProficiency + spellAttackExtra,
+      dc: 10 + spellAbilityValue + spellProficiency + spellDcExtra,
+      ability: abilityKey,
+      proficiency: spellProficiency,
+      attackExtra: spellAttackExtra,
+      dcExtra: spellDcExtra,
+    };
+
     return data
   }
 }
