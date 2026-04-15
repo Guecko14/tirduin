@@ -660,12 +660,32 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     const source = String(formula || '').trim();
     if (!source) return '';
 
-    // Show readable ability names instead of raw @paths.
-    return source.replace(/@abilities\.([a-zA-Z0-9_]+)\.value/g, (_m, abilityKey) => {
+    const abilityLabel = (abilityKey) => {
       const key = String(abilityKey || '').toLowerCase();
       const i18nKey = CONFIG.TIRDUIN_RPS?.abilities?.[key];
-      return i18nKey ? game.i18n.localize(i18nKey) : `@abilities.${key}.value`;
-    });
+      return i18nKey ? game.i18n.localize(i18nKey) : `@abilities.${key}`;
+    };
+
+    const spellcastingClassAbility = {
+      combatiente: 'inst',
+      especialista: 'pre',
+      canalizador: 'ment'
+    };
+    const className = this.actor?.system?.details?.className || 'combatiente';
+    const spellAbilityLabel = abilityLabel(spellcastingClassAbility[className] || 'inst');
+
+    const spellcastingLabels = {
+      spellAbilityValue: spellAbilityLabel,
+      attackBonus: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Spells.AttackBonus'),
+      dc: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Spells.SpellDC'),
+      proficiency: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Spells.Proficiency'),
+      attackExtra: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Spells.AttackExtra'),
+      dcExtra: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Spells.DCExtra'),
+    };
+
+    return source
+      .replace(/@abilities\.([a-zA-Z0-9_]+)\.(?:value|mod)/g, (_m, abilityKey) => abilityLabel(abilityKey))
+      .replace(/@spellcasting\.([a-zA-Z0-9_]+)/g, (_m, key) => spellcastingLabels[key] || `@spellcasting.${key}`);
   }
 
   _resolveInlineDamageLabel(damageKey = '') {
