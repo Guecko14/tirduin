@@ -118,6 +118,7 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
       proficiency: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0, max: 5 }),
       attackExtra: new fields.NumberField({ ...requiredInteger, initial: 0 }),
       dcExtra: new fields.NumberField({ ...requiredInteger, initial: 0 }),
+      spellAbilityValue: new fields.NumberField({ ...requiredInteger, initial: 0 }),
       attackBonus: new fields.NumberField({ ...requiredInteger, initial: 0 })
     });
 
@@ -206,6 +207,17 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
     this.luck.value = Math.max(0, Math.min(3, Number(this.luck?.value) || 0));
     this.luck.max = 3;
 
+    const spellcastingClassAbility = {
+      combatiente: 'inst',
+      especialista: 'pre',
+      canalizador: 'ment'
+    };
+    const className = this.details?.className || 'combatiente';
+    const abilityKey = spellcastingClassAbility[className] || 'inst';
+    const spellAbilityValue = (Number(this.abilities?.[abilityKey]?.value) || 0) + this.attributes.fatigue.rollPenalty;
+    this.spellcasting.spellAbilityValue = spellAbilityValue;
+    this.spellcasting.spellAbilityLabel = game.i18n.localize(CONFIG.TIRDUIN_RPS.abilities[abilityKey]) || abilityKey;
+
     // Character speed is derived from agility using the system progression table.
     const speedByAgility = {
       1: 25,
@@ -278,6 +290,10 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
     const spellProficiency = Math.max(0, Math.min(5, Number(this.spellcasting?.proficiency) || 0));
     const spellAttackExtra = Number(this.spellcasting?.attackExtra) || 0;
     const spellDcExtra = Number(this.spellcasting?.dcExtra) || 0;
+    const spellAbilityLabel = game.i18n.localize(CONFIG.TIRDUIN_RPS.abilities[abilityKey]) || abilityKey;
+
+    this.spellcasting.spellAbilityValue = spellAbilityValue;
+    this.spellcasting.spellAbilityLabel = spellAbilityLabel;
 
     data.spellcasting = {
       attackBonus: spellAbilityValue + spellProficiency + spellAttackExtra,
@@ -286,6 +302,8 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
       proficiency: spellProficiency,
       attackExtra: spellAttackExtra,
       dcExtra: spellDcExtra,
+      spellAbilityValue,
+      spellAbilityLabel,
     };
 
     return data
