@@ -345,7 +345,10 @@
 /* ================================================================
    GM FEAR COUNTER DIALOG
 ================================================================ */
-
+.app.window-app.dialog.themed.theme-light{
+  resize: both;
+  overflow: auto;
+}
 
 .window-app.tirduin-fear-counter-dialog,
 .application.tirduin-fear-counter-dialog {

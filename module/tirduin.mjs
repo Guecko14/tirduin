@@ -16,7 +16,7 @@ import {
 // Import DataModel classes
 import * as models from './data/_module.mjs';
 
-const FEAR_COUNTER_MAX = 13;
+const FEAR_COUNTER_MAX = 12;
 let fearCounterDialog = null;
 
 const clampFearCounterValue = (value) => {
