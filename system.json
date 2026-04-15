@@ -1,72 +1,73 @@
 {
-  "id": "tirduin",
-  "title": "TirduinRPS",
-  "description": "The TirduinRPS system for FoundryVTT!",
-  "authors": [
-    {
-      "name": "Guecko Feliz",
-      "discord": "Guecko"
-    }
-  ],
-  "url": "https://github.com/Guecko14/tirduin.git",
-  "license": "LICENSE.txt",
-  "readme": "README.md",
-  "bugs": "https://github.com/Guecko14/tirduin/issues",
-  "changelog": "CHANGELOG.md",
-  "media": [
-    {
-      "type": "setup",
-      "url": "systems/tirduin/assets/anvil-impact.png",
-      "thumbnail": "systems/tirduin/assets/anvil-impact.png"
-    }
-  ],
-  "version": "0.2.7",
-  "compatibility": {
-    "minimum": 14,
-    "verified": "14.359"
-  },
-  "esmodules": ["module/tirduin.mjs"],
-  "styles": [
-    "css/utils.css",
-    "css/base.css",
-    "css/tabs.css",
-    "css/npc-sheet.css",
-    "css/character-sheet.css",
-    "css/loot-sheet.css",
-    "css/item-fear.css",
-    "css/item-special.css",
-    "css/npc-objects.css",
-    "css/roll-dialog.css"
-  ],
-  "languages": [
-    {
-      "lang": "en",
-      "name": "English",
-      "path": "lang/en.json"
-    }
-  ],
-  "packs": [],
-  "packFolders": [],
-  "documentTypes": {
-    "Actor": {
-      "character": {},
-      "npc": {}
-    },
-    "Item": {
-      "item": {},
-      "feature": {},
-      "spell": {},
-      "fear": {},
-      "weapon": {},
-      "armor": {}
-    }
-  },
-  "socket": false,
-  "manifest": "https://raw.githubusercontent.com/Guecko14/tirduin/refs/heads/main/system.json",
-  "download": "https://github.com/Guecko14/Tirduin/archive/refs/heads/main.zip",
-  "background": "systems/tirduin/assets/anvil-impact.png",
-  "gridDistance": 5,
-  "gridUnits": "ft",
-  "primaryTokenAttribute": "health",
-  "secondaryTokenAttribute": "power"
+"id": "tirduin",
+"title": "TirduinRPS",
+"description": "The TirduinRPS system for FoundryVTT!",
+"authors": [
+{
+"name": "Guecko Feliz",
+"discord": "Guecko"
+}
+],
+"url": "https://github.com/Guecko14/tirduin.git",
+"license": "LICENSE.txt",
+"readme": "README.md",
+"bugs": "https://github.com/Guecko14/tirduin/issues",
+"changelog": "CHANGELOG.md",
+"media": [
+{
+"type": "setup",
+"url": "systems/tirduin/assets/anvil-impact.png",
+"thumbnail": "systems/tirduin/assets/anvil-impact.png"
+}
+],
+"version": "0.2.8",
+"compatibility": {
+"minimum": 14,
+"verified": "14.359"
+},
+"esmodules": ["module/tirduin.mjs"],
+"styles": [
+"css/utils.css",
+"css/base.css",
+"css/tabs.css",
+"css/npc-sheet.css",
+"css/character-sheet.css",
+"css/loot-sheet.css",
+"css/item-fear.css",
+"css/item-special.css",
+"css/npc-objects.css",
+"css/roll-dialog.css"
+],
+"languages": [
+{
+"lang": "en",
+"name": "English",
+"path": "lang/en.json"
+}
+],
+"packs": [],
+"packFolders": [],
+"documentTypes": {
+"Actor": {
+"character": {},
+"npc": {}
+},
+"Item": {
+"item": {},
+"feature": {},
+"spell": {},
+"fear": {},
+"weapon": {},
+"armor": {}
+}
+},
+"socket": false,
+"manifest":
+"https://raw.githubusercontent.com/Guecko14/tirduin/refs/heads/main/system.json",
+"download": "https://github.com/Guecko14/Tirduin/archive/refs/heads/main.zip",
+"background": "systems/tirduin/assets/anvil-impact.png",
+"gridDistance": 5,
+"gridUnits": "ft",
+"primaryTokenAttribute": "health",
+"secondaryTokenAttribute": "attributes.armorClass.value"
 }

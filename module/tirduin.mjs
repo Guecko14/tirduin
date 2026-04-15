@@ -707,7 +707,9 @@ Hooks.once('ready', function () {
 
   // Players can open loot from tokens, but loot actors stay hidden in Actor Directory.
   const hideLootActorsFromDirectory = (html) => {
-    const entries = html.find('.directory-item.document.actor, .directory-item.actor, li.directory-item');
+    // Ensure html is jQuery-wrapped for v14+ compatibility
+    const jqueryHtml = html instanceof jQuery ? html : $(html);
+    const entries = jqueryHtml.find('.directory-item.document.actor, .directory-item.actor, li.directory-item');
     for (const element of entries) {
       const actorId = element?.dataset?.documentId
         || element?.dataset?.entryId
@@ -893,6 +895,17 @@ Hooks.once('ready', function () {
         return;
       }
 
+      let messageMode = 'public';
+      try {
+        messageMode = game.settings.get('core', 'messageMode') || 'public';
+      } catch (_error) {
+        try {
+          messageMode = game.settings.get('core', 'rollMode') || 'public';
+        } catch (_err2) {
+          messageMode = 'public';
+        }
+      }
+
       await roll.toMessage({
         speaker: ChatMessage.getSpeaker(actor ? { actor } : {}),
         flavor: rollDamage
@@ -902,7 +915,7 @@ Hooks.once('ready', function () {
             })
           : game.i18n.format('TIRDUIN_RPS.Chat.InlineRollFlavor', { formula: rollLabel }),
       }, {
-        rollMode: game.settings.get('core', 'rollMode'),
+        rollMode: messageMode,
       });
   };
 
