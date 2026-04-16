@@ -14,7 +14,9 @@
     {{#if specialActions.length}}
     <ul class="special-list">
         {{#each specialActions as |action|}}
-        <li class="special-item" data-item-id="{{action._id}}">
+        <li
+            class="special-item {{#if action.flags.tirduin.collapsed}}collapsed-item{{/if}}"
+            data-item-id="{{action._id}}">
 
             {{!-- Fila principal: nombre y controles de edicion/borrado --}}
             <div class="special-item-main">

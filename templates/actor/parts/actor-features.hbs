@@ -12,7 +12,9 @@
   {{#if features.length}}
   <ol class="character-features-list">
     {{#each features as |item|}}
-    <li class="character-feature-item" data-item-id="{{item._id}}">
+    <li
+      class="character-feature-item {{#if item.flags.tirduin.collapsed}}collapsed-item{{/if}}"
+      data-item-id="{{item._id}}">
       <div class="character-feature-main item-edit"
         title="{{localize 'TIRDUIN_RPS.CharacterSheet.Features.Edit'}}">
         <div class="character-feature-title-row">
@@ -22,7 +24,7 @@
         </div>
 
         <div class="character-feature-meta-row">
-          <span class="character-feature-chip">
+          <span class="character-feature-chip character-feature-origin">
             {{localize "TIRDUIN_RPS.CharacterSheet.Features.Origin"}}:
             {{#if (eq item.system.origin "race")}}
             {{localize "TIRDUIN_RPS.CharacterSheet.Features.Origins.Race"}}
@@ -33,8 +35,7 @@
             {{localize "TIRDUIN_RPS.CharacterSheet.Features.Origins.Class"}}
             {{/if}}
           </span>
-          <span class="character-feature-chip">
-            {{localize "TIRDUIN_RPS.CharacterSheet.Features.Level"}}:
+          <span class="character-feature-chip character-feature-level">
             {{item.system.level}}
           </span>
         </div>

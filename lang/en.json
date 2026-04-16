@@ -240,8 +240,10 @@
         },
         "Fields": {
           "Name": "Nombre",
-          "Domain": "Dominio",
-          "Domain.None": "Sin dominio",
+          "Domain": {
+            "Label": "Dominio",
+            "None": "Sin dominio"
+          },
           "Type": "Tipo",
           "Level": "Nivel",
           "Action": "Accion",

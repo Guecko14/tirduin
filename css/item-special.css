@@ -70,6 +70,21 @@
   gap: 8px;
 }
 
+.tirduin .special-item.collapsed-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tirduin .special-item.collapsed-item .special-item-main {
+  min-width: 0;
+}
+
+.tirduin .special-item.collapsed-item .special-name,
+.tirduin .special-item.collapsed-item .special-controls {
+  min-width: 0;
+}
+
 .tirduin .special-name {
   flex: 1 1 0;
   font-size: 0.9rem;
@@ -94,6 +109,14 @@
 }
 .tirduin .special-controls .special-edit:hover   { color: #9ad; }
 .tirduin .special-controls .special-delete:hover { color: #e66; }
+
+.tirduin .special-name {
+  cursor: pointer;
+}
+
+.tirduin .special-item.collapsed-item .special-desc {
+  display: none;
+}
 
 .tirduin .special-desc {
   margin-top: 5px;

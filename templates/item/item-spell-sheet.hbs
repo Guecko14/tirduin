@@ -16,7 +16,7 @@
       </div>
       <div class="special-field special-field-domain">
         <label for="system.spellDomain">{{localize
-          "TIRDUIN_RPS.Item.Spell.Fields.Domain"}}</label>
+          "TIRDUIN_RPS.Item.Spell.Fields.Domain.Label"}}</label>
         <select name="system.spellDomain">
           <option value>{{localize
             "TIRDUIN_RPS.Item.Spell.Fields.Domain.None"}}</option>
@@ -145,10 +145,13 @@
               "concentration")}}selected{{/if}}>{{localize
               "TIRDUIN_RPS.Item.Spell.Options.Duration.Concentration"}}</option>
           </select>
+          {{#if (or (eq system.durationType "turns") (eq system.durationType
+          "minutes"))}}
           <input class="spell-duration-value" name="system.durationValue"
             type="number"
             value="{{system.durationValue}}"
             min="0" data-dtype="Number" />
+          {{/if}}
         </div>
       </div>
     </div>

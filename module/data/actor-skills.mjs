@@ -32,5 +32,6 @@ export function prepareSkills(skills = {}, actorType = 'npc') {
         bonus,
         total: rank + bonus
       };
-    });
+    })
+    .sort((a, b) => String(a.label).localeCompare(String(b.label), undefined, { sensitivity: 'base' }));
 }
