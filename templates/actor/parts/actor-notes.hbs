@@ -13,7 +13,9 @@
     {{#if notesActions.length}}
     <ul class="special-list">
         {{#each notesActions as |note|}}
-        <li class="special-item" data-item-id="{{note._id}}">
+        <li
+            class="special-item {{#if note.flags.tirduin.collapsed}}collapsed-item{{/if}}"
+            data-item-id="{{note._id}}">
 
             <div class="special-item-main">
                 <span class="special-name">{{note.name}}</span>

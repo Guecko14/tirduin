@@ -113,6 +113,28 @@
 .tirduin .fear-controls .fear-edit:hover   { color: #9ad; }
 .tirduin .fear-controls .fear-delete:hover { color: #e66; }
 
+.tirduin .fear-name {
+  cursor: pointer;
+}
+
+.tirduin .fear-item.collapsed-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tirduin .fear-item.collapsed-item .fear-name {
+  min-width: 0;
+}
+
+.tirduin .fear-item.collapsed-item .fear-cost-badge {
+  flex-shrink: 0;
+}
+
+.tirduin .fear-item.collapsed-item .fear-desc {
+  display: none;
+}
+
 .tirduin .fear-desc {
   margin-top: 5px;
   font-size: 0.76rem;

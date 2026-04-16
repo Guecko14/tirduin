@@ -718,6 +718,52 @@
   -webkit-box-orient: vertical;
 }
 
+.tirduin .character .character-feature-title-row {
+  cursor: pointer;
+}
+
+.tirduin .character .character-feature-item.collapsed-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: center;
+}
+
+.tirduin .character .character-feature-item.collapsed-item .character-feature-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.tirduin .character .character-feature-item.collapsed-item .character-feature-title-row,
+.tirduin .character .character-feature-item.collapsed-item .character-feature-meta-row {
+  min-width: 0;
+}
+
+.tirduin .character .character-feature-item.collapsed-item .character-feature-meta-row {
+  margin: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.tirduin .character .character-feature-item.collapsed-item .character-feature-meta-row .character-feature-chip {
+  opacity: 1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.tirduin .character .character-feature-item.collapsed-item .character-feature-meta-row .character-feature-chip:not(.character-feature-origin):not(.character-feature-level) {
+  display: none;
+}
+
+.tirduin .character .character-feature-item.collapsed-item .character-feature-description {
+  display: none;
+}
+
 .tirduin .character .character-feature-controls {
   display: flex;
   align-items: flex-start;
@@ -915,6 +961,52 @@
   font-weight: 700;
 }
 
+.tirduin .character .character-spell-title-row {
+  cursor: pointer;
+}
+
+.tirduin .character .character-spell-item.collapsed-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: center;
+}
+
+.tirduin .character .character-spell-item.collapsed-item .character-spell-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.tirduin .character .character-spell-item.collapsed-item .character-spell-title-row,
+.tirduin .character .character-spell-item.collapsed-item .character-spell-meta-row {
+  min-width: 0;
+}
+
+.tirduin .character .character-spell-item.collapsed-item .character-spell-meta-row {
+  margin: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.tirduin .character .character-spell-item.collapsed-item .character-spell-meta-row .character-feature-chip {
+  opacity: 1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.tirduin .character .character-spell-item.collapsed-item .character-spell-meta-row .character-feature-chip:not(.character-spell-action):not(.character-spell-cost) {
+  display: none;
+}
+
+.tirduin .character .character-spell-item.collapsed-item .character-feature-description {
+  display: none;
+}
+
 .tirduin .character .character-spell-meta-row {
   margin-top: 6px;
   display: flex;
@@ -961,6 +1053,15 @@
 .tirduin .character .items-list .items-header .item-name {
   padding-left: 5px;
   text-align: left;
+}
+
+.tirduin .character .item-quantity {
+  flex: 0 0 75px;
+  padding: 0 8px;
+  text-align: center;
+  border-left: 1px solid #c9c7b8;
+  border-right: 1px solid #c9c7b8;
+  font-size: 12px;
 }
 
 .tirduin .character .item-formula {

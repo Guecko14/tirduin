@@ -113,7 +113,9 @@
     {{#if spells.length}}
     <ol class="character-spells-list">
       {{#each spells as |item|}}
-      <li class="character-spell-item" data-item-id="{{item._id}}">
+      <li
+        class="character-spell-item {{#if item.flags.tirduin.collapsed}}collapsed-item{{/if}}"
+        data-item-id="{{item._id}}">
         <div class="character-spell-main item-edit"
           title="{{localize 'TIRDUIN_RPS.Item.Spell.Edit'}}">
           <div class="character-spell-title-row">
@@ -131,7 +133,7 @@
               {{localize "TIRDUIN_RPS.Item.Spell.Options.Type.Conj"}}
               {{/if}}
             </span>
-            <span class="character-feature-chip">
+            <span class="character-feature-chip character-spell-action">
               {{localize "TIRDUIN_RPS.Item.Spell.Fields.Action"}}:
               {{#if (eq item.system.actionCost "2")}}
               {{localize "TIRDUIN_RPS.Item.Spell.Options.Action.Two"}}
@@ -141,7 +143,7 @@
               {{localize "TIRDUIN_RPS.Item.Spell.Options.Action.One"}}
               {{/if}}
             </span>
-            <span class="character-feature-chip">
+            <span class="character-feature-chip character-spell-cost">
               {{localize "TIRDUIN_RPS.Item.Spell.Fields.Cost"}}:
               {{item.system.costValue}}
             </span>
@@ -161,6 +163,9 @@
               {{else if (eq item.system.durationType "minutes")}}
               {{item.system.durationValue}} {{localize
               "TIRDUIN_RPS.Item.Spell.Options.Duration.Minutes"}}
+              {{else if (eq item.system.durationType "concentration")}}
+              {{localize
+              "TIRDUIN_RPS.Item.Spell.Options.Duration.Concentration"}}
               {{else}}
               {{item.system.durationValue}} {{localize
               "TIRDUIN_RPS.Item.Spell.Options.Duration.Turns"}}

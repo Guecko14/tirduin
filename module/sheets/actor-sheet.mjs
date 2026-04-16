@@ -200,7 +200,8 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
           bonus,
           total: abilityVal + rank + bonus + fatigueRollPenalty
         };
-    });
+    })
+    .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }));
 
     if (this.actor.type === 'character') {
       const spellcastingClassAbility = {
@@ -343,7 +344,8 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
         gear.push(i);
         // Los NPCs usan los items genéricos también en la sección de objetos.
         npcGenericObjects.push(i);
-        currentSlots += Number(i.system?.weight) || 0;
+        const quantity = Number(i.system?.quantity) || 1;
+        currentSlots += (Number(i.system?.weight) || 0) * quantity;
       }
       // Las acciones de miedo pueden existir como feature(category=fear) o como item type=fear.
       else if ((i.type === 'feature' && i.system.category === 'fear') || i.type === 'fear') {
@@ -368,12 +370,14 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       // Armas del NPC: van al listado de armas del tab de objetos.
       else if (i.type === 'weapon') {
         npcWeapons.push(i);
-        currentSlots += Number(i.system?.weight) || 0;
+        const quantity = Number(i.system?.quantity) || 1;
+        currentSlots += (Number(i.system?.weight) || 0) * quantity;
       }
       // Armaduras del NPC: van al listado de armaduras del tab de objetos.
       else if (i.type === 'armor') {
         npcArmors.push(i);
-        currentSlots += Number(i.system?.weight) || 0;
+        const quantity = Number(i.system?.quantity) || 1;
+        currentSlots += (Number(i.system?.weight) || 0) * quantity;
       }
       // Conjuros agrupados por nivel para el partial de spells.
       else if (i.type === 'spell') {
@@ -461,6 +465,20 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       const item = this.actor.items.get(row.data('itemId'));
       if (!item) return;
       item.sheet.render(true);
+    });
+
+    // Toggle collapsed view for compact rows in selected item lists.
+    html.on('click', '.fear-name, .special-name, .character-feature-title-row, .character-spell-title-row', async (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+
+      const row = $(ev.currentTarget).closest('[data-item-id]');
+      const item = this.actor.items.get(row.data('itemId'));
+      if (!item) return;
+
+      const collapsed = !row.hasClass('collapsed-item');
+      row.toggleClass('collapsed-item', collapsed);
+      await item.setFlag('tirduin', 'collapsed', collapsed);
     });
 
     // Publica en chat un resumen estructurado de dotes y conjuros.
@@ -622,6 +640,10 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     // El tipo ya viaja en itemData.type; se elimina del system inicial.
     delete itemData.system['type'];
 
+    // Make sure new items are created at the end of the actor's item order.
+    const maxSort = this.actor.items.reduce((max, item) => Math.max(max, Number(item.sort) || 0), 0);
+    itemData.sort = maxSort + 1;
+
     // Finally, create the item!
     return await Item.create(itemData, { parent: this.actor });
   }
@@ -636,12 +658,12 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     const dragData = item.toDragData();
     const suggestedIcon = this._getSuggestedItemIcon(item);
 
-    // When source item keeps default icon, ship explicit item data with fallback icon.
+    // When source item keeps default icon, preserve the owned uuid while supplying a fallback icon.
     if ((item.img === Item.DEFAULT_ICON || !item.img) && suggestedIcon) {
+      dragData.img = suggestedIcon;
       const itemData = item.toObject();
       itemData.img = suggestedIcon;
       dragData.data = itemData;
-      delete dragData.uuid;
     }
 
     event.dataTransfer.setData('text/plain', JSON.stringify(dragData));
@@ -836,13 +858,15 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       ? game.i18n.localize('TIRDUIN_RPS.Item.Spell.Options.Duration.Instant')
       : item.system?.durationType === 'minutes'
         ? `${Number(item.system?.durationValue) || 0} ${game.i18n.localize('TIRDUIN_RPS.Item.Spell.Options.Duration.Minutes')}`
-        : `${Number(item.system?.durationValue) || 0} ${game.i18n.localize('TIRDUIN_RPS.Item.Spell.Options.Duration.Turns')}`;
+        : item.system?.durationType === 'concentration'
+          ? game.i18n.localize('TIRDUIN_RPS.Item.Spell.Options.Duration.Concentration')
+          : `${Number(item.system?.durationValue) || 0} ${game.i18n.localize('TIRDUIN_RPS.Item.Spell.Options.Duration.Turns')}`;
     const verbal = !!item.system?.components?.verbal;
     const somatic = !!item.system?.components?.somatic;
     const components = verbal || somatic
       ? `${verbal ? game.i18n.localize('TIRDUIN_RPS.Item.Spell.Abbr.Verbal') : ''}${verbal && somatic ? ' / ' : ''}${somatic ? game.i18n.localize('TIRDUIN_RPS.Item.Spell.Abbr.Somatic') : ''}`
       : game.i18n.localize('TIRDUIN_RPS.Item.Spell.None');
-    const cost = `${Number(item.system?.costValue) || 0}`;
+    const cost = String(item.system?.costValue || '0');
     const description = this._renderSummaryTextWithRollButtons(item.system?.description || '');
 
     return `
@@ -867,13 +891,23 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       : game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Features.Summary');
     const typeLabel = game.i18n.localize(isSpell ? 'TYPES.Item.spell' : 'TYPES.Item.feature');
     const body = isSpell ? this._buildSpellSummaryBody(item) : this._buildFeatureSummaryBody(item);
+    const spellDomain = isSpell && item.system?.spellDomain
+      ? game.i18n.localize(`TIRDUIN_RPS.Item.Spell.Domains.${item.system.spellDomain}`)
+      : '';
+    const domainSuffix = spellDomain
+      ? `<span class="tirduin-item-summary-domain"> · ${this._escapeHtml(spellDomain)}</span>`
+      : '';
+    const quantity = item.type === 'item' ? Number(item.system?.quantity || 0) : 0;
+    const quantitySuffix = quantity > 0
+      ? `<span class="tirduin-item-summary-quantity"> · x${this._escapeHtml(String(quantity))}</span>`
+      : '';
 
     return `
       <article class="tirduin-item-summary-card">
         <header class="tirduin-item-summary-header">
           <img src="${this._escapeHtml(item.img || Item.DEFAULT_ICON)}" width="26" height="26" alt="${this._escapeHtml(item.name)}" />
           <div>
-            <div class="tirduin-item-summary-title">${this._escapeHtml(item.name)}</div>
+            <div class="tirduin-item-summary-title">${this._escapeHtml(item.name)}${domainSuffix}${quantitySuffix}</div>
             <div class="tirduin-item-summary-subtitle">${this._escapeHtml(typeLabel)} · ${this._escapeHtml(summaryLabel)}</div>
           </div>
         </header>
