@@ -5,7 +5,7 @@
       "Agil": { "long": "Agilidad", "abbr": "Agil" },
       "Ment": { "long": "Mente", "abbr": "Ment" },
       "Inst": { "long": "Instinto", "abbr": "Inst" },
-      "Pre": { "long": "Precencia", "abbr": "Pre" }
+      "Pre": { "long": "Presencia", "abbr": "Pre" }
     },
     "attributes": {
       "level": {

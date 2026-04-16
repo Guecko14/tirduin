@@ -227,10 +227,51 @@
 .tirduin .npc-special,
 .tirduin .npc-abilities {
   margin-bottom: 8px;
-  padding: 6px;
+  padding: 6px !important;
   background: #1a1a1a;
   border: 1px solid #333;
   border-radius: 6px;
+}
+.tirduin .npc-special .special-actions {
+  padding: 0;
+}
+.tirduin .npc-special .special-actions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+.tirduin .npc-special .special-actions-header h2 {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #9ad;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.tirduin .npc-special .special-list {
+  gap: 6px;
+}
+.tirduin .npc-special .special-item {
+  background: #151515;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 8px;
+}
+.tirduin .npc-special .special-desc {
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: #b7a57d;
+  line-height: 1.4;
+}
+.tirduin .npc-special .special-empty {
+  color: #666;
+  font-style: italic;
+  font-size: 0.82rem;
+  text-align: center;
+  padding: 16px 0;
 }
 .tirduin .npc-special label,
 .tirduin .npc-abilities label {
