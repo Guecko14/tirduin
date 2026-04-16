@@ -816,13 +816,15 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       ? game.i18n.localize('TIRDUIN_RPS.Item.Spell.Options.Duration.Instant')
       : item.system?.durationType === 'minutes'
         ? `${Number(item.system?.durationValue) || 0} ${game.i18n.localize('TIRDUIN_RPS.Item.Spell.Options.Duration.Minutes')}`
-        : `${Number(item.system?.durationValue) || 0} ${game.i18n.localize('TIRDUIN_RPS.Item.Spell.Options.Duration.Turns')}`;
+        : item.system?.durationType === 'concentration'
+          ? game.i18n.localize('TIRDUIN_RPS.Item.Spell.Options.Duration.Concentration')
+          : `${Number(item.system?.durationValue) || 0} ${game.i18n.localize('TIRDUIN_RPS.Item.Spell.Options.Duration.Turns')}`;
     const verbal = !!item.system?.components?.verbal;
     const somatic = !!item.system?.components?.somatic;
     const components = verbal || somatic
       ? `${verbal ? game.i18n.localize('TIRDUIN_RPS.Item.Spell.Abbr.Verbal') : ''}${verbal && somatic ? ' / ' : ''}${somatic ? game.i18n.localize('TIRDUIN_RPS.Item.Spell.Abbr.Somatic') : ''}`
       : game.i18n.localize('TIRDUIN_RPS.Item.Spell.None');
-    const cost = `${Number(item.system?.costValue) || 0}`;
+    const cost = String(item.system?.costValue || '0');
     const description = this._renderSummaryTextWithRollButtons(item.system?.description || '');
 
     return `
@@ -847,13 +849,19 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       : game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Features.Summary');
     const typeLabel = game.i18n.localize(isSpell ? 'TYPES.Item.spell' : 'TYPES.Item.feature');
     const body = isSpell ? this._buildSpellSummaryBody(item) : this._buildFeatureSummaryBody(item);
+    const spellDomain = isSpell && item.system?.spellDomain
+      ? game.i18n.localize(`TIRDUIN_RPS.Item.Spell.Domains.${item.system.spellDomain}`)
+      : '';
+    const domainSuffix = spellDomain
+      ? `<span class="tirduin-item-summary-domain"> · ${this._escapeHtml(spellDomain)}</span>`
+      : '';
 
     return `
       <article class="tirduin-item-summary-card">
         <header class="tirduin-item-summary-header">
           <img src="${this._escapeHtml(item.img || Item.DEFAULT_ICON)}" width="26" height="26" alt="${this._escapeHtml(item.name)}" />
           <div>
-            <div class="tirduin-item-summary-title">${this._escapeHtml(item.name)}</div>
+            <div class="tirduin-item-summary-title">${this._escapeHtml(item.name)}${domainSuffix}</div>
             <div class="tirduin-item-summary-subtitle">${this._escapeHtml(typeLabel)} · ${this._escapeHtml(summaryLabel)}</div>
           </div>
         </header>

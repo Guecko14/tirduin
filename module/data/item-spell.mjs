@@ -36,12 +36,20 @@ export default class TirduinRPSSpell extends TirduinRPSItemBase {
       choices: ['hope', 'stress'],
     });
 
-    schema.costValue = new fields.NumberField({
+    schema.costValue = new fields.StringField({
       required: true,
       nullable: false,
-      integer: true,
-      initial: 1,
-      min: 0,
+      blank: false,
+      initial: '1',
+    });
+
+    const spellDomains = Object.keys(CONFIG.TIRDUIN_RPS.spellDomains || {});
+    schema.spellDomain = new fields.StringField({
+      required: false,
+      nullable: false,
+      blank: true,
+      initial: '',
+      choices: ['', ...spellDomains],
     });
 
     schema.rangeType = new fields.StringField({
@@ -76,7 +84,7 @@ export default class TirduinRPSSpell extends TirduinRPSItemBase {
       required: true,
       blank: false,
       initial: 'instant',
-      choices: ['instant', 'turns', 'minutes'],
+      choices: ['instant', 'turns', 'minutes', 'concentration'],
     });
 
     schema.durationValue = new fields.NumberField({

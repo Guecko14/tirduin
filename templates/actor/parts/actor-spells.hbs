@@ -161,6 +161,9 @@
               {{else if (eq item.system.durationType "minutes")}}
               {{item.system.durationValue}} {{localize
               "TIRDUIN_RPS.Item.Spell.Options.Duration.Minutes"}}
+              {{else if (eq item.system.durationType "concentration")}}
+              {{localize
+              "TIRDUIN_RPS.Item.Spell.Options.Duration.Concentration"}}
               {{else}}
               {{item.system.durationValue}} {{localize
               "TIRDUIN_RPS.Item.Spell.Options.Duration.Turns"}}

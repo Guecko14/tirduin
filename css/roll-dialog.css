@@ -690,6 +690,12 @@
   color: #fff1cc;
 }
 
+.chat-message .tirduin-item-summary-domain {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #d4c29a;
+}
+
 .chat-message .tirduin-item-summary-subtitle {
   font-size: 0.74rem;
   font-weight: 700;

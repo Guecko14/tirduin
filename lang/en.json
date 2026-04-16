@@ -240,6 +240,8 @@
         },
         "Fields": {
           "Name": "Nombre",
+          "Domain": "Dominio",
+          "Domain.None": "Sin dominio",
           "Type": "Tipo",
           "Level": "Nivel",
           "Action": "Accion",
@@ -275,7 +277,8 @@
           "Duration": {
             "Instant": "Inst.",
             "Turns": "Turnos",
-            "Minutes": "Minutos"
+            "Minutes": "Minutos",
+            "Concentration": "Concentración"
           }
         },
         "Domains": {
