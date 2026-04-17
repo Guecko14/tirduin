@@ -93,6 +93,18 @@
         "label": "Asustado",
         "description": "Tiene desventaja en todas las tiradas mientras tenga a la fuente de su miedo en su rango de visión. No se puede acercar voluntariamente a la fuente de su miedo."
       },
+      "invisible": {
+        "label": "Invisible",
+        "description": "No puede ser visto sin percepción especial. Los ataques en su contra suelen hacerse con desventaja."
+      },
+      "asleep": {
+        "label": "Dormido",
+        "description": "No puede actuar ni reaccionar mientras está dormido. Cualquier daño lo despierta."
+      },
+      "unconscious": {
+        "label": "Inconsciente",
+        "description": "No puede actuar ni reaccionar. Los ataques contra él tienen ventaja y los impactos a melee son críticos automáticos."
+      },
       "paralyzed": {
         "label": "Paralizado",
         "description": "No se puede mover ni hacer acciones ni reacciones. Está Vulnerable. Los impactos a melee son críticos automáticamente."
