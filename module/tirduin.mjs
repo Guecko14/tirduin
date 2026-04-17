@@ -1320,12 +1320,14 @@ async function rollItemMacro(itemUuid) {
 
   const abilityKey = selection.abilityKey;
   const edgeMode = selection.edgeMode;
+  const attackBonus = selection.attackBonus || 0;
+  const extraDamageEntries = selection.extraDamageEntries || [];
   const fatigueRollPenalty = item.actor?.type === 'character'
     ? (Number(item.actor.system?.attributes?.fatigue?.rollPenalty) || 0)
     : 0;
   const abilityValue = (Number(item.actor.system?.abilities?.[abilityKey]?.value) || 0) + fatigueRollPenalty;
 
-  const attackBaseFormula = `1d20 + (${abilityValue}) + (${proficiency})`;
+  const attackBaseFormula = `1d20 + (${abilityValue}) + (${proficiency}) + (${attackBonus})`;
   const attackFormula = applyRollEdgeToFormula(attackBaseFormula, edgeMode);
   const damageFormula = `${damageDie} + (${abilityValue})`;
   const damageFormula2 = damageDie2 || '';
@@ -1353,6 +1355,18 @@ async function rollItemMacro(itemUuid) {
     await damageRoll2.evaluate();
   }
 
+  const extraDamageRolls = [];
+  for (const entry of extraDamageEntries) {
+    const extraRoll = new Roll(entry.formula, actorRollData);
+    await extraRoll.evaluate();
+    extraDamageRolls.push({
+      roll: extraRoll,
+      typeLabel: entry.damageTypeKey
+        ? game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[entry.damageTypeKey] || entry.damageTypeKey)
+        : '',
+    });
+  }
+
   const targetToken = game.user?.targets?.first();
   const targetName = targetToken?.name ?? null;
   const targetAC = targetToken?.actor
@@ -1374,7 +1388,7 @@ async function rollItemMacro(itemUuid) {
       damageTypeLabel2: damageTypeKey2
         ? game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[damageTypeKey2] || damageTypeKey2)
         : '',
-      damageRollExtraEntries: [],
+      damageRollExtraEntries: extraDamageRolls,
       targetName,
       targetAC,
     }),
