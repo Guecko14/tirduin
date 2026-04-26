@@ -67,18 +67,19 @@
               placeholder="{{localize "TIRDUIN_RPS.CharacterSheet.Race"}}" />
           </div>
           <div class="character-meta-field npc-stat">
-            <label for="system.details.className">{{localize
-              "TIRDUIN_RPS.CharacterSheet.Class"}}</label>
-            <select name="system.details.className" class="sheet-skill-select">
-              <option value="combatiente" {{#if (eq system.details.className
-                'combatiente')}}selected{{/if}}>{{localize
-                "TIRDUIN_RPS.CharacterSheet.ClassOptions.Combatiente"}}</option>
-              <option value="especialista" {{#if (eq system.details.className
-                'especialista')}}selected{{/if}}>{{localize
-                "TIRDUIN_RPS.CharacterSheet.ClassOptions.Especialista"}}</option>
-              <option value="canalizador" {{#if (eq system.details.className
-                'canalizador')}}selected{{/if}}>{{localize
-                "TIRDUIN_RPS.CharacterSheet.ClassOptions.Canalizador"}}</option>
+            <label for="system.details.spellAttribute">{{localize
+              "TIRDUIN_RPS.CharacterSheet.SpellAttribute"}}</label>
+            <select name="system.details.spellAttribute"
+              class="sheet-skill-select">
+              <option value="ment" {{#if (eq system.details.spellAttribute
+                'ment')}}selected{{/if}}>{{localize
+                "TIRDUIN_RPS.CharacterSheet.SpellAttributeOptions.Ment"}}</option>
+              <option value="inst" {{#if (eq system.details.spellAttribute
+                'inst')}}selected{{/if}}>{{localize
+                "TIRDUIN_RPS.CharacterSheet.SpellAttributeOptions.Inst"}}</option>
+              <option value="pre" {{#if (eq system.details.spellAttribute
+                'pre')}}selected{{/if}}>{{localize
+                "TIRDUIN_RPS.CharacterSheet.SpellAttributeOptions.Pre"}}</option>
             </select>
           </div>
           <div class="character-meta-field npc-stat">

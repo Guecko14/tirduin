@@ -149,7 +149,7 @@
     "CharacterSheet": {
       "Name": "Nombre",
       "Race": "Raza",
-      "Class": "Clase",
+      "SpellAttribute": "Atributo de conjuros",
       "Background": "Transfondo",
       "Size": "Tamaño",
       "FatigueDeath": "Muerte",
@@ -161,10 +161,10 @@
       "SavingThrows": "Salvaciones",
       "InitiativeRoll": "Tirar iniciativa",
       "Of": "de",
-      "ClassOptions": {
-        "Combatiente": "Combatiente",
-        "Especialista": "Especialista",
-        "Canalizador": "Canalizador"
+      "SpellAttributeOptions": {
+        "Ment": "Mente",
+        "Inst": "Instinto",
+        "Pre": "Presencia"
       },
       "SizeOptions": {
         "Diminuto": "Diminuto",

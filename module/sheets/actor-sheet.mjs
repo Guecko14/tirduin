@@ -204,21 +204,17 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }));
 
     if (this.actor.type === 'character') {
-      const spellcastingClassAbility = {
-        combatiente: 'inst',
-        especialista: 'pre',
-        canalizador: 'ment'
-      };
-      const className = context.system?.details?.className || 'combatiente';
-      const abilityKey = spellcastingClassAbility[className] || 'inst';
+      
+      const abilityKey = context.system?.details?.spellAttribute || 'ment';
       const abilityValue = Number(context.system?.abilities?.[abilityKey]?.value) || 0;
       const proficiency = Math.max(0, Math.min(5, Number(context.system?.spellcasting?.proficiency) || 0));
       const attackExtra = Number(context.system?.spellcasting?.attackExtra) || 0;
       const dcExtra = Number(context.system?.spellcasting?.dcExtra) || 0;
+      const level = Number(context.system?.attributes?.level?.value) || 1;
 
       context.system.spellcasting = context.system.spellcasting || {};
       context.system.spellcasting.attackBonusComputed = proficiency + abilityValue + attackExtra;
-      context.system.spellcasting.dcComputed = 10 + abilityValue + proficiency + dcExtra;
+      context.system.spellcasting.dcComputed = 10 + abilityValue + level + dcExtra;
       context.system.spellcasting.attackAbility = abilityKey;
       context.system.spellcasting.attackAbilityLabel = game.i18n.localize(CONFIG.TIRDUIN_RPS.abilities[abilityKey]) || abilityKey;
     }
@@ -688,13 +684,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       return i18nKey ? game.i18n.localize(i18nKey) : `@abilities.${key}`;
     };
 
-    const spellcastingClassAbility = {
-      combatiente: 'inst',
-      especialista: 'pre',
-      canalizador: 'ment'
-    };
-    const className = this.actor?.system?.details?.className || 'combatiente';
-    const spellAbilityLabel = abilityLabel(spellcastingClassAbility[className] || 'inst');
+    const spellAbilityLabel = abilityLabel(this.actor?.system?.details?.spellAttribute || 'ment');
 
     const spellcastingLabels = {
       spellAbilityValue: spellAbilityLabel,

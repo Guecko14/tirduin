@@ -193,7 +193,7 @@ Hooks.once('init', function () {
    * @type {String}
    */
   CONFIG.Combat.initiative = {
-    formula: '1d20 + @abilities.agil.mod',
+    formula: '1d20 + @abilities.agil.mod + @abilities.inst.mod',
     decimals: 2,
   };
 
@@ -860,7 +860,7 @@ Hooks.once('ready', function () {
       const firstCombatant = this.combatants.get(idList[0]);
       const actor = firstCombatant?.actor || null;
       const rollData = actor?.getRollData?.() || {};
-      const baseFormula = options?.formula || CONFIG.Combat?.initiative?.formula || '1d20 + @abilities.agil.mod';
+      const baseFormula = options?.formula || CONFIG.Combat?.initiative?.formula || '1d20 + @abilities.agil.mod + @abilities.inst.mod';
 
       const selection = await promptInitiativeConfirmation({ formula: baseFormula, rollData });
       if (!selection) return this;
