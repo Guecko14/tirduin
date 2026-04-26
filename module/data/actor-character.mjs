@@ -193,12 +193,8 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
     this.attributes.fatigue.isDeadly = Boolean(fatigueEffect.isDeadly);
 
     const sourceHasHope = foundry.utils.hasProperty(this._source ?? {}, 'system.hope');
-    const legacyPowerValue = Number(this.power?.value) || 0;
-    const currentHope = sourceHasHope
-      ? (Number(this.hope?.value) || 0)
-      : legacyPowerValue;
-    // Rehidrata Esperanza desde power en actores previos a la migración del recurso.
-    this.hope.value = Math.max(0, Math.min(6, currentHope));
+  
+    this.hope.value = Math.max(0, Math.min(6, Number(this.hope?.value)|| 2));
     this.hope.max = 6;
 
     this.stress.value = Math.max(0, Math.min(6, Number(this.stress?.value) || 0));

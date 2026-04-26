@@ -180,8 +180,8 @@
         "Voluntad": "Voluntad"
       },
       "Resources": {
-        "Hope": "Esperanza",
-        "HopeCurrent": "Esperanza actual",
+        "Hope": "Energia",
+        "HopeCurrent": "Energia actual",
         "Stress": "Estrés",
         "StressCurrent": "Estrés actual",
         "Luck": "Suerte",
@@ -277,8 +277,8 @@
             "Reaction": "Reaccion"
           },
           "Cost": {
-            "Hope": "Esperanza",
-            "Stress": "Estres"
+            "Hope": "Energia",
+            "Stress": "Estrés"
           },
           "Range": {
             "Melee": "Toque",

@@ -70,10 +70,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     if (actorData.type == 'character') {
       this._prepareItems(context);
       this._prepareCharacterData(context);
-      // Esperanza mantiene compatibilidad con actores antiguos que solo tenían power.
-      const currentHope = foundry.utils.hasProperty(context.system ?? {}, 'hope.value')
-        ? context.system?.hope?.value
-        : context.system?.power?.value;
+      const currentHope = context.system?.hope?.value;
       context.hopePips = this._buildResourcePips({
         path: 'system.hope.value',
         maxPath: 'system.hope.max',
@@ -517,13 +514,6 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
 
       if (maxPath && maxValue > 0) {
         updateData[maxPath] = maxValue;
-      }
-
-      if (resourcePath === 'system.hope.value') {
-        // Sincroniza el campo heredado para que Esperanza siga funcionando en
-        // actores creados antes del cambio desde power hacia hope.
-        updateData['system.power.value'] = nextValue;
-        updateData['system.power.max'] = 6;
       }
 
       await this.actor.update(updateData);
