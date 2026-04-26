@@ -29,10 +29,6 @@ export class TirduinRPSItemSheet extends BaseItemSheet {
   /** @override */
   get template() {
     const path = 'systems/tirduin/templates/item';
-    // Las acciones de miedo reutilizan el tipo feature, pero con una sheet dedicada.
-    if (this.item.type === 'feature' && this.item.system.category === 'fear') {
-      return `${path}/item-fear-sheet.hbs`;
-    }
     // Los especiales del NPC reutilizan feature, pero con una sheet simplificada.
     if (this.item.type === 'feature' && this.item.system.category === 'special') {
       return `${path}/item-special-sheet.hbs`;

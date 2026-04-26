@@ -260,24 +260,11 @@
 .npc-skills,
 .npc-special,
 .npc-abilities,
-.npc-fear {
-  margin-bottom: 8px;
-  padding: 6px;
-  background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 6px;
-}
+
 
 .npc-special label,
 .npc-abilities label,
-.npc-fear label {
-  display: block;
-  font-size: 12px;
-  color: #bbb;
-  margin-bottom: 4px;
-  border-bottom: 1px solid #333;
-  padding-bottom: 2px;
-}
+
 
 textarea {
   width: 100%;
@@ -293,11 +280,6 @@ textarea {
 
 .npc-abilities textarea {
   min-height: 70px;
-}
-
-.npc-fear textarea {
-  min-height: 60px;
-  border: 1px solid #6b1f1f;
 }
 
 input:focus,

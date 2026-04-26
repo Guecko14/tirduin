@@ -324,13 +324,6 @@
       "InlineRollFlavor": "Tirada de: {formula}",
       "InlineRollFlavorWithDamage": "Tirada de: {formula} | Daño: {damage}"
     },
-    "FearCounter": {
-      "Title": "Miedo",
-      "Label": "Contador de miedo",
-      "PipLabel": "Miedo {value}/{max}",
-      "SettingName": "Fear Counter Value",
-      "SettingHint": "Valor persistente del contador de miedo del GM."
-    },
     "Loot": {
       "Prefix": "Botin: {name}",
       "GMOnly": "Solo el GM puede crear botines en el mapa.",
@@ -383,13 +376,12 @@
         "item": "Objeto",
         "feature": "Dote",
         "spell": "Conjuro",
-        "fear": "Miedo",
         "special": "Especial",
         "weapon": "Arma",
         "armor": "Armadura"
       },
       "Mood": {
-        "Hope": "Esperanza",
+        "Hope": "Energia",
         "Fear": "Miedo"
       },
       "Outcome": {
