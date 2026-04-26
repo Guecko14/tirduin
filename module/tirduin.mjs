@@ -512,10 +512,6 @@ Hooks.once('ready', function () {
   };
 
   const createLootTokenWithItem = async (dropData, item) => {
-    if (!game.user?.isGM) {
-      ui.notifications?.warn(game.i18n.localize('TIRDUIN_RPS.Loot.GMOnly'));
-      return false;
-    }
     if (!canvas?.scene) return false;
 
     // Loot containers are NPC actors flagged as loot to keep data-model compatibility.
@@ -534,10 +530,11 @@ Hooks.once('ready', function () {
         },
       },
       prototypeToken: {
-        actorLink: false,
+        actorLink: true,
         name: lootName,
         img: lootImg,
         disposition: getNeutralDisposition(),
+        vision: false,
       },
     });
 

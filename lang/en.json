@@ -326,7 +326,6 @@
     },
     "Loot": {
       "Prefix": "Botin: {name}",
-      "GMOnly": "Solo el GM puede crear botines en el mapa.",
       "DropReadError": "No se pudo leer el item soltado.",
       "AddToActor": "{item} anadido a {actor}.",
       "AddToActorError": "No se pudo anadir el item al inventario del token.",
