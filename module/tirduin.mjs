@@ -313,19 +313,31 @@ Hooks.once('ready', function () {
       await actor.update({
         'prototypeToken.width': tokenUnits,
         'prototypeToken.height': tokenUnits,
-      });
+      }, { tirduinSync: true });
     }
 
     const activeTokens = actor.getActiveTokens(true) || [];
     const tokenUpdates = [];
-    for (const token of activeTokens) {
-      const tokenWidth = Number(token.document?.width) || 1;
-      const tokenHeight = Number(token.document?.height) || 1;
-      if (tokenWidth === tokenUnits && tokenHeight === tokenUnits) continue;
-      tokenUpdates.push(token.document.update({ width: tokenUnits, height: tokenUnits }));
-    }
 
-    if (tokenUpdates.length) await Promise.all(tokenUpdates);
+  for (const token of activeTokens) {
+    // Filtrado de permisos: evita errores en clientes sin control
+    if (!game.user.isGM && !token.actor?.isOwner) continue;
+
+    const tokenWidth = Number(token.document?.width) || 1;
+    const tokenHeight = Number(token.document?.height) || 1;
+    if (tokenWidth === tokenUnits && tokenHeight === tokenUnits) continue;
+
+    tokenUpdates.push({
+      _id: token.id,
+      width: tokenUnits,
+     height: tokenUnits
+   });
+  }
+
+  // Batch update seguro
+    if (tokenUpdates.length && canvas.scene) {
+      await canvas.scene.updateEmbeddedDocuments("Token", tokenUpdates);
+    }
   };
 
   const calculateArmorClassFromArmor = (actor, armorSystem, isBroken = false) => {
@@ -681,10 +693,35 @@ Hooks.once('ready', function () {
   });
 
   // Si cambia Agilidad del NPC, la CA se recalcula automaticamente.
-  Hooks.on('updateActor', async (actor, changedData, options) => {
+  Hooks.on('updateActor', async (actor, changedData, options, userId) => {
+    // Evita reaccionar a tu propio update si ya viene marcado
+    if (options?.tirduinSync) return;
+
+    if (!isAuthoritativeUser(actor)) return;
+
+     // Ejecuta sync centralizado
+    await runActorSync(actor, changedData);
+  });
+
+  function isAuthoritativeUser(actor) {
+    // Prioridad: GM
+    if (game.user.isGM) return true;
+
+    // Fallback: propietario del actor
+    if (actor?.isOwner) {
+      // Opcional: evitar múltiples owners ejecutando
+      const owners = game.users.filter(u =>
+        u.active && actor.testUserPermission(u, CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER)
+      );
+      const firstOwner = owners.sort((a, b) => a.id.localeCompare(b.id))[0];
+      return game.user.id === firstOwner?.id;
+    }
+
+    return false;
+  }
+
+  async function runActorSync(actor, changedData) {
     if (!actor || !['npc', 'character'].includes(actor.type)) return;
-    if (options?.tirduinSkipArmorSync) return;
-    if (!actor.isOwner) return;
 
     // Compara con valor numérico para evitar falsos positivos por coerción de
     // tipo string→number que el FormApplication de Foundry v1 introduce al
@@ -701,7 +738,9 @@ Hooks.once('ready', function () {
       // Igual que con CA: guard para no encadenar ciclos de preparación.
       await syncActorTokenSize(actor);
     }
-  });
+
+  }
+
 
   // Intercept initiative rolls from Combat Encounter to ask for confirmation.
   if (!Combat.prototype._tirduinInitiativePatched) {
