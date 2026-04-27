@@ -304,6 +304,9 @@ Hooks.once('ready', function () {
 
   const syncActorTokenSize = async (actor) => {
     if (!actor || !['npc', 'character'].includes(actor.type)) return;
+    
+    // Solo el dueño o el GM deben procesar la actualización en DB
+    if (!game.user.isGM && !actor.isOwner ) return;
 
     const tokenUnits = getTokenSizeUnits(actor);
 
@@ -375,6 +378,10 @@ Hooks.once('ready', function () {
 
   const syncNpcArmorClass = async (actor) => {
     if (!actor || !['npc', 'character'].includes(actor.type)) return;
+    
+    // Solo el dueño o el GM deben procesar la actualización en DB
+    if (!game.user.isGM && !actor.isOwner ) return;
+
     const armorClass = calculateArmorClassFromEquippedArmors(actor);
     if (Number(actor.system?.attributes?.armorClass?.value) === armorClass) return;
     await actor.update(
