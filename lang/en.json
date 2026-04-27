@@ -149,7 +149,7 @@
     "CharacterSheet": {
       "Name": "Nombre",
       "Race": "Raza",
-      "Class": "Clase",
+      "SpellAttribute": "Atributo de conjuros",
       "Background": "Transfondo",
       "Size": "Tamaño",
       "FatigueDeath": "Muerte",
@@ -161,10 +161,10 @@
       "SavingThrows": "Salvaciones",
       "InitiativeRoll": "Tirar iniciativa",
       "Of": "de",
-      "ClassOptions": {
-        "Combatiente": "Combatiente",
-        "Especialista": "Especialista",
-        "Canalizador": "Canalizador"
+      "SpellAttributeOptions": {
+        "Ment": "Mente",
+        "Inst": "Instinto",
+        "Pre": "Presencia"
       },
       "SizeOptions": {
         "Diminuto": "Diminuto",
@@ -180,8 +180,8 @@
         "Voluntad": "Voluntad"
       },
       "Resources": {
-        "Hope": "Esperanza",
-        "HopeCurrent": "Esperanza actual",
+        "Hope": "Energia",
+        "HopeCurrent": "Energia actual",
         "Stress": "Estrés",
         "StressCurrent": "Estrés actual",
         "Luck": "Suerte",
@@ -277,8 +277,8 @@
             "Reaction": "Reaccion"
           },
           "Cost": {
-            "Hope": "Esperanza",
-            "Stress": "Estres"
+            "Hope": "Energia",
+            "Stress": "Estrés"
           },
           "Range": {
             "Melee": "Toque",
@@ -324,16 +324,8 @@
       "InlineRollFlavor": "Tirada de: {formula}",
       "InlineRollFlavorWithDamage": "Tirada de: {formula} | Daño: {damage}"
     },
-    "FearCounter": {
-      "Title": "Miedo",
-      "Label": "Contador de miedo",
-      "PipLabel": "Miedo {value}/{max}",
-      "SettingName": "Fear Counter Value",
-      "SettingHint": "Valor persistente del contador de miedo del GM."
-    },
     "Loot": {
       "Prefix": "Botin: {name}",
-      "GMOnly": "Solo el GM puede crear botines en el mapa.",
       "DropReadError": "No se pudo leer el item soltado.",
       "AddToActor": "{item} anadido a {actor}.",
       "AddToActorError": "No se pudo anadir el item al inventario del token.",
@@ -383,13 +375,12 @@
         "item": "Objeto",
         "feature": "Dote",
         "spell": "Conjuro",
-        "fear": "Miedo",
         "special": "Especial",
         "weapon": "Arma",
         "armor": "Armadura"
       },
       "Mood": {
-        "Hope": "Esperanza",
+        "Hope": "Energia",
         "Fear": "Miedo"
       },
       "Outcome": {

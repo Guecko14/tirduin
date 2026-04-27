@@ -14,7 +14,7 @@ import {
 
 export class TirduinRPSItem extends Item {
   // Declare all valid item types for this system
-  static TYPES = ['item', 'feature', 'spell', 'fear', 'weapon', 'armor'];
+  static TYPES = ['item', 'feature', 'spell', 'weapon', 'armor'];
 
   /**
    * Override the schema to explicitly define valid item types

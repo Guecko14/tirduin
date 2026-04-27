@@ -19,130 +19,6 @@ import {
 } from './helpers/roll-dialog.mjs';
 // Import DataModel classes
 import * as models from './data/_module.mjs';
-
-const FEAR_COUNTER_MAX = 12;
-let fearCounterDialog = null;
-
-const clampFearCounterValue = (value) => {
-  const numeric = Number(value);
-  const safe = Number.isFinite(numeric) ? numeric : 0;
-  return Math.min(FEAR_COUNTER_MAX, Math.max(0, safe));
-};
-
-const getFearCounterValue = () => {
-  try {
-    const stored = game.settings.get('tirduin', 'fearCounterValue');
-    return clampFearCounterValue(stored);
-  } catch (_error) {
-    return 0;
-  }
-};
-
-const buildFearCounterPipsHtml = (value) => {
-  let html = '';
-  for (let i = 1; i <= FEAR_COUNTER_MAX; i += 1) {
-    const activeClass = i <= value ? 'is-active' : '';
-    const pipLabel = game.i18n.format('TIRDUIN_RPS.FearCounter.PipLabel', {
-      value: i,
-      max: FEAR_COUNTER_MAX,
-    });
-    html += `
-      <button
-        type="button"
-        class="tirduin-fear-pip ${activeClass}"
-        data-value="${i}"
-        title="${pipLabel}"
-        aria-label="${pipLabel}"
-      ></button>
-    `;
-  }
-  return html;
-};
-
-const buildFearCounterDialogContent = (value) => `
-  <div class="tirduin-fear-counter" data-role="fear-counter-root">
-    <p class="tirduin-fear-counter-label">${game.i18n.localize('TIRDUIN_RPS.FearCounter.Label')}</p>
-    <p class="tirduin-fear-counter-value" data-role="fear-counter-value">${value}/${FEAR_COUNTER_MAX}</p>
-    <div class="tirduin-fear-counter-pips" data-role="fear-counter-pips">
-      ${buildFearCounterPipsHtml(value)}
-    </div>
-  </div>
-`;
-
-const applyFearCounterForcedStyles = (html) => {
-  const appRoot = html.closest('.app, .window-app, .application');
-  const targets = appRoot.length ? appRoot : html;
-
-  targets.find('.window-content, .dialog-content, form, .tirduin-fear-counter').css({
-    background: '#000000',
-    'background-image': 'none',
-  });
-};
-
-const refreshFearCounterDialog = () => {
-  if (!fearCounterDialog?.rendered || !fearCounterDialog.element) return;
-  applyFearCounterForcedStyles(fearCounterDialog.element);
-
-  const value = getFearCounterValue();
-  fearCounterDialog.element.find('[data-role="fear-counter-value"]').text(`${value}/${FEAR_COUNTER_MAX}`);
-  fearCounterDialog.element.find('.tirduin-fear-pip').each((_index, element) => {
-    const pip = $(element);
-    const pipValue = Number(pip.data('value')) || 0;
-    pip.toggleClass('is-active', pipValue <= value);
-  });
-};
-
-const setFearCounterValue = async (value) => {
-  const clamped = clampFearCounterValue(value);
-  try {
-    if (clamped === getFearCounterValue()) return;
-    await game.settings.set('tirduin', 'fearCounterValue', clamped);
-  } catch (_error) {
-    // Ignore when setting is unavailable during startup failures.
-  }
-};
-
-const renderFearCounterDialog = () => {
-  if (!game.user?.isGM) return;
-  if (fearCounterDialog?.rendered) {
-    fearCounterDialog.bringToTop();
-    refreshFearCounterDialog();
-    return;
-  }
-
-  const value = getFearCounterValue();
-  fearCounterDialog = new Dialog({
-    title: game.i18n.localize('TIRDUIN_RPS.FearCounter.Title'),
-    content: buildFearCounterDialogContent(value),
-    buttons: {},
-    classes: ['tirduin', 'tirduin-fear-counter-dialog'],
-    render: (html) => {
-      applyFearCounterForcedStyles(html);
-
-      html.on('click', '.tirduin-fear-pip', async (event) => {
-        event.preventDefault();
-        const target = event.currentTarget;
-        const selected = Number(target.dataset.value) || 0;
-        const current = getFearCounterValue();
-        const next = selected === current ? Math.max(0, current - 1) : selected;
-        await setFearCounterValue(next);
-      });
-      refreshFearCounterDialog();
-    },
-    close: () => {
-      fearCounterDialog = null;
-    },
-  }, {
-    width: 260,
-    height: 'auto',
-    resizable: false,
-    top: 80,
-    left: 80,
-  });
-
-  fearCounterDialog.render(true, { focus: false });
-};
-
 /* -------------------------------------------- */
 /*  Init Hook                                   */
 /* -------------------------------------------- */
@@ -170,20 +46,7 @@ Hooks.once('init', function () {
     damage: damageHelpers,
     alteredStates: alteredStatesHelpers,
     rollItemMacro,
-    renderFearCounterDialog,
   };
-
-  game.settings.register('tirduin', 'fearCounterValue', {
-    name: game.i18n.localize('TIRDUIN_RPS.FearCounter.SettingName'),
-    hint: game.i18n.localize('TIRDUIN_RPS.FearCounter.SettingHint'),
-    scope: 'world',
-    config: false,
-    type: Number,
-    default: 0,
-    onChange: () => {
-      refreshFearCounterDialog();
-    },
-  });
 
   // Add custom constants for configuration.
   CONFIG.TIRDUIN_RPS = TIRDUIN_RPS;
@@ -193,7 +56,7 @@ Hooks.once('init', function () {
    * @type {String}
    */
   CONFIG.Combat.initiative = {
-    formula: '1d20 + @abilities.agil.mod',
+    formula: '1d20 + @abilities.agil.mod + @abilities.inst.mod',
     decimals: 2,
   };
 
@@ -214,7 +77,6 @@ Hooks.once('init', function () {
     item: models.TirduinRPSItem,
     feature: models.TirduinRPSFeature,
     spell: models.TirduinRPSSpell,
-    fear: models.TirduinRPSFear,
     // Objetos de equipo del NPC: armas y armaduras con sus propias hojas.
     weapon: models.TirduinRPSWeapon,
     armor: models.TirduinRPSArmor,
@@ -404,9 +266,6 @@ Handlebars.registerHelper('armorResistanceSummary', function (armorSystem) {
 /* -------------------------------------------- */
 
 Hooks.once('ready', function () {
-  if (game.user?.isGM) {
-    renderFearCounterDialog();
-  }
 
   // Force Foundry core Grid Diagonals setting to Alternative (1/2/1).
   if (game.user?.isGM) {
@@ -653,10 +512,6 @@ Hooks.once('ready', function () {
   };
 
   const createLootTokenWithItem = async (dropData, item) => {
-    if (!game.user?.isGM) {
-      ui.notifications?.warn(game.i18n.localize('TIRDUIN_RPS.Loot.GMOnly'));
-      return false;
-    }
     if (!canvas?.scene) return false;
 
     // Loot containers are NPC actors flagged as loot to keep data-model compatibility.
@@ -675,10 +530,11 @@ Hooks.once('ready', function () {
         },
       },
       prototypeToken: {
-        actorLink: false,
+        actorLink: true,
         name: lootName,
         img: lootImg,
         disposition: getNeutralDisposition(),
+        vision: false,
       },
     });
 
@@ -828,6 +684,7 @@ Hooks.once('ready', function () {
   Hooks.on('updateActor', async (actor, changedData, options) => {
     if (!actor || !['npc', 'character'].includes(actor.type)) return;
     if (options?.tirduinSkipArmorSync) return;
+    if (!actor.isOwner) return;
 
     // Compara con valor numérico para evitar falsos positivos por coerción de
     // tipo string→number que el FormApplication de Foundry v1 introduce al
@@ -860,7 +717,7 @@ Hooks.once('ready', function () {
       const firstCombatant = this.combatants.get(idList[0]);
       const actor = firstCombatant?.actor || null;
       const rollData = actor?.getRollData?.() || {};
-      const baseFormula = options?.formula || CONFIG.Combat?.initiative?.formula || '1d20 + @abilities.agil.mod';
+      const baseFormula = options?.formula || CONFIG.Combat?.initiative?.formula || '1d20 + @abilities.agil.mod + @abilities.inst.mod';
 
       const selection = await promptInitiativeConfirmation({ formula: baseFormula, rollData });
       if (!selection) return this;

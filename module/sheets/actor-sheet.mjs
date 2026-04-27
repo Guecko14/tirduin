@@ -70,10 +70,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     if (actorData.type == 'character') {
       this._prepareItems(context);
       this._prepareCharacterData(context);
-      // Esperanza mantiene compatibilidad con actores antiguos que solo tenían power.
-      const currentHope = foundry.utils.hasProperty(context.system ?? {}, 'hope.value')
-        ? context.system?.hope?.value
-        : context.system?.power?.value;
+      const currentHope = context.system?.hope?.value;
       context.hopePips = this._buildResourcePips({
         path: 'system.hope.value',
         maxPath: 'system.hope.max',
@@ -204,21 +201,17 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }));
 
     if (this.actor.type === 'character') {
-      const spellcastingClassAbility = {
-        combatiente: 'inst',
-        especialista: 'pre',
-        canalizador: 'ment'
-      };
-      const className = context.system?.details?.className || 'combatiente';
-      const abilityKey = spellcastingClassAbility[className] || 'inst';
+      
+      const abilityKey = context.system?.details?.spellAttribute || 'ment';
       const abilityValue = Number(context.system?.abilities?.[abilityKey]?.value) || 0;
       const proficiency = Math.max(0, Math.min(5, Number(context.system?.spellcasting?.proficiency) || 0));
       const attackExtra = Number(context.system?.spellcasting?.attackExtra) || 0;
       const dcExtra = Number(context.system?.spellcasting?.dcExtra) || 0;
+      const level = Number(context.system?.attributes?.level?.value) || 1;
 
       context.system.spellcasting = context.system.spellcasting || {};
       context.system.spellcasting.attackBonusComputed = proficiency + abilityValue + attackExtra;
-      context.system.spellcasting.dcComputed = 10 + abilityValue + proficiency + dcExtra;
+      context.system.spellcasting.dcComputed = 10 + abilityValue + level + dcExtra;
       context.system.spellcasting.attackAbility = abilityKey;
       context.system.spellcasting.attackAbilityLabel = game.i18n.localize(CONFIG.TIRDUIN_RPS.abilities[abilityKey]) || abilityKey;
     }
@@ -286,8 +279,6 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     if (type === 'spell') return 'icons/svg/book.svg';
     if (type === 'weapon') return 'icons/svg/sword.svg';
     if (type === 'armor') return 'icons/svg/shield.svg';
-    if (type === 'fear') return 'icons/svg/skull.svg';
-    if (type === 'feature' && category === 'fear') return 'icons/svg/skull.svg';
     if (type === 'feature' && category === 'note') return 'icons/svg/book.svg';
     if (type === 'feature' && category === 'special') return 'icons/svg/aura.svg';
     if (type === 'feature' && category === 'magicAction') return 'icons/svg/explosion.svg';
@@ -304,7 +295,6 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     // Separa los items por seccion visible de la ficha para simplificar las plantillas.
     const gear = [];
     const features = [];
-    const fearActions = [];
     const notesActions = [];
     const specialActions = [];
     const magicActions = [];
@@ -347,10 +337,6 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
         const quantity = Number(i.system?.quantity) || 1;
         currentSlots += (Number(i.system?.weight) || 0) * quantity;
       }
-      // Las acciones de miedo pueden existir como feature(category=fear) o como item type=fear.
-      else if ((i.type === 'feature' && i.system.category === 'fear') || i.type === 'fear') {
-        fearActions.push(i);
-      }
       // Notas del personaje: features marcadas con category=note.
       else if (i.type === 'feature' && i.system.category === 'note') {
         notesActions.push(i);
@@ -391,7 +377,6 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     // Assign and return
     context.gear = gear;
     context.features = features;
-    context.fearActions = fearActions;
     context.notesActions = notesActions;
     context.specialActions = specialActions;
     context.npcMagicActions = magicActions;
@@ -468,7 +453,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     });
 
     // Toggle collapsed view for compact rows in selected item lists.
-    html.on('click', '.fear-name, .special-name, .character-feature-title-row, .character-spell-title-row', async (ev) => {
+    html.on('click', '.special-name, .character-feature-title-row, .character-spell-title-row', async (ev) => {
       ev.preventDefault();
       ev.stopPropagation();
 
@@ -529,13 +514,6 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
 
       if (maxPath && maxValue > 0) {
         updateData[maxPath] = maxValue;
-      }
-
-      if (resourcePath === 'system.hope.value') {
-        // Sincroniza el campo heredado para que Esperanza siga funcionando en
-        // actores creados antes del cambio desde power hacia hope.
-        updateData['system.power.value'] = nextValue;
-        updateData['system.power.max'] = 6;
       }
 
       await this.actor.update(updateData);
@@ -614,9 +592,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       data.actionEnabled = data.actionEnabled === true || data.actionEnabled === 'true';
     }
     // Da nombres utiles por defecto segun la categoria del item creado.
-    const name = data.category === 'fear'
-      ? 'Nueva accion de miedo'
-      : data.category === 'note'
+    const name = data.category === 'note'
         ? game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Notes.Add')
       : data.category === 'special'
         ? 'Nueva habilidad especial'
@@ -688,13 +664,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       return i18nKey ? game.i18n.localize(i18nKey) : `@abilities.${key}`;
     };
 
-    const spellcastingClassAbility = {
-      combatiente: 'inst',
-      especialista: 'pre',
-      canalizador: 'ment'
-    };
-    const className = this.actor?.system?.details?.className || 'combatiente';
-    const spellAbilityLabel = abilityLabel(spellcastingClassAbility[className] || 'inst');
+    const spellAbilityLabel = abilityLabel(this.actor?.system?.details?.spellAttribute || 'ment');
 
     const spellcastingLabels = {
       spellAbilityValue: spellAbilityLabel,

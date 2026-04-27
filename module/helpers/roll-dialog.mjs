@@ -184,7 +184,6 @@ export function getRollTypeLabel(typeKey = '') {
     item: game.i18n.localize('TIRDUIN_RPS.Roll.Type.item'),
     feature: game.i18n.localize('TIRDUIN_RPS.Roll.Type.feature'),
     spell: game.i18n.localize('TIRDUIN_RPS.Roll.Type.spell'),
-    fear: game.i18n.localize('TIRDUIN_RPS.Roll.Type.fear'),
     special: game.i18n.localize('TIRDUIN_RPS.Roll.Type.special'),
     weapon: game.i18n.localize('TIRDUIN_RPS.Roll.Type.weapon'),
     armor: game.i18n.localize('TIRDUIN_RPS.Roll.Type.armor'),

@@ -54,11 +54,11 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
 
     schema.details = new fields.SchemaField({
       race: new fields.StringField({ required: true, nullable: false, initial: '' }),
-      className: new fields.StringField({
+      spellAttribute: new fields.StringField({
         required: true,
         nullable: false,
-        initial: 'combatiente',
-        choices: ['combatiente', 'especialista', 'canalizador']
+        initial: 'ment',
+        choices: ['ment', 'inst', 'pre']
       }),
       background: new fields.StringField({ required: true, nullable: false, initial: '' }),
       size: new fields.StringField({
@@ -193,12 +193,8 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
     this.attributes.fatigue.isDeadly = Boolean(fatigueEffect.isDeadly);
 
     const sourceHasHope = foundry.utils.hasProperty(this._source ?? {}, 'system.hope');
-    const legacyPowerValue = Number(this.power?.value) || 0;
-    const currentHope = sourceHasHope
-      ? (Number(this.hope?.value) || 0)
-      : legacyPowerValue;
-    // Rehidrata Esperanza desde power en actores previos a la migración del recurso.
-    this.hope.value = Math.max(0, Math.min(6, currentHope));
+  
+    this.hope.value = Math.max(0, Math.min(6, Number(this.hope?.value)|| 2));
     this.hope.max = 6;
 
     this.stress.value = Math.max(0, Math.min(6, Number(this.stress?.value) || 0));
@@ -207,16 +203,10 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
     this.luck.value = Math.max(0, Math.min(3, Number(this.luck?.value) || 0));
     this.luck.max = 3;
 
-    const spellcastingClassAbility = {
-      combatiente: 'inst',
-      especialista: 'pre',
-      canalizador: 'ment'
-    };
-    const className = this.details?.className || 'combatiente';
-    const abilityKey = spellcastingClassAbility[className] || 'inst';
-    const spellAbilityValue = (Number(this.abilities?.[abilityKey]?.value) || 0) + this.attributes.fatigue.rollPenalty;
+    const spellAttrName = this.details?.spellAttribute || 'inst';
+    const spellAbilityValue = (Number(this.abilities?.[spellAttrName]?.value) || 0) + this.attributes.fatigue.rollPenalty;
     this.spellcasting.spellAbilityValue = spellAbilityValue;
-    this.spellcasting.spellAbilityLabel = game.i18n.localize(CONFIG.TIRDUIN_RPS.abilities[abilityKey]) || abilityKey;
+    this.spellcasting.spellAbilityLabel = game.i18n.localize(CONFIG.TIRDUIN_RPS.abilities[spellAttrName]) || spellAttrName;
 
     // Character speed is derived from agility using the system progression table.
     const speedByAgility = {
@@ -279,25 +269,19 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
       dcPenalty: Number(this.attributes?.fatigue?.dcPenalty) || 0,
     };
 
-    const spellcastingClassAbility = {
-      combatiente: 'inst',
-      especialista: 'pre',
-      canalizador: 'ment'
-    };
-    const className = this.details?.className || 'combatiente';
-    const abilityKey = spellcastingClassAbility[className] || 'inst';
+    const abilityKey = this.details?.spellAttribute || 'inst';
     const spellAbilityValue = (Number(this.abilities?.[abilityKey]?.value) || 0) + fatigueRollPenalty;
     const spellProficiency = Math.max(0, Math.min(5, Number(this.spellcasting?.proficiency) || 0));
     const spellAttackExtra = Number(this.spellcasting?.attackExtra) || 0;
     const spellDcExtra = Number(this.spellcasting?.dcExtra) || 0;
     const spellAbilityLabel = game.i18n.localize(CONFIG.TIRDUIN_RPS.abilities[abilityKey]) || abilityKey;
-
+    
     this.spellcasting.spellAbilityValue = spellAbilityValue;
     this.spellcasting.spellAbilityLabel = spellAbilityLabel;
 
     data.spellcasting = {
       attackBonus: spellAbilityValue + spellProficiency + spellAttackExtra,
-      dc: 10 + spellAbilityValue + spellProficiency + spellDcExtra,
+      dc: 10 + spellAbilityValue + data.lvl + spellDcExtra,
       ability: abilityKey,
       proficiency: spellProficiency,
       attackExtra: spellAttackExtra,

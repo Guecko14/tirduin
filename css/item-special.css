@@ -188,18 +188,6 @@
   flex: 0 0 180px;
 }
 
-.special-item-sheet .fear-sheet-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 10px;
-}
-
-.special-item-sheet .fear-field {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
 .special-item-sheet .spell-components {
   display: flex;
   flex-wrap: nowrap;
@@ -307,10 +295,4 @@
   outline: none;
   border-color: #b08b43;
   box-shadow: 0 0 0 1px rgba(176, 139, 67, 0.25);
-}
-
-@media (max-width: 700px) {
-  .special-item-sheet .fear-sheet-grid {
-    grid-template-columns: 1fr;
-  }
 }

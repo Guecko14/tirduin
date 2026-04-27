@@ -20,7 +20,7 @@
 "thumbnail": "systems/tirduin/assets/anvil-impact.png"
 }
 ],
-"version": "0.2.10",
+"version": "0.2.11",
 "compatibility": {
 "minimum": 14,
 "verified": "14.359"
@@ -33,7 +33,6 @@
 "css/npc-sheet.css",
 "css/character-sheet.css",
 "css/loot-sheet.css",
-"css/item-fear.css",
 "css/item-special.css",
 "css/npc-objects.css",
 "css/roll-dialog.css"
@@ -56,7 +55,6 @@
 "item": {},
 "feature": {},
 "spell": {},
-"fear": {},
 "weapon": {},
 "armor": {}
 }
