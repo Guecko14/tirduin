@@ -684,6 +684,7 @@ Hooks.once('ready', function () {
   Hooks.on('updateActor', async (actor, changedData, options) => {
     if (!actor || !['npc', 'character'].includes(actor.type)) return;
     if (options?.tirduinSkipArmorSync) return;
+    if (!actor.isOwner) return;
 
     // Compara con valor numérico para evitar falsos positivos por coerción de
     // tipo string→number que el FormApplication de Foundry v1 introduce al
