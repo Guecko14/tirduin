@@ -222,12 +222,9 @@ export function getD20OutcomeText(roll) {
   const natural = getNaturalD20Result(roll);
   if (natural === null) return '';
 
-  const mood = (natural % 2 === 0)
-    ? game.i18n.localize('TIRDUIN_RPS.Roll.Mood.Hope')
-    : game.i18n.localize('TIRDUIN_RPS.Roll.Mood.Fear');
-  if (natural === 20) return `${mood} | ${game.i18n.localize('TIRDUIN_RPS.Roll.Outcome.CriticalNatural')}`;
-  if (natural === 1) return `${mood} | ${game.i18n.localize('TIRDUIN_RPS.Roll.Outcome.Fumble')}`;
-  return game.i18n.format('TIRDUIN_RPS.Roll.Outcome.RollWithMood', { mood });
+  if (natural === 20) return `${game.i18n.localize('TIRDUIN_RPS.Roll.Outcome.Critical')}`;
+  if (natural === 1) return `${game.i18n.localize('TIRDUIN_RPS.Roll.Outcome.Fumble')}`;
+  return '';
 }
 
 /**
@@ -262,27 +259,9 @@ export function getRollDiceBreakdown(roll) {
 }
 
 /**
- * Build d20 outcome text with optional mood suppression.
- * @param {Roll} roll
- * @param {{includeMood?: boolean}} options
- * @returns {string}
- */
-export function getD20OutcomeTextWithOptions(roll, { includeMood = true } = {}) {
-  const natural = getNaturalD20Result(roll);
-  if (natural === null) return '';
-
-  if (!includeMood) {
-    if (natural === 20) return game.i18n.localize('TIRDUIN_RPS.Roll.Outcome.CriticalNatural');
-    if (natural === 1) return game.i18n.localize('TIRDUIN_RPS.Roll.Outcome.Fumble');
-    return '';
-  }
-
-  return getD20OutcomeText(roll);
-}
-
-/**
- * Build a stylized HTML flavor card for chat messages.
- * @param {{title: string, roll?: Roll, outcomeText?: string, edgeMode?: string, totalOverride?: number|null, showDiceBreakdown?: boolean, showBonus?: boolean}} options
+ * Construye una tarjeta de estilo HTML para los mensajes de chat de tiradas, simplificada.
+ * Colorea el borde de la tarjeta si es crítico o pifia.
+ * @param {{title: string, roll?: Roll, outcomeText?: string, edgeMode?: string, totalOverride?: number|null, showDiceBreakdown?: boolean, showBonus?: boolean, type?: string}} options
  * @returns {string}
  */
 export function buildRollFlavorHtml({
@@ -291,9 +270,11 @@ export function buildRollFlavorHtml({
   outcomeText = '',
   edgeMode = ROLL_EDGE_MODE.NONE,
   totalOverride = null,
-  showDiceBreakdown = false,
+  showDiceBreakdown = true,
   showBonus = false,
+  type = '',
 } = {}) {
+  // Limpieza de seguridad del título.
   const safeTitle = String(title)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -301,6 +282,7 @@ export function buildRollFlavorHtml({
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
+  // Obtenemos los datos necesarios de la tirada para los cálculos visuales.
   const natural = roll ? getNaturalD20Result(roll) : null;
   const edgeD6 = roll ? getEdgeD6Result(roll) : null;
   const total = typeof totalOverride === 'number'
@@ -327,33 +309,30 @@ export function buildRollFlavorHtml({
   const bonusLabel = bonus === null
     ? ''
     : `${bonus >= 0 ? '+' : ''}${bonus}`;
-  const mood = natural !== null ? (natural % 2 === 0 ? 'esperanza' : 'miedo') : '';
-  const moodLabel = mood ? game.i18n.localize(mood === 'esperanza' ? 'TIRDUIN_RPS.Roll.Mood.Hope' : 'TIRDUIN_RPS.Roll.Mood.Fear') : '';
+
+  // Determinamos las clases de estado (crítico o pifia).
+  let statusClass = "";
+  if (natural === 20) statusClass = "is-critical";
+  else if (natural === 1) statusClass = "is-fumble";
+
+  // Obtenemos el texto de resultado definitivo (ya traducido).
   const resolvedOutcome = outcomeText || (roll ? getD20OutcomeText(roll) : '');
-  const edgeLabel = hasEdge
-    ? `${edgeMode === ROLL_EDGE_MODE.ADVANTAGE ? '+' : '-'}${edgeD6}`
-    : '';
   const diceBreakdown = showDiceBreakdown && roll ? getRollDiceBreakdown(roll) : '';
 
+  // Devolvemos el HTML simplificado.
+  // Fíjate que hemos añadido ${statusClass} en las clases principales,
   return `
-    <div class="tirduin-roll-flavor ${mood ? `is-${mood}` : ''}">
+    <div class="tirduin-roll-flavor ${type} ${statusClass}">
       ${safeTitle ? `<div class="tirduin-roll-title">${safeTitle}</div>` : ''}
-      ${natural !== null ? `
-      <div class="tirduin-roll-mood ${hasEdge ? 'tirduin-roll-mood-edge' : ''}">
-        <span class="tirduin-roll-dot"></span>
-        <span class="tirduin-roll-mood-label">${moodLabel}</span>
-        <span class="tirduin-roll-mood-value">${natural}</span>
-        ${hasEdge ? `<span class="tirduin-roll-edge-value">${edgeLabel}</span>` : ''}
-      </div>
-      ` : ''}
-      ${diceBreakdown ? `<div class="tirduin-roll-breakdown">${diceBreakdown}</div>` : ''}
+      
+      ${diceBreakdown ? `<div class="tirduin-roll-breakdown"><i class="fa-sharp fa-thin fa-dice-d20"></i>${diceBreakdown}</div>` : ''}
       ${total !== null ? `
       <div class="tirduin-roll-metrics">
         ${shouldShowBonus ? `<div class="tirduin-roll-bonus">${game.i18n.format('TIRDUIN_RPS.Roll.Metric.Bonus', { value: bonusLabel })}</div>` : ''}
         <div class="tirduin-roll-total">${game.i18n.format('TIRDUIN_RPS.Roll.Metric.Total', { value: total })}</div>
       </div>
       ` : ''}
-      ${resolvedOutcome ? `<div class="tirduin-roll-outcome">${resolvedOutcome}</div>` : ''}
+      ${resolvedOutcome ? `<div class="tirduin-roll-outcome ${statusClass}">${resolvedOutcome}</div>` : ''}
     </div>
   `;
 }
@@ -390,19 +369,14 @@ export function buildWeaponAttackDamageFlavorHtml({
 
   let attackOutcomeText = getD20OutcomeText(attackRoll);
   if (targetName !== null && targetAC !== null) {
-    const hit = (Number(attackRoll.total) || 0) >= Number(targetAC);
+    const hit = ((Number(attackRoll.total) || 0) >= Number(targetAC)) || isCritical;
+    console.log(`Comparing attack total ${attackRoll.total} against target AC ${targetAC} => hit: ${hit}`);
     const hitLabel = hit
       ? game.i18n.localize('TIRDUIN_RPS.Roll.Outcome.Hit')
       : game.i18n.localize('TIRDUIN_RPS.Roll.Outcome.Miss');
     attackOutcomeText = [attackOutcomeText, `${hitLabel} a ${targetName}`]
       .filter(Boolean)
       .join(' | ');
-  }
-
-  if (isCritical) {
-    attackOutcomeText = `${attackOutcomeText ? `${attackOutcomeText} | ` : ''}<span class="tirduin-roll-outcome-badge is-critical">${game.i18n.localize('TIRDUIN_RPS.Roll.Outcome.Critical')}</span>`;
-  } else if (isFumble) {
-    attackOutcomeText = `${attackOutcomeText ? `${attackOutcomeText} | ` : ''}<span class="tirduin-roll-outcome-badge is-fumble">${game.i18n.localize('TIRDUIN_RPS.Roll.Outcome.FumbleUpper')}</span>`;
   }
 
   return `
@@ -416,7 +390,7 @@ export function buildWeaponAttackDamageFlavorHtml({
       ${buildRollFlavorHtml({
         title: damageTitle,
         roll: damageRoll,
-        outcomeText: isCritical ? `<span class="tirduin-roll-outcome-badge is-critical">${game.i18n.localize('TIRDUIN_RPS.Roll.Outcome.CriticalDice')}</span>` : '',
+        outcomeText: isCritical ? `<span class="tirduin-roll-outcome-badge is-critical">${game.i18n.localize('TIRDUIN_RPS.Roll.Outcome.Critical')}</span>` : '',
         showDiceBreakdown: true,
         showBonus: true,
       })}

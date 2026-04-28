@@ -202,6 +202,7 @@ Handlebars.registerHelper('weaponCategoryLabel', function (category) {
     simple: 'Simple',
     marcial: 'Marcial',
     magica: 'Magica',
+    extra: 'Extra',
   };
   return labels[category] || category;
 });
@@ -1295,6 +1296,7 @@ async function rollItemMacro(itemUuid) {
       targetName,
       targetAC,
     }),
+    roll: [attackRoll, damageRoll, ...(damageRoll2 ? [damageRoll2] : []), ...extraDamageRolls.map(e => e.roll)],
   }));
 
   if (isRangedWeapon) {

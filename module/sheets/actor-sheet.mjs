@@ -970,6 +970,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       await ChatMessage.create(applyChatRollMode({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
         content: flavor,
+        rolls: [roll],
       }));
       return roll;
     }
@@ -986,7 +987,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     event.stopPropagation();
 
     const actorRollData = this.actor.getRollData();
-    const baseFormula = CONFIG.Combat?.initiative?.formula || '1d20 + @abilities.agil.mod';
+    const baseFormula = CONFIG.Combat?.initiative?.formula || '1d20 + @abilities.agil.mod + @abilities.inst.mod';
     const selection = await promptInitiativeConfirmation({
       formula: baseFormula,
       rollData: actorRollData,
@@ -1010,11 +1011,12 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     await ChatMessage.create(applyChatRollMode({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       content: buildRollFlavorHtml({
-        title: `${buildTypedRollTitle('ability', game.i18n.localize('TIRDUIN_RPS.Roll.Label.Initiative'))}${getRollEdgeFlavorSuffix(edgeMode)}`,
+        title: `${buildTypedRollTitle('initiative', game.i18n.localize('TIRDUIN_RPS.Roll.Label.Initiative'))}${getRollEdgeFlavorSuffix(edgeMode)}`,
         roll,
         showDiceBreakdown: true,
         showBonus: true,
       }),
+      rolls: [roll],
     }));
 
     return roll;
@@ -1038,18 +1040,25 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     await roll.evaluate();
 
     const natural = getNaturalD20Result(roll);
-    const isHope = natural !== null && natural % 2 === 0;
 
     // Increment the corresponding death-roll counter (capped at max).
     const system = this.actor.system;
-    if (isHope) {
+    if (natural !== null && natural > 10) {
       const current = Number(system?.deathRoll?.hope?.value) || 0;
       const max = Number(system?.deathRoll?.hope?.max) || 3;
-      await this.actor.update({ 'system.deathRoll.hope.value': Math.min(current + 1, max) });
+      if(natural==20){
+        await this.actor.update({ 'system.deathRoll.hope.value': Math.min(max, max) }); 
+      }else{
+        await this.actor.update({ 'system.deathRoll.hope.value': Math.min(current + 1, max) });
+      }
     } else {
       const current = Number(system?.deathRoll?.fear?.value) || 0;
       const max = Number(system?.deathRoll?.fear?.max) || 3;
-      await this.actor.update({ 'system.deathRoll.fear.value': Math.min(current + 1, max) });
+      if(natural==1){
+        await this.actor.update({ 'system.deathRoll.fear.value': Math.min(current + 2, max) });
+      }else{
+        await this.actor.update({ 'system.deathRoll.fear.value': Math.min(current + 1, max) });
+      }
     }
 
     const outcomeText = getD20OutcomeText(roll);
@@ -1059,6 +1068,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     await ChatMessage.create(applyChatRollMode({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       content: flavor,
+      rolls: [roll],
     }));
   }
 
@@ -1099,6 +1109,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
         showDiceBreakdown: true,
         showBonus: true,
       }),
+      rolls: [roll],
     }));
 
     const raMax = Math.max(0, Number(item.system?.ra) || 0);
@@ -1137,7 +1148,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     const row = event.currentTarget;
     const itemId = row?.dataset?.itemId;
     const weapon = this.actor.items.get(itemId);
-    if (!weapon || weapon.type !== 'weapon') return;
+    if (!weapon || weapon.type !== 'weapon' || weapon.system?.category === 'extra') return;
 
     const damageDie = String(weapon.system?.damageDie || '').trim();
     if (!damageDie) {
@@ -1257,6 +1268,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
         targetName,
         targetAC,
       }),
+      rolls: [attackRoll, damageRoll, ...(damageRoll2 ? [damageRoll2] : []), ...damageRollExtraEntries.map((e) => e.roll)],
     }));
 
     if (isRangedWeapon) {
@@ -1353,6 +1365,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       await ChatMessage.create(applyChatRollMode({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
         content: `<div class="tirduin-roll-bundle">${damageCard}</div>`,
+        rolls: [damageRoll],
       }));
       return { damageRoll };
     }
@@ -1397,6 +1410,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     await ChatMessage.create(applyChatRollMode({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       content: `<div class="tirduin-roll-bundle">${saveCard}${damageCard}</div>`,
+      rolls: [saveRoll, damageRoll],
     }));
 
     return { saveRoll, damageRoll, success, appliedDamageTotal };
