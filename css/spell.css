@@ -225,3 +225,163 @@
   gap: 6px;
 }
 
+.special-item-sheet .spell-sheet-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+}
+
+.special-item-sheet .spell-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+@media (max-width: 700px) {
+  .special-item-sheet .spell-sheet-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+//Tarjeta de conjuros en el sheet de mensajes de tirduin.
+
+/* Contenedor principal de la tarjeta */
+.tirduin-item-summary-card {
+    border: 1px solid #b5b3a4;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 5px;
+    padding: 8px;
+    margin: 5px 0;
+    font-family: "Signika", sans-serif;
+    color: #191813;
+}
+
+/* Encabezado: Imagen y Títulos */
+.tirduin-item-summary-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 2px solid #7a7971;
+    padding-bottom: 5px;
+    margin-bottom: 8px;
+}
+
+.tirduin-item-summary-header img {
+    border: none;
+    border-radius: 4px;
+    background: #4b4a44;
+    padding: 2px;
+}
+
+.tirduin-item-summary-title {
+    font-weight: bold;
+    font-size: 1.1em;
+    text-transform: uppercase;
+    color: #4b0101; /* Un granate oscuro clásico de RPG */
+}
+
+.tirduin-item-summary-subtitle {
+    font-size: 0.85em;
+    font-style: italic;
+    color: #4b4a44;
+}
+
+/* Cuadrícula de Propiedades */
+.tirduin-item-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Divide en 2 columnas */
+    gap: 4px 8px;
+    font-size: 0.9em;
+}
+
+/* Estilo de cada fila de atributo */
+.tirduin-item-summary-row {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dotted #b5b3a4;
+    padding: 2px 0;
+}
+
+/* La etiqueta (Tipo, Nivel, etc) */
+.tirduin-item-summary-row span {
+    font-weight: normal;
+    color: #7a7971;
+}
+
+/* El valor (Conj., 1, Toque, etc) */
+.tirduin-item-summary-row strong {
+    font-weight: bold;
+    color: #191813;
+}
+
+/* Casos especiales: Si una fila debe ocupar todo el ancho (ej. Componentes) */
+.tirduin-item-summary-row:last-child {
+    grid-column: span 2;
+}
+
+/* Contenedor de la descripción */
+.tirduin-item-summary-description {
+    margin-top: 10px;
+    border-top: 1px solid #b5b3a4;
+    padding-top: 5px;
+}
+
+/* Título de la descripción */
+.tirduin-item-summary-description h4 {
+    margin: 0 0 5px 0;
+    font-size: 0.9em;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #4b4a44;
+}
+
+/* El botón de tirada dentro del texto */
+.tirduin-summary-roll {
+    /* 1. Comportamiento Inline Estricto */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;      /* Evita que el texto del botón se rompa */
+    width: auto;              /* Asegura que no ocupe todo el ancho */
+    
+    /* 2. Dimensiones Mini */
+    height: 10px;             /* Altura fija pequeña para no separar líneas */
+    padding: 0 6px;           /* Espacio a los lados */
+    vertical-align: baseline; /* Alinea la base del botón con la base del texto */
+    
+    /* 3. Estética Redonda (Pill) */
+    border-radius: 12px;      /* Mitad de la altura aproximadamente para ser redondo */
+    background: #ecebe3;
+    border: 1px solid #7a7971;
+    
+    /* 4. Texto y Fuente */
+    font-size: 0.75rem;       /* Texto más pequeño que el párrafo */
+    font-weight: bold;
+    line-height: 1;           /* Evita que el texto interno ensanche el botón */
+    cursor: pointer;
+    box-shadow: none;
+}
+
+/* Ajuste del icono para que no asome por fuera */
+.tirduin-summary-roll i {
+    font-size: 0.7rem;
+    margin-right: 4px;
+    color: #4b4a44;
+}
+
+/* Efecto al pasar el ratón */
+.tirduin-summary-roll:hover {
+    background: #4b0101;
+    color: white;
+    border-color: #000;
+}
+
+/* Ajuste del icono del dado */
+.tirduin-summary-roll i {
+    font-size: 0.9em;
+    color: #4b4a44;
+}
+
+.tirduin-summary-roll:hover i {
+    color: white;
+}
