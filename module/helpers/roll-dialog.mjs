@@ -172,8 +172,8 @@ export function applyChatRollMode(chatData, mode = null) {
   // --- NUEVA LÓGICA PARA EL ICONO ---
   // Si no hay imagen en chatData, intentamos sacarla del "speaker"
   if (!messageData.img && messageData.speaker) {
-      const actor = game.actors.get(messageData.speaker.actor);
-      if (actor) messageData.img = actor.img; // O actor.prototypeToken.texture.src
+    const actor = game.actors.get(messageData.speaker.actor);
+    if (actor) messageData.img = actor.img; // O actor.prototypeToken.texture.src
   }
 
   return messageData;
@@ -358,12 +358,12 @@ export function buildWeaponAttackDamageFlavorHtml({
   targetName = null,
   targetAC = null,
 } = {}) {
- // 1. Título del Ataque
+  // 1. Título del Ataque
   const attackTitle = buildTypedRollTitle(
     'weapon',
     `${weaponName} ${game.i18n.localize('TIRDUIN_RPS.Roll.Label.AttackSuffix')}${edgeText}`
   );
-  
+
   const naturalAttack = getNaturalD20Result(attackRoll);
   const isCritical = naturalAttack === 20;
 
@@ -386,8 +386,8 @@ export function buildWeaponAttackDamageFlavorHtml({
       title: entry.typeLabel || game.i18n.localize('TIRDUIN_RPS.Roll.Label.Damage'),
       roll: entry.roll,
       // Solo mostramos el badge de crítico en el primer bloque de daño
-      outcomeText: (isCritical && index === 0) 
-        ? `<span class="tirduin-roll-outcome-badge is-critical">${game.i18n.localize('TIRDUIN_RPS.Roll.Outcome.Critical')}</span>` 
+      outcomeText: (isCritical && index === 0)
+        ? `<span class="tirduin-roll-outcome-badge is-critical">${game.i18n.localize('TIRDUIN_RPS.Roll.Outcome.Critical')}</span>`
         : '',
       showDiceBreakdown: true,
       showBonus: true,
@@ -399,11 +399,11 @@ export function buildWeaponAttackDamageFlavorHtml({
   return `
     <div class="tirduin-roll-bundle">
       ${buildRollFlavorHtml({
-        title: attackTitle,
-        roll: attackRoll,
-        outcomeText: attackOutcomeText,
-        edgeMode,
-      })}
+    title: attackTitle,
+    roll: attackRoll,
+    outcomeText: attackOutcomeText,
+    edgeMode,
+  })}
       ${damageHtml} 
     </div>
   `;

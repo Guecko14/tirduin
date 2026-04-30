@@ -9,6 +9,6 @@ export default class TirduinRPSDataModel extends foundry.abstract.TypeDataModel 
    * @returns {object} Plain object either via deepClone or the spread operator.
    */
   toPlainObject() {
-    return {...this};
+    return { ...this };
   }
 }

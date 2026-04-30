@@ -197,11 +197,11 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
           bonus,
           total: abilityVal + rank + bonus + fatigueRollPenalty
         };
-    })
-    .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }));
+      })
+      .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }));
 
     if (this.actor.type === 'character') {
-      
+
       const abilityKey = context.system?.details?.spellAttribute || 'ment';
       const abilityValue = Number(context.system?.abilities?.[abilityKey]?.value) || 0;
       const proficiency = Math.max(0, Math.min(5, Number(context.system?.spellcasting?.proficiency) || 0));
@@ -431,11 +431,11 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       ev.preventDefault();
       const tabName = $(ev.currentTarget).data('tab');
       const tabContent = $(ev.currentTarget).closest('.sheet-tabs').siblings('.tabs-content');
-      
+
       // Deactivate all tabs and contents
       $(ev.currentTarget).closest('.sheet-tabs').find('.item').removeClass('active');
       tabContent.find('.tab').removeClass('active');
-      
+
       // Activate selected tab
       $(ev.currentTarget).addClass('active');
       tabContent.find(`.tab[data-tab="${tabName}"]`).addClass('active');
@@ -593,18 +593,18 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     }
     // Da nombres utiles por defecto segun la categoria del item creado.
     const name = data.category === 'note'
-        ? game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Notes.Add')
+      ? game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Notes.Add')
       : data.category === 'special'
         ? 'Nueva habilidad especial'
-      : data.category === 'magicAction'
-        ? 'Nuevo ataque magico'
-      : (type === 'spell')
-        ? 'Nuevo conjuro'
-      : (type === 'feature')
-        ? 'Nueva dote'
-      : (type === 'weapon' && data.actionEnabled)
-        ? 'Nuevo ataque'
-      : `New ${type.capitalize()}`;
+        : data.category === 'magicAction'
+          ? 'Nuevo ataque magico'
+          : (type === 'spell')
+            ? 'Nuevo conjuro'
+            : (type === 'feature')
+              ? 'Nueva dote'
+              : (type === 'weapon' && data.actionEnabled)
+                ? 'Nuevo ataque'
+                : `New ${type.capitalize()}`;
     // Prepare the item object.
     const itemData = {
       name: name,
@@ -1048,17 +1048,17 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     if (natural !== null && natural > 10) {
       const current = Number(system?.deathRoll?.hope?.value) || 0;
       const max = Number(system?.deathRoll?.hope?.max) || 3;
-      if(natural==20){
-        await this.actor.update({ 'system.deathRoll.hope.value': Math.min(max, max) }); 
-      }else{
+      if (natural == 20) {
+        await this.actor.update({ 'system.deathRoll.hope.value': Math.min(max, max) });
+      } else {
         await this.actor.update({ 'system.deathRoll.hope.value': Math.min(current + 1, max) });
       }
     } else {
       const current = Number(system?.deathRoll?.fear?.value) || 0;
       const max = Number(system?.deathRoll?.fear?.max) || 3;
-      if(natural==1){
+      if (natural == 1) {
         await this.actor.update({ 'system.deathRoll.fear.value': Math.min(current + 2, max) });
-      }else{
+      } else {
         await this.actor.update({ 'system.deathRoll.fear.value': Math.min(current + 1, max) });
       }
     }
@@ -1149,7 +1149,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     event.preventDefault();
     const row = event.currentTarget.closest('[data-item-id]');
     const item = this.actor.items.get(row.dataset.itemId);
-    
+
     if (!item || item.type !== 'weapon' || item.system?.category == 'extra') return;
 
     // Delegates the actual attack roll and damage application to the Tirduin system, which needs to be involved in order to properly handle the various weapon categories and special rules.

@@ -193,8 +193,8 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
     this.attributes.fatigue.isDeadly = Boolean(fatigueEffect.isDeadly);
 
     const sourceHasHope = foundry.utils.hasProperty(this._source ?? {}, 'system.hope');
-  
-    this.hope.value = Math.max(0, Math.min(6, Number(this.hope?.value)|| 2));
+
+    this.hope.value = Math.max(0, Math.min(6, Number(this.hope?.value) || 2));
     this.hope.max = 6;
 
     this.stress.value = Math.max(0, Math.min(6, Number(this.stress?.value) || 0));
@@ -249,7 +249,7 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
     // Copy the ability scores to the top level, so that rolls can use
     // formulas like `@vig.mod + 4`.
     if (this.abilities) {
-      for (let [k,v] of Object.entries(this.abilities)) {
+      for (let [k, v] of Object.entries(this.abilities)) {
         data[k] = foundry.utils.deepClone(v);
         data[k].mod = (Number(data[k].mod) || 0) + fatigueRollPenalty;
       }
@@ -275,7 +275,7 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
     const spellAttackExtra = Number(this.spellcasting?.attackExtra) || 0;
     const spellDcExtra = Number(this.spellcasting?.dcExtra) || 0;
     const spellAbilityLabel = game.i18n.localize(CONFIG.TIRDUIN_RPS.abilities[abilityKey]) || abilityKey;
-    
+
     this.spellcasting.spellAbilityValue = spellAbilityValue;
     this.spellcasting.spellAbilityLabel = spellAbilityLabel;
 

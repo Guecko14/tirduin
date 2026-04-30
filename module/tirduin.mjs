@@ -275,7 +275,7 @@ Hooks.once('ready', function () {
       try {
         const current = game.settings.get('core', 'gridDiagonals');
         if (current !== alternateMode) {
-          game.settings.set('core', 'gridDiagonals', alternateMode).catch(() => {});
+          game.settings.set('core', 'gridDiagonals', alternateMode).catch(() => { });
         }
       } catch (_error) {
         // Ignore if the core setting key changes across versions.
@@ -299,9 +299,9 @@ Hooks.once('ready', function () {
 
   const syncActorTokenSize = async (actor) => {
     if (!actor || !['npc', 'character'].includes(actor.type)) return;
-    
+
     // Solo el dueño o el GM deben procesar la actualización en DB
-    if (!game.user.isGM && !actor.isOwner ) return;
+    if (!game.user.isGM && !actor.isOwner) return;
 
     const tokenUnits = getTokenSizeUnits(actor);
 
@@ -317,22 +317,22 @@ Hooks.once('ready', function () {
     const activeTokens = actor.getActiveTokens(true) || [];
     const tokenUpdates = [];
 
-  for (const token of activeTokens) {
-    // Filtrado de permisos: evita errores en clientes sin control
-    if (!game.user.isGM && !token.actor?.isOwner) continue;
+    for (const token of activeTokens) {
+      // Filtrado de permisos: evita errores en clientes sin control
+      if (!game.user.isGM && !token.actor?.isOwner) continue;
 
-    const tokenWidth = Number(token.document?.width) || 1;
-    const tokenHeight = Number(token.document?.height) || 1;
-    if (tokenWidth === tokenUnits && tokenHeight === tokenUnits) continue;
+      const tokenWidth = Number(token.document?.width) || 1;
+      const tokenHeight = Number(token.document?.height) || 1;
+      if (tokenWidth === tokenUnits && tokenHeight === tokenUnits) continue;
 
-    tokenUpdates.push({
-      _id: token.id,
-      width: tokenUnits,
-     height: tokenUnits
-   });
-  }
+      tokenUpdates.push({
+        _id: token.id,
+        width: tokenUnits,
+        height: tokenUnits
+      });
+    }
 
-  // Batch update seguro
+    // Batch update seguro
     if (tokenUpdates.length && canvas.scene) {
       await canvas.scene.updateEmbeddedDocuments("Token", tokenUpdates);
     }
@@ -373,9 +373,9 @@ Hooks.once('ready', function () {
 
   const syncNpcArmorClass = async (actor) => {
     if (!actor || !['npc', 'character'].includes(actor.type)) return;
-    
+
     // Solo el dueño o el GM deben procesar la actualización en DB
-    if (!game.user.isGM && !actor.isOwner ) return;
+    if (!game.user.isGM && !actor.isOwner) return;
 
     const armorClass = calculateArmorClassFromEquippedArmors(actor);
     if (Number(actor.system?.attributes?.armorClass?.value) === armorClass) return;
@@ -575,7 +575,7 @@ Hooks.once('ready', function () {
   if (game.user?.isGM) {
     for (const actor of game.actors ?? []) {
       if (!isLootActor(actor)) continue;
-      ensureLootActorAccess(actor).catch(() => {});
+      ensureLootActorAccess(actor).catch(() => { });
     }
   }
 
@@ -701,7 +701,7 @@ Hooks.once('ready', function () {
 
     if (!isAuthoritativeUser(actor)) return;
 
-     // Ejecuta sync centralizado
+    // Ejecuta sync centralizado
     await runActorSync(actor, changedData);
   });
 
@@ -780,49 +780,49 @@ Hooks.once('ready', function () {
 
   // Botones de tirada embebidos en resúmenes de chat ([formula]).
   const handleInlineSummaryRollClick = async (event) => {
-      event.preventDefault();
+    event.preventDefault();
 
-      const button = event.currentTarget;
-      const formula = String(button.dataset.rollFormula || '').trim();
-      if (!formula) return;
-      const rollLabel = String(button.dataset.rollLabel || formula).trim();
-      const rollDamage = String(button.dataset.rollDamage || '').trim();
+    const button = event.currentTarget;
+    const formula = String(button.dataset.rollFormula || '').trim();
+    if (!formula) return;
+    const rollLabel = String(button.dataset.rollLabel || formula).trim();
+    const rollDamage = String(button.dataset.rollDamage || '').trim();
 
-      const actorId = String(button.dataset.actorId || '').trim();
-      const actor = actorId ? game.actors?.get(actorId) : null;
-      const rollData = actor?.getRollData?.() || {};
+    const actorId = String(button.dataset.actorId || '').trim();
+    const actor = actorId ? game.actors?.get(actorId) : null;
+    const rollData = actor?.getRollData?.() || {};
 
-      let roll;
+    let roll;
+    try {
+      roll = new Roll(formula, rollData);
+      await roll.evaluate();
+    } catch (_error) {
+      ui.notifications?.warn(game.i18n.localize('TIRDUIN_RPS.Chat.InvalidFormula'));
+      return;
+    }
+
+    let messageMode = 'public';
+    try {
+      messageMode = game.settings.get('core', 'messageMode') || 'public';
+    } catch (_error) {
       try {
-        roll = new Roll(formula, rollData);
-        await roll.evaluate();
-      } catch (_error) {
-        ui.notifications?.warn(game.i18n.localize('TIRDUIN_RPS.Chat.InvalidFormula'));
-        return;
+        messageMode = game.settings.get('core', 'rollMode') || 'public';
+      } catch (_err2) {
+        messageMode = 'public';
       }
+    }
 
-      let messageMode = 'public';
-      try {
-        messageMode = game.settings.get('core', 'messageMode') || 'public';
-      } catch (_error) {
-        try {
-          messageMode = game.settings.get('core', 'rollMode') || 'public';
-        } catch (_err2) {
-          messageMode = 'public';
-        }
-      }
-
-      await roll.toMessage({
-        speaker: ChatMessage.getSpeaker(actor ? { actor } : {}),
-        flavor: rollDamage
-          ? game.i18n.format('TIRDUIN_RPS.Chat.InlineRollFlavorWithDamage', {
-              formula: rollLabel,
-              damage: rollDamage,
-            })
-          : game.i18n.format('TIRDUIN_RPS.Chat.InlineRollFlavor', { formula: rollLabel }),
-      }, {
-        rollMode: messageMode,
-      });
+    await roll.toMessage({
+      speaker: ChatMessage.getSpeaker(actor ? { actor } : {}),
+      flavor: rollDamage
+        ? game.i18n.format('TIRDUIN_RPS.Chat.InlineRollFlavorWithDamage', {
+          formula: rollLabel,
+          damage: rollDamage,
+        })
+        : game.i18n.format('TIRDUIN_RPS.Chat.InlineRollFlavor', { formula: rollLabel }),
+    }, {
+      rollMode: messageMode,
+    });
   };
 
   Hooks.on('renderChatMessageHTML', (_message, element) => {
@@ -896,12 +896,12 @@ export async function rollWeaponAttack(item) {
   };
 
   // Recopilar bonificaciones de armas extra equipadas
-  const armasExtraEquipadas = actor.items.filter(i => 
-    i.type === 'weapon' && 
+  const armasExtraEquipadas = actor.items.filter(i =>
+    i.type === 'weapon' &&
     i.system?.actionEnabled === true && // equipado y usable
     i.system?.category === 'extra'
   );
-  
+
   // Extraemos los detalles de cada bonificador
   const extrasList = armasExtraEquipadas.map(i => ({
     name: i.name,
@@ -917,7 +917,7 @@ export async function rollWeaponAttack(item) {
   // 3. Lógica de Tirada (Ataque y Daño)
   const { abilityKey, edgeMode, attackBonus, extraDamageEntries } = selection;
   const rollData = actor.getRollData();
-  
+
   // Penalizador por fatiga (si aplica)
   const fatiguePenalty = actor.type === 'character' ? (Number(actor.system.attributes?.fatigue?.rollPenalty) || 0) : 0;
   const abilityValue = (Number(actor.system.abilities?.[weaponData.ability]?.value) || 0) + fatiguePenalty;
@@ -949,10 +949,10 @@ export async function rollWeaponAttack(item) {
 
   // 3. Agrupar daños de los extras por tipo
   for (const extra of extrasList) {
-    
-    const type = extra.damagetype || weaponData.damageType; 
+
+    const type = extra.damagetype || weaponData.damageType;
     const formula = extra.damage;
-    
+
     if (!damageMap.has(type)) damageMap.set(type, []);
     damageMap.get(type).push(formula);
   }
@@ -961,21 +961,21 @@ export async function rollWeaponAttack(item) {
   const damageRolls = [];
   for (const [type, components] of damageMap) {
     let finalFormula;
-    
+
     if (isCritical) {
-        const diceParts = components.filter(c => c.includes('d'));
-        const flatParts = components.filter(c => !c.includes('d'));
-        const doubledDice = diceParts.length > 0 ? dDice(diceParts.join(' + ')) : "";
-        const flatBonus = flatParts.length > 0 ? flatParts.join(' + ') : "";
-        finalFormula = [doubledDice, flatBonus].filter(Boolean).join(' + ');
+      const diceParts = components.filter(c => c.includes('d'));
+      const flatParts = components.filter(c => !c.includes('d'));
+      const doubledDice = diceParts.length > 0 ? dDice(diceParts.join(' + ')) : "";
+      const flatBonus = flatParts.length > 0 ? flatParts.join(' + ') : "";
+      finalFormula = [doubledDice, flatBonus].filter(Boolean).join(' + ');
     } else {
-        finalFormula = components.join(' + ');
+      finalFormula = components.join(' + ');
     }
-    
+
     const roll = await new Roll(finalFormula, rollData).evaluate();
-    damageRolls.push({ 
-        roll, 
-        typeLabel: game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[type] || type) 
+    damageRolls.push({
+      roll,
+      typeLabel: game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[type] || type)
     });
   }
 
@@ -1012,12 +1012,12 @@ async function promptWeaponRollOptions({ actor, weapon, extrasList }) {
   const i18n = (k) => game.i18n.localize(k);
   const fatigue = actor.type === 'character' ? (Number(actor.system.attributes?.fatigue?.rollPenalty) || 0) : 0;
   // Construimos una representación visual de los extras para el preview
-  const extrasAttackString = extrasList.length > 0 
-    ? extrasList.map(e => e.attack !== 0 ? ` + ${e.attack}[${e.name}]` : '').join('') 
+  const extrasAttackString = extrasList.length > 0
+    ? extrasList.map(e => e.attack !== 0 ? ` + ${e.attack}[${e.name}]` : '').join('')
     : "";
   // Construimos una representación visual de los extras para el preview
-  const extrasDamageString = extrasList.length > 0 
-    ? extrasList.map(e => e.damage !== '' ? ` + ${e.damage} ${i18n('TIRDUIN_RPS.Damage.Type.'+e.damagetype)}[${e.name}]` : '').join('') 
+  const extrasDamageString = extrasList.length > 0
+    ? extrasList.map(e => e.damage !== '' ? ` + ${e.damage} ${i18n('TIRDUIN_RPS.Damage.Type.' + e.damagetype)}[${e.name}]` : '').join('')
     : "";
 
 
@@ -1066,14 +1066,14 @@ async function promptWeaponRollOptions({ actor, weapon, extrasList }) {
           const dis = html.find('[name="edge"][value="disadvantage"]').is(':checked');
 
           let formulaBase = `Ataque: 1d20 + ${abVal}[${weapon.ability.toUpperCase()}] + ${weapon.proficiency}[PROF] ${extrasAttackString}`;
-          
+
           if (adv) formulaBase = `(${formulaBase}) + 1d6`;
           else if (dis) formulaBase = `(${formulaBase}) - 1d6`;
 
           html.find('.roll-preview-attack').text(formulaBase);
 
           // Formamos la fórmula de daño considerando bonificaciones extra y estado de fatiga
-          let damageFormula = `Daño: ${weapon.damageDie}  + ${abVal} ${i18n('TIRDUIN_RPS.Damage.Type.'+weapon.damageType)} ${weapon.damageDie2!== '' ? `+ ${weapon.damageDie2} ${i18n('TIRDUIN_RPS.Damage.Type.'+weapon.damageType2)}` : ''} ${extrasDamageString}`;
+          let damageFormula = `Daño: ${weapon.damageDie}  + ${abVal} ${i18n('TIRDUIN_RPS.Damage.Type.' + weapon.damageType)} ${weapon.damageDie2 !== '' ? `+ ${weapon.damageDie2} ${i18n('TIRDUIN_RPS.Damage.Type.' + weapon.damageType2)}` : ''} ${extrasDamageString}`;
 
           html.find('.roll-preview-damage').text(damageFormula);
         };
