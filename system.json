@@ -35,7 +35,8 @@
 "css/loot-sheet.css",
 "css/item-special.css",
 "css/npc-objects.css",
-"css/roll-dialog.css"
+"css/roll-dialog.css",
+"css/spell.css"
 ],
 "languages": [
 {

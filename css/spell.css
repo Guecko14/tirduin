@@ -1,0 +1,227 @@
+/* Conjuros en la character sheet. */
+.tirduin .character .character-spells {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 6px 0;
+}
+
+.tirduin .character .character-spellcasting-panel {
+  border: 1px solid #3f3522;
+  border-radius: 6px;
+  padding: 10px;
+  background: #19160f;
+}
+
+.tirduin .character .character-spellcasting-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tirduin .character .character-spellcasting-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tirduin .character .character-spellcasting-field--wide {
+  grid-column: 1 / -1;
+}
+
+.tirduin .character .character-spellcasting-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tirduin .character .character-spellcasting-field label {
+  font-size: 0.74rem;
+  color: #d7c497;
+  font-weight: 700;
+}
+
+.tirduin .character .character-spellcasting-field input {
+  width: 100%;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  background: #000;
+  color: #fff;
+  padding: 0 6px;
+  font-size: 0.75rem;
+  box-sizing: border-box;
+}
+
+.tirduin .character .character-spellcasting-field select.sheet-skill-select {
+  width: 100%;
+  height: 30px;
+  border-radius: 4px;
+}
+
+.tirduin .character .character-spellcasting-field input[readonly] {
+  background: #111;
+  color: #b8d7ff;
+  font-weight: 700;
+}
+
+.tirduin .character .character-spellcasting-note {
+  margin: 8px 0 0;
+  font-size: 0.74rem;
+  color: #b7a57d;
+}
+
+@media (max-width: 900px) {
+  .tirduin .character .character-spellcasting-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .tirduin .character .character-spellcasting-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tirduin .character .character-spellcasting-row {
+    grid-template-columns: 1fr;
+  }
+
+  .tirduin .character .character-spellcasting-field--wide {
+    grid-column: auto;
+  }
+}
+
+.tirduin .character .character-spell-level {
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 10px;
+  background: #141414;
+}
+
+.tirduin .character .character-spells-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #2f2f2f;
+}
+
+.tirduin .character .character-spells-header h2 {
+  margin: 0;
+  font-size: 0.96rem;
+  color: #b9d6f5;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.tirduin .character .character-spell-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: #18283b;
+  border: 1px solid #365f8f;
+  border-radius: 4px;
+  color: #d6e9ff;
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.tirduin .character .character-spell-add:hover {
+  background: #213650;
+  border-color: #4f7fb9;
+  color: #eef6ff;
+}
+
+.tirduin .character .character-spells-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tirduin .character .character-spell-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  gap: 8px;
+  background: #131d27;
+  border: 1px solid #2b4463;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.tirduin .character .character-spell-main {
+  min-width: 0;
+}
+
+.tirduin .character .character-spell-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tirduin .character .character-spell-title-row h4 {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #e2f1ff;
+  font-weight: 700;
+}
+
+.tirduin .character .character-spell-title-row {
+  cursor: pointer;
+}
+
+.tirduin .character .character-spell-item.collapsed-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: center;
+}
+
+.tirduin .character .character-spell-item.collapsed-item .character-spell-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.tirduin .character .character-spell-item.collapsed-item .character-spell-title-row,
+.tirduin .character .character-spell-item.collapsed-item .character-spell-meta-row {
+  min-width: 0;
+}
+
+.tirduin .character .character-spell-item.collapsed-item .character-spell-meta-row {
+  margin: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.tirduin .character .character-spell-item.collapsed-item .character-spell-meta-row .character-feature-chip {
+  opacity: 1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.tirduin .character .character-spell-item.collapsed-item .character-spell-meta-row .character-feature-chip:not(.character-spell-action):not(.character-spell-cost) {
+  display: none;
+}
+
+.tirduin .character .character-spell-item.collapsed-item .character-feature-description {
+  display: none;
+}
+
+.tirduin .character .character-spell-meta-row {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
