@@ -54,7 +54,7 @@ TIRDUIN_RPS.skills = {
  * @type {Object<string, string>}
  */
 TIRDUIN_RPS.spellDomains = {
-  conocimiento: 'TIRDUIN_RPS.Item.Spell.Domains.conocimiento',
+  ocultismo: 'TIRDUIN_RPS.Item.Spell.Domains.ocultismo',
   piromancia: 'TIRDUIN_RPS.Item.Spell.Domains.piromancia',
   naturaleza: 'TIRDUIN_RPS.Item.Spell.Domains.naturaleza',
   tirador: 'TIRDUIN_RPS.Item.Spell.Domains.tirador',
@@ -64,8 +64,6 @@ TIRDUIN_RPS.spellDomains = {
   filo: 'TIRDUIN_RPS.Item.Spell.Domains.filo',
   arte: 'TIRDUIN_RPS.Item.Spell.Domains.arte',
   guerra: 'TIRDUIN_RPS.Item.Spell.Domains.guerra',
-  oscuridad: 'TIRDUIN_RPS.Item.Spell.Domains.oscuridad',
-  muerte: 'TIRDUIN_RPS.Item.Spell.Domains.muerte',
 };
 
 /**

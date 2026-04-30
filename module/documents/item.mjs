@@ -99,7 +99,7 @@ export class TirduinRPSItem extends Item {
         speaker: speaker,
         flavor: label,
         content: item.system.description ?? '',
-      }, rollMode));
+      }, rollMode,));
     }
     // Otherwise, create a roll and send a chat message from it.
     else {
@@ -127,6 +127,7 @@ export class TirduinRPSItem extends Item {
           outcomeText,
           edgeMode,
         }),
+        rolls: [roll],
       }, rollMode));
       return roll;
     }

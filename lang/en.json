@@ -47,10 +47,6 @@
       "intimidacion": "Intimidación"
     },
     "Damage": {
-      "Rule": {
-        "vulnerability": "Vulnerability adds value x number of damage dice.",
-        "resistance": "Resistance subtracts value x number of damage dice."
-      },
       "Group": {
         "physical": "Físico",
         "elemental": "Elemental",
@@ -230,7 +226,8 @@
         }
       },
       "DeathRoll": "Tirada de Muerte",
-      "DeathRollFear": "Miedo"
+      "Save": "Salvación",
+      "Death": "Muerte"
     },
     "Item": {
       "Spell": {
@@ -296,7 +293,7 @@
           }
         },
         "Domains": {
-          "conocimiento": "Conocimiento",
+          "ocultismo": "Ocultismo",
           "piromancia": "Piromancia",
           "naturaleza": "Naturaleza",
           "tirador": "Tirador",
@@ -305,9 +302,7 @@
           "valor": "Valor",
           "filo": "Filo",
           "arte": "Arte",
-          "guerra": "Guerra",
-          "oscuridad": "Oscuridad",
-          "muerte": "Muerte"
+          "guerra": "Guerra"
         }
       }
     },
@@ -349,7 +344,7 @@
         "Bonus": "Bonif. iniciativa"
       },
       "Weapon": {
-        "Title": "Ataque de arma: {weaponName}",
+        "Title": "Ataque de arma:",
         "Attribute": "Atributo",
         "AbilityVigor": "Vigor",
         "AbilityAgility": "Agilidad",
@@ -379,19 +374,11 @@
         "weapon": "Arma",
         "armor": "Armadura"
       },
-      "Mood": {
-        "Hope": "Energia",
-        "Fear": "Miedo"
-      },
       "Outcome": {
-        "CriticalNatural": "CRITICO NATURAL",
-        "Fumble": "Pifia",
-        "RollWithMood": "Tirada con {mood}",
+        "Fumble": "PIFIA",
         "Hit": "IMPACTA",
         "Miss": "FALLA",
-        "Critical": "CRITICO",
-        "FumbleUpper": "PIFIA",
-        "CriticalDice": "CRITICO"
+        "Critical": "CRITICO"
       },
       "Metric": {
         "Bonus": "Bonificador: {value}",

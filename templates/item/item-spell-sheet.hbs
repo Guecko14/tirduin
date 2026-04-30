@@ -18,12 +18,10 @@
         <label for="system.spellDomain">{{localize
           "TIRDUIN_RPS.Item.Spell.Fields.Domain.Label"}}</label>
         <select name="system.spellDomain">
-          <option value>{{localize
-            "TIRDUIN_RPS.Item.Spell.Fields.Domain.None"}}</option>
-          {{#each config.spellDomains as |domainLabel domainKey|}}
-          <option value="{{domainKey}}" {{#if (eq system.spellDomain
-            domainKey)}}selected{{/if}}>{{localize domainLabel}}</option>
-          {{/each}}
+          {{selectOptions config.spellDomains
+          selected=system.spellDomain
+          localize=true
+          blank=(localize "TIRDUIN_RPS.Item.Spell.Fields.Domain.None")}}
         </select>
       </div>
     </div>

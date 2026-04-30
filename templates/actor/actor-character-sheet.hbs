@@ -282,7 +282,7 @@
         </button>
         <div class="death-roll-group">
           <label>{{localize
-            "TIRDUIN_RPS.CharacterSheet.Resources.Hope"}}</label>
+            "TIRDUIN_RPS.CharacterSheet.Save"}}</label>
           <div class="resource-pips resource-pips--hope">
             {{#each deathRollHopePips as |pip|}}
             <button type="button"
@@ -292,14 +292,14 @@
               data-resource-path="{{pip.path}}"
               data-max-path="{{pip.maxPath}}"
               data-max-value="{{pip.max}}"
-              title="{{localize "TIRDUIN_RPS.CharacterSheet.Resources.Hope"}}
+              title="{{localize "TIRDUIN_RPS.CharacterSheet.Save"}}"
               {{pip.value}} {{localize "TIRDUIN_RPS.CharacterSheet.Of"}}
               {{pip.max}}"></button>
             {{/each}}
           </div>
         </div>
         <div class="death-roll-group">
-          <label>{{localize "TIRDUIN_RPS.CharacterSheet.DeathRollFear"}}</label>
+          <label>{{localize "TIRDUIN_RPS.CharacterSheet.Death"}}</label>
           <div class="resource-pips resource-pips--fear">
             {{#each deathRollFearPips as |pip|}}
             <button type="button"
@@ -309,7 +309,7 @@
               data-resource-path="{{pip.path}}"
               data-max-path="{{pip.maxPath}}"
               data-max-value="{{pip.max}}"
-              title="{{localize "TIRDUIN_RPS.CharacterSheet.DeathRollFear"}}
+              title="{{localize "TIRDUIN_RPS.CharacterSheet.Death"}}
               {{pip.value}} {{localize "TIRDUIN_RPS.CharacterSheet.Of"}}
               {{pip.max}}"></button>
             {{/each}}

@@ -30,9 +30,11 @@
                         'marcial')}}selected{{/if}}>Marcial</option>
                     <option value="magica" {{#if (eq system.category
                         'magica')}}selected{{/if}}>Mágica</option>
+                    <option value="extra" {{#if (eq system.category
+                        'extra')}}selected{{/if}}>Extra</option>
                 </select>
             </div>
-
+            {{#if (not (eq system.category 'extra'))}}
             <div class="weapon-field">
                 <label for="system.subcategory">Subcategoría</label>
                 <select name="system.subcategory">
@@ -42,10 +44,11 @@
                         'distancia')}}selected{{/if}}>A distancia</option>
                 </select>
             </div>
-
+            {{/if}}
         </div>
 
         {{!-- Fila de datos de combate: dado de daño, alcance, grip --}}
+        {{#if (not (eq system.category 'extra'))}}
         <div class="weapon-row weapon-row-combat">
 
             <div class="weapon-field">
@@ -134,13 +137,68 @@
             </div>
 
             <div class="weapon-field">
+                <label for="system.ability">Atributo</label>
+                <select name="system.ability">
+                    <option value="vig" {{#if (eq system.ability
+                        'vig')}}selected{{/if}}>{{localize
+                        "TIRDUIN_RPS.Ability.Vig.long"}}</option>
+                    <option value="agil" {{#if (eq system.ability
+                        'agil')}}selected{{/if}}>{{localize
+                        "TIRDUIN_RPS.Ability.Agil.long"}}</option>
+                    <option value="ment" {{#if (eq
+                        system.ability
+                        'ment')}}selected{{/if}}>{{localize
+                        "TIRDUIN_RPS.Ability.Ment.long"}}</option>
+                    <option value="inst" {{#if (eq
+                        system.ability
+                        'inst')}}selected{{/if}}>{{localize
+                        "TIRDUIN_RPS.Ability.Inst.long"}}</option>
+                    <option value="pre" {{#if (eq
+                        system.ability
+                        'pre')}}selected{{/if}}>{{localize
+                        "TIRDUIN_RPS.Ability.Pre.long"}}</option>
+                </select>
+            </div>
+
+            <div class="weapon-field">
                 <label for="system.weight">Peso</label>
                 <input name="system.weight" type="number"
                     value="{{system.weight}}" min="0" step="0.1" />
             </div>
 
         </div>
+        {{else}}
+        <div class="weapon-row weapon-row-combat">
+            <div class="weapon-field">
+                <label for="system.proficiencyExtra">Ataque Extra</label>
+                <input name="system.proficiencyExtra" type="number"
+                    value="{{system.proficiencyExtra}}" min="0" step="1"
+                    data-dtype="Number" />
+            </div>
 
+            <div class="weapon-field">
+                <label for="system.damageDieExtra">Dado de daño extra</label>
+                <input name="system.damageDieExtra" type="text"
+                    value="{{system.damageDieExtra}}"
+                    placeholder="1d6" />
+            </div>
+
+            <div class="weapon-field">
+                <label for="system.damageTypeExtra">Tipo daño extra</label>
+                <select name="system.damageTypeExtra">
+                    {{#each config.damageTypes as |label key|}}
+                    <option value="{{key}}"
+                        {{#if (eq ../system.damageTypeExtra
+                        key)}}selected{{/if}}>
+                        {{localize label}}
+                    </option>
+                    {{/each}}
+                </select>
+            </div>
+        </div>
+        {{/if}}
+
+        {{#if (not (eq system.category 'extra'))}}
         {{!-- Propiedades especiales (texto libre, a expandir en el futuro) --}}
         <div class="weapon-field weapon-field-properties">
             <label for="system.properties">Propiedades</label>
@@ -148,7 +206,7 @@
                 value="{{system.properties}}"
                 placeholder="(próximamente)" />
         </div>
-
+        {{/if}}
         {{!-- Descripción larga del arma --}}
         <div class="weapon-field weapon-field-description">
             <label for="system.description">Descripción</label>
