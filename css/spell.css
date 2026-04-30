@@ -375,13 +375,3 @@
     color: white;
     border-color: #000;
 }
-
-/* Ajuste del icono del dado */
-.tirduin-summary-roll i {
-    font-size: 0.9em;
-    color: #4b4a44;
-}
-
-.tirduin-summary-roll:hover i {
-    color: white;
-}

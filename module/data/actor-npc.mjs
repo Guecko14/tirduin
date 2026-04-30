@@ -9,10 +9,10 @@ export default class TirduinRPSNPC extends TirduinRPSActorBase {
 
     schema.attributes = new fields.SchemaField({
       armorClass: new fields.SchemaField({
-        value: new fields.NumberField({ ...requiredInteger, initial: 10})
+        value: new fields.NumberField({ ...requiredInteger, initial: 10 })
       }),
       speed: new fields.SchemaField({
-        value: new fields.NumberField({ ...requiredInteger, initial: 20})
+        value: new fields.NumberField({ ...requiredInteger, initial: 20 })
       }),
       slotsExtra: new fields.SchemaField({
         value: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 })
@@ -34,7 +34,7 @@ export default class TirduinRPSNPC extends TirduinRPSActorBase {
       copper: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
     });
 
-     schema.abilities = new fields.SchemaField(Object.keys(CONFIG.TIRDUIN_RPS.abilities).reduce((obj, ability) => {
+    schema.abilities = new fields.SchemaField(Object.keys(CONFIG.TIRDUIN_RPS.abilities).reduce((obj, ability) => {
       obj[ability] = new fields.SchemaField({
         value: new fields.NumberField({ ...requiredInteger, initial: 0 }),
       });
@@ -123,7 +123,7 @@ export default class TirduinRPSNPC extends TirduinRPSActorBase {
     // Copy the ability scores to the top level, so that rolls can use
     // formulas like `@vig.mod + 4`.
     if (this.abilities) {
-      for (let [k,v] of Object.entries(this.abilities)) {
+      for (let [k, v] of Object.entries(this.abilities)) {
         data[k] = foundry.utils.deepClone(v);
       }
     }
