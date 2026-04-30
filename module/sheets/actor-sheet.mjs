@@ -473,10 +473,10 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     html.on('click', '.loot-item-row', this._onLootItemRoll.bind(this));
 
     // Click en una armadura del NPC: tira VD y aplica desgaste de RA.
-    html.on('click', '.npc-armor-item', this._onArmorItemClick.bind(this));
+    html.on('click', '.npc-armor-item span', this._onArmorItemClick.bind(this));
 
     // Click en un arma del NPC: dialogo de ataque (VIG/AGIL + competencia) y daño.
-    html.on('click', '.npc-weapon-item', this._onWeaponItemClick.bind(this));
+    html.on('click', '.npc-weapon-item span', this._onWeaponItemClick.bind(this));
 
     // Toggle de armadura equipada (icono de escudo en la tabla de armaduras).
     html.on('click', '.armor-equip-toggle', this._onArmorEquipToggle.bind(this));
@@ -485,7 +485,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     html.on('click', '.weapon-action-toggle', this._onWeaponActionToggle.bind(this));
 
     // Click en filas del tab de Acciones (arma, parar, mágico).
-    html.on('click', '.npc-action-item', this._onActionItemClick.bind(this));
+    html.on('click', '.npc-action-item span', this._onActionItemClick.bind(this));
 
     // -------------------------------------------------------------
     // Everything below here is only needed if the sheet is editable
@@ -971,6 +971,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
         content: flavor,
         rolls: [roll],
+        img: this.actor.img,
       }));
       return roll;
     }
@@ -1017,6 +1018,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
         showBonus: true,
       }),
       rolls: [roll],
+      img: this.actor.img,
     }));
 
     return roll;
@@ -1069,6 +1071,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       content: flavor,
       rolls: [roll],
+      img: this.actor.img
     }));
   }
 
@@ -1110,6 +1113,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
         showBonus: true,
       }),
       rolls: [roll],
+      img: this.actor.img,
     }));
 
     const raMax = Math.max(0, Number(item.system?.ra) || 0);
@@ -1142,141 +1146,14 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
    * @private
    */
   async _onWeaponItemClick(event) {
-    const clickedControl = event.target.closest('.npc-object-controls');
-    if (clickedControl) return;
+    event.preventDefault();
+    const row = event.currentTarget.closest('[data-item-id]');
+    const item = this.actor.items.get(row.dataset.itemId);
+    
+    if (!item || item.type !== 'weapon' || item.system?.category == 'extra') return;
 
-    const row = event.currentTarget;
-    const itemId = row?.dataset?.itemId;
-    const weapon = this.actor.items.get(itemId);
-    if (!weapon || weapon.type !== 'weapon' || weapon.system?.category === 'extra') return;
-
-    const damageDie = String(weapon.system?.damageDie || '').trim();
-    if (!damageDie) {
-      ui.notifications?.warn(game.i18n.format('TIRDUIN_RPS.Roll.Warning.WeaponNoDamageDie', { item: weapon.name }));
-      return null;
-    }
-    const damageDie2 = String(weapon.system?.damageDie2 || '').trim();
-    const damageTypeKey = String(weapon.system?.damageType || '').trim();
-    const damageTypeKey2 = String(weapon.system?.damageType2 || '').trim();
-    const isRangedWeapon = String(weapon.system?.subcategory || '') === 'distancia';
-    const currentProjectiles = Math.max(0, Number(weapon.system?.projectiles) || 0);
-
-    if (isRangedWeapon && currentProjectiles <= 0) {
-      ui.notifications?.warn(game.i18n.format('TIRDUIN_RPS.Roll.Warning.WeaponNoProjectiles', { item: weapon.name }));
-      return null;
-    }
-
-    const proficiency = Number(weapon.system?.proficiency) || 0;
-    const actorRollData = this.actor.getRollData();
-    const selection = await this._promptWeaponRollOptions({
-      weaponName: weapon.name,
-      damageDie,
-      damageDie2,
-      proficiency,
-      actorRollData,
-    });
-    if (!selection) return null;
-
-    const abilityKey = selection.abilityKey;
-    const edgeMode = selection.edgeMode;
-    const attackBonus = Number(selection.attackBonus) || 0;
-    const extraDamageEntries = Array.isArray(selection.extraDamageEntries)
-      ? selection.extraDamageEntries
-      : [];
-    const fatigueRollPenalty = this.actor.type === 'character'
-      ? (Number(this.actor.system?.attributes?.fatigue?.rollPenalty) || 0)
-      : 0;
-    const abilityValue = (Number(this.actor.system?.abilities?.[abilityKey]?.value) || 0) + fatigueRollPenalty;
-
-    const attackBaseFormula = `1d20 + (${abilityValue}) + (${proficiency}) + (${attackBonus})`;
-    const attackFormula = applyRollEdgeToFormula(attackBaseFormula, edgeMode);
-    const damageFormula = `${damageDie} + (${abilityValue})`;
-    const damageFormula2 = damageDie2 || '';
-
-    const damageTypeLabel = damageTypeKey
-      ? game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[damageTypeKey] || damageTypeKey)
-      : '';
-    const damageTypeLabel2 = damageTypeKey2
-      ? game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[damageTypeKey2] || damageTypeKey2)
-      : '';
-
-    // Critico: duplica solo los dados del daño (incluyendo extras),
-    // sin duplicar modificadores estaticos como atributos.
-    const duplicateDiceTermsInFormula = (formula = '') => String(formula).replace(
-      /(\d*)d(\d+)/gi,
-      (_match, count, faces) => `${(Number(count) || 1) * 2}d${faces}`
-    );
-
-    const attackRoll = new Roll(attackFormula, actorRollData);
-    await attackRoll.evaluate();
-    const isCritical = getNaturalD20Result(attackRoll) === 20;
-    const resolvedDamageFormula = isCritical
-      ? duplicateDiceTermsInFormula(damageFormula)
-      : damageFormula;
-    const resolvedDamageFormula2 = (isCritical && damageFormula2)
-      ? duplicateDiceTermsInFormula(damageFormula2)
-      : damageFormula2;
-
-    const damageRoll = new Roll(resolvedDamageFormula, actorRollData);
-    await damageRoll.evaluate();
-    let damageRoll2 = null;
-    const damageRollExtraEntries = [];
-    if (resolvedDamageFormula2) {
-      damageRoll2 = new Roll(resolvedDamageFormula2, actorRollData);
-      await damageRoll2.evaluate();
-    }
-    for (const entry of extraDamageEntries) {
-      const formula = String(entry?.formula || '').trim();
-      if (!formula) continue;
-
-      const typeKey = String(entry?.damageTypeKey || '').trim();
-      const typeLabel = typeKey
-        ? game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[typeKey] || typeKey)
-        : '';
-      const resolvedExtraFormula = isCritical
-        ? duplicateDiceTermsInFormula(formula)
-        : formula;
-
-      try {
-        const roll = new Roll(resolvedExtraFormula, actorRollData);
-        await roll.evaluate();
-        damageRollExtraEntries.push({ roll, typeLabel });
-      } catch (_error) {
-        ui.notifications?.warn(game.i18n.format('TIRDUIN_RPS.Roll.Warning.InvalidExtraDamageFormula', { formula }));
-        return null;
-      }
-    }
-
-    const targetToken = game.user?.targets?.first();
-    const targetName = targetToken?.name ?? null;
-    const targetAC = targetToken?.actor
-      ? (Number(targetToken.actor.system?.attributes?.armorClass?.value) || null)
-      : null;
-
-    await ChatMessage.create(applyChatRollMode({
-      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      content: buildWeaponAttackDamageFlavorHtml({
-        weaponName: weapon.name,
-        edgeText: getRollEdgeFlavorSuffix(edgeMode),
-        edgeMode,
-        attackRoll,
-        damageRoll,
-        damageTypeLabel,
-        damageRoll2,
-        damageTypeLabel2,
-        damageRollExtraEntries,
-        targetName,
-        targetAC,
-      }),
-      rolls: [attackRoll, damageRoll, ...(damageRoll2 ? [damageRoll2] : []), ...damageRollExtraEntries.map((e) => e.roll)],
-    }));
-
-    if (isRangedWeapon) {
-      const nextProjectiles = Math.max(0, currentProjectiles - 1);
-      await weapon.update({ 'system.projectiles': nextProjectiles });
-    }
-
-    return { attackRoll, damageRoll, damageRoll2, damageRollExtraEntries };
+    // Delegates the actual attack roll and damage application to the Tirduin system, which needs to be involved in order to properly handle the various weapon categories and special rules.
+    return game.tirduin.rollWeaponAttack(item);
   }
 
   /**
@@ -1366,6 +1243,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
         content: `<div class="tirduin-roll-bundle">${damageCard}</div>`,
         rolls: [damageRoll],
+        img: this.actor.img,
       }));
       return { damageRoll };
     }
@@ -1411,6 +1289,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       content: `<div class="tirduin-roll-bundle">${saveCard}${damageCard}</div>`,
       rolls: [saveRoll, damageRoll],
+      img: this.actor.img,
     }));
 
     return { saveRoll, damageRoll, success, appliedDamageTotal };

@@ -47,10 +47,6 @@
       "intimidacion": "Intimidación"
     },
     "Damage": {
-      "Rule": {
-        "vulnerability": "Vulnerability adds value x number of damage dice.",
-        "resistance": "Resistance subtracts value x number of damage dice."
-      },
       "Group": {
         "physical": "Físico",
         "elemental": "Elemental",
@@ -348,7 +344,7 @@
         "Bonus": "Bonif. iniciativa"
       },
       "Weapon": {
-        "Title": "Ataque de arma: {weaponName}",
+        "Title": "Ataque de arma:",
         "Attribute": "Atributo",
         "AbilityVigor": "Vigor",
         "AbilityAgility": "Agilidad",

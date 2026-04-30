@@ -9,14 +9,7 @@ import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
 import { TIRDUIN_RPS } from './helpers/config.mjs';
 import * as damageHelpers from './helpers/damage.mjs';
 import * as alteredStatesHelpers from './helpers/altered-states.mjs';
-import {
-  applyRollEdgeToFormula,
-  promptInitiativeConfirmation,
-  applyChatRollMode,
-  buildWeaponAttackDamageFlavorHtml,
-  getNaturalD20Result,
-  getRollEdgeFlavorSuffix,
-} from './helpers/roll-dialog.mjs';
+import * as rollDialog from './helpers/roll-dialog.mjs';
 // Import DataModel classes
 import * as models from './data/_module.mjs';
 /* -------------------------------------------- */
@@ -46,6 +39,7 @@ Hooks.once('init', function () {
     damage: damageHelpers,
     alteredStates: alteredStatesHelpers,
     rollItemMacro,
+    rollWeaponAttack,
   };
 
   // Add custom constants for configuration.
@@ -850,459 +844,243 @@ Hooks.once('ready', function () {
  * @returns {Promise}
  */
 async function createItemMacro(data, slot) {
-  // First, determine if this is a valid owned item.
-  if (data.type !== 'Item') return;
-  if (!data.uuid.includes('Actor.') && !data.uuid.includes('Token.')) {
-    return ui.notifications.warn(
-      'You can only create macro buttons for owned Items'
-    );
-  }
-  // If it is, retrieve it based on the uuid.
-  const item = await Item.fromDropData(data);
+  if (data.type !== "Item") return;
+  if (!data.uuid) return;
+  const item = await fromUuid(data.uuid);
 
-  // Create the macro command using the uuid.
   const command = `game.tirduin.rollItemMacro("${data.uuid}");`;
-  let macro = game.macros.find(
-    (m) => m.name === item.name && m.command === command
-  );
+  let macro = game.macros.find((m) => m.name === item.name && m.command === command);
   if (!macro) {
     macro = await Macro.create({
       name: item.name,
-      type: 'script',
+      type: "script",
       img: item.img,
       command: command,
-      flags: { 'tirduin.itemMacro': true },
+      flags: { "tirduin.itemMacro": true },
     });
   }
   game.user.assignHotbarMacro(macro, slot);
   return false;
 }
 
-function promptWeaponRollOptions({ weaponName, damageDie, damageDie2 = '', proficiency, actorRollData }) {
-  return new Promise((resolve) => {
-    let settled = false;
+async function rollItemMacro(itemUuid) {
+  const item = await fromUuid(itemUuid);
+  if (!item) return ui.notifications.warn("No se encontró el objeto.");
 
-    const safeResolve = (value) => {
-      if (settled) return;
-      settled = true;
-      resolve(value);
-    };
+  // Si es un arma, usamos el método centralizado
+  if (item.type === 'weapon') {
+    return rollWeaponAttack(item);
+  }
 
-    const damageTypeOptions = Object.entries(CONFIG.TIRDUIN_RPS?.damageTypes || {})
-      .map(([key, i18nKey]) => `<option value="${key}">${game.i18n.localize(i18nKey)}</option>`)
-      .join('');
-    let customSelectDocNamespace = '';
-    const attributeLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Weapon.Attribute');
-    const vigorLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Weapon.AbilityVigor');
-    const agilityLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Weapon.AbilityAgility');
-    const proficiencyLabel = game.i18n.format('TIRDUIN_RPS.RollDialog.Weapon.Proficiency', { value: proficiency });
-    const attackBonusLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Weapon.AttackBonus');
-    const attackBonusTitle = game.i18n.localize('TIRDUIN_RPS.RollDialog.Weapon.AttackBonusTitle');
-    const addExtraDamageTitle = game.i18n.localize('TIRDUIN_RPS.RollDialog.Weapon.AddExtraDamageTitle');
-    const extraDamagePlaceholder = game.i18n.localize('TIRDUIN_RPS.RollDialog.Weapon.ExtraDamagePlaceholder');
-    const noTypeLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Weapon.NoType');
-    const removeLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Weapon.Remove');
-    const rollLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Common.Roll');
-    const cancelLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Common.Cancel');
-    const advantageLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Common.Advantage');
-    const disadvantageLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Common.Disadvantage');
-    const selectLabel = game.i18n.localize('TIRDUIN_RPS.RollDialog.Common.Select');
+  // Para otros objetos
+  return item.roll();
+}
 
-    const content = `
-      <form class="tirduin-roll-confirmation tirduin-weapon-roll-confirmation">
-        <div class="roll-summary">
-          <div class="weapon-roll-topline">
-            <span>${attributeLabel}</span>
-            <select name="tirduin-weapon-ability">
-              <option value="vig">${vigorLabel}</option>
-              <option value="agil">${agilityLabel}</option>
-            </select>
-            <span class="weapon-roll-prof">${proficiencyLabel}</span>
-          </div>
+/**
+ * Lanza el diálogo de ataque y ejecuta la tirada.
+ * Esta función es ahora el "cerebro" único para ataques, usado por fichas y macros.
+ */
+export async function rollWeaponAttack(item) {
+  const actor = item.actor;
+  if (!actor) return;
 
-          <div class="weapon-roll-line">
-            <p class="weapon-roll-preview" data-role="weapon-attack-preview"></p>
-            <button type="button" class="weapon-roll-line-add" data-role="attack-bonus-toggle" title="${attackBonusTitle}">+</button>
-          </div>
-          <div class="weapon-roll-inline-fields" data-role="attack-bonus-fields" style="display:none;">
-            <label>
-              ${attackBonusLabel}
-              <input type="number" name="tirduin-attack-bonus" value="0" step="1">
-            </label>
-          </div>
+  // 1. Recopilar datos necesarios del item
+  const weaponData = {
+    name: item.name,
+    damageDie: String(item.system?.damageDie || "").trim(),
+    damageDie2: String(item.system?.damageDie2 || "").trim(),
+    proficiency: Number(item.system?.proficiency) || 0,
+    ability: item.system?.ability || 'vig',
+    damageType: item.system?.damageType,
+    damageType2: item.system?.damageType2,
+  };
 
-          <div class="weapon-roll-line">
-            <p class="weapon-roll-preview" data-role="weapon-damage-preview"></p>
-            <button type="button" class="weapon-roll-line-add" data-role="damage-bonus-add" title="${addExtraDamageTitle}">+</button>
-          </div>
-          <p class="weapon-roll-preview" data-role="weapon-damage2-preview"></p>
+  // Recopilar bonificaciones de armas extra equipadas
+  const armasExtraEquipadas = actor.items.filter(i => 
+    i.type === 'weapon' && 
+    i.system?.actionEnabled === true && // equipado y usable
+    i.system?.category === 'extra'
+  );
+  
+  // Extraemos los detalles de cada bonificador
+  const extrasList = armasExtraEquipadas.map(i => ({
+    name: i.name,
+    attack: Number(i.system?.proficiencyExtra) || 0,
+    damage: i.system?.damageDieExtra || '',
+    damagetype: i.system?.damageTypeExtra || '',
+  }));
 
-          <div class="weapon-roll-damage-bonuses" data-role="damage-bonuses"></div>
-          <div class="weapon-roll-extra-previews" data-role="weapon-damage-extra-previews"></div>
-        </div>
+  // 2. Abrir el diálogo (Standalone, sin depender de la sheet)
+  const selection = await promptWeaponRollOptions({ actor, weapon: weaponData, extrasList });
+  if (!selection) return null;
 
-        <div class="roll-edge-row">
-          <label class="roll-edge-option">
-            <input type="radio" name="tirduin-roll-edge" value="advantage">
-            ${advantageLabel}
-          </label>
-          <label class="roll-edge-option">
-            <input type="radio" name="tirduin-roll-edge" value="disadvantage">
-            ${disadvantageLabel}
-          </label>
-        </div>
-      </form>
-    `;
+  // 3. Lógica de Tirada (Ataque y Daño)
+  const { abilityKey, edgeMode, attackBonus, extraDamageEntries } = selection;
+  const rollData = actor.getRollData();
+  
+  // Penalizador por fatiga (si aplica)
+  const fatiguePenalty = actor.type === 'character' ? (Number(actor.system.attributes?.fatigue?.rollPenalty) || 0) : 0;
+  const abilityValue = (Number(actor.system.abilities?.[weaponData.ability]?.value) || 0) + fatiguePenalty;
 
+  // Ejecutar Ataque
+  const baseFormula = `1d20 + ${abilityValue} + ${weaponData.proficiency} + ${extrasList.reduce((sum, e) => sum + e.attack, 0)}`;
+  const attackFormula = rollDialog.applyRollEdgeToFormula(baseFormula, edgeMode);
+  const attackRoll = new Roll(attackFormula, rollData);
+  await attackRoll.evaluate();
+
+  const isCritical = rollDialog.getNaturalD20Result(attackRoll) === 20;
+  const dDice = (f) => String(f).replace(/(\d*)d(\d+)/gi, (m, c, faces) => `${(Number(c) || 1) * 2}d${faces}`);
+
+  // Daños agrupados por tipo usando Map para mantener orden y flexibilidad
+  const damageMap = new Map();
+
+  // 1. Añadir daño base del arma
+  const baseKey = weaponData.damageType;
+  const baseFormulaAttack = `${weaponData.damageDie} + ${abilityValue}`;
+  damageMap.set(baseKey, [baseFormulaAttack]);
+
+  // 2. Añadir segundo daño del arma (si existe)
+  if (weaponData.damageDie2) {
+    const type2 = weaponData.damageType2 || baseKey;
+    // IMPORTANTE: Si el tipo no existe en el mapa, lo creamos antes de hacer el push
+    if (!damageMap.has(type2)) damageMap.set(type2, []);
+    damageMap.get(type2).push(weaponData.damageDie2);
+  }
+
+  // 3. Agrupar daños de los extras por tipo
+  for (const extra of extrasList) {
+    
+    const type = extra.damagetype || weaponData.damageType; 
+    const formula = extra.damage;
+    
+    if (!damageMap.has(type)) damageMap.set(type, []);
+    damageMap.get(type).push(formula);
+  }
+
+  // 4. Evaluar las tiradas agrupadas (esto se mantiene igual)
+  const damageRolls = [];
+  for (const [type, components] of damageMap) {
+    let finalFormula;
+    
+    if (isCritical) {
+        const diceParts = components.filter(c => c.includes('d'));
+        const flatParts = components.filter(c => !c.includes('d'));
+        const doubledDice = diceParts.length > 0 ? dDice(diceParts.join(' + ')) : "";
+        const flatBonus = flatParts.length > 0 ? flatParts.join(' + ') : "";
+        finalFormula = [doubledDice, flatBonus].filter(Boolean).join(' + ');
+    } else {
+        finalFormula = components.join(' + ');
+    }
+    
+    const roll = await new Roll(finalFormula, rollData).evaluate();
+    damageRolls.push({ 
+        roll, 
+        typeLabel: game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[type] || type) 
+    });
+  }
+
+  // 5. Generar mensaje de chat usando roll-dialog.mjs
+  const target = game.user.targets.first();
+  const chatContent = rollDialog.buildWeaponAttackDamageFlavorHtml({
+    weaponName: weaponData.name,
+    edgeText: rollDialog.getRollEdgeFlavorSuffix(edgeMode),
+    edgeMode,
+    attackRoll,
+    damageRollEntries: damageRolls,
+    targetName: target?.name,
+    targetAC: target?.actor?.system?.attributes?.armorClass?.value
+  });
+
+  await ChatMessage.create(rollDialog.applyChatRollMode({
+    speaker: ChatMessage.getSpeaker({ actor }),
+    content: chatContent,
+    rolls: [attackRoll, ...damageRolls.map(d => d.roll)],
+    img: actor.img
+  }));
+
+  // Gasto de munición si es a distancia
+  if (item.system.subcategory === 'distancia') {
+    const p = Number(item.system.projectiles) || 0;
+    await item.update({ "system.projectiles": Math.max(0, p - 1) });
+  }
+}
+
+/**
+ * El diálogo de opciones. He restaurado los textos de tu sistema.
+ */
+async function promptWeaponRollOptions({ actor, weapon, extrasList }) {
+  const i18n = (k) => game.i18n.localize(k);
+  const fatigue = actor.type === 'character' ? (Number(actor.system.attributes?.fatigue?.rollPenalty) || 0) : 0;
+  // Construimos una representación visual de los extras para el preview
+  const extrasAttackString = extrasList.length > 0 
+    ? extrasList.map(e => e.attack !== 0 ? ` + ${e.attack}[${e.name}]` : '').join('') 
+    : "";
+  // Construimos una representación visual de los extras para el preview
+  const extrasDamageString = extrasList.length > 0 
+    ? extrasList.map(e => e.damage !== '' ? ` + ${e.damage} ${i18n('TIRDUIN_RPS.Damage.Type.'+e.damagetype)}[${e.name}]` : '').join('') 
+    : "";
+
+
+  // Generamos el HTML igual que lo hacía tu actor-sheet
+  const content = `
+    <form>
+      <div class="roll-preview-attack" style="text-align:center; font-weight:bold; padding:10px; background:rgba(0,0,0,0.05); border-radius:4px;">
+        ---
+      </div>
+      <div class="roll-preview-damage" style="text-align:center; font-weight:bold; padding:10px; background:rgba(0,0,0,0.05); border-radius:4px;">
+        ---
+      </div>
+      <div class="form-group">
+        <label>${i18n('TIRDUIN_RPS.RollDialog.Common.Advantage')}</label>
+        <input type="radio" name="edge" value="advantage">
+        <label>Normal</label>
+        <input type="radio" name="edge" value="none" checked>
+        <label>${i18n('TIRDUIN_RPS.RollDialog.Common.Disadvantage')}</label>
+        <input type="radio" name="edge" value="disadvantage">
+      </div>
+    </form>`;
+
+  return new Promise(resolve => {
     new Dialog({
-      title: game.i18n.format('TIRDUIN_RPS.RollDialog.Weapon.Title', { weaponName }),
+      title: `${i18n('TIRDUIN_RPS.RollDialog.Weapon.Title')} ${weapon.name}`,
       content,
       buttons: {
         roll: {
           icon: '<i class="fas fa-dice-d20"></i>',
-          label: rollLabel,
-          callback: (html) => {
-            const abilityKey = html.find('select[name="tirduin-weapon-ability"]').val() || 'vig';
-            const edgeMode = html.find('input[name="tirduin-roll-edge"]:checked').val() || 'none';
-            const attackBonusEnabled = html.find('[data-role="attack-bonus-fields"]').is(':visible');
-            const attackBonus = attackBonusEnabled
-              ? (Number(html.find('input[name="tirduin-attack-bonus"]').val()) || 0)
-              : 0;
-
-            const extraDamageEntries = [];
-            html.find('.weapon-roll-damage-bonus-row').each((_index, element) => {
-              const row = $(element);
-              const formula = String(row.find('input[name="tirduin-extra-damage"]')?.val() || '').trim();
-              const damageTypeKey = String(row.find('select[name="tirduin-extra-damage-type"]')?.val() || '').trim();
-              if (!formula) return;
-              extraDamageEntries.push({ formula, damageTypeKey });
-            });
-
-            safeResolve({ abilityKey, edgeMode, attackBonus, extraDamageEntries });
-          },
+          label: i18n('TIRDUIN_RPS.RollDialog.Common.Roll'),
+          callback: (html) => resolve({
+            edgeMode: html.find('[name="edge"]:checked').val()
+          })
         },
         cancel: {
           icon: '<i class="fas fa-times"></i>',
-          label: cancelLabel,
-          callback: () => safeResolve(null),
-        },
+          label: i18n('TIRDUIN_RPS.RollDialog.Common.Cancel'),
+          callback: () => resolve(null)
+        }
       },
-      default: 'roll',
-      classes: ['tirduin', 'tirduin-roll-dialog'],
       render: (html) => {
-        customSelectDocNamespace = `.tirduinWeaponSelect-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+        const update = () => {
+          // Formamos la fórmula de ataque en base a la habilidad, bonificaciones extra y estado de fatiga
+          const abVal = (actor.system.abilities[weapon.ability]?.value || 0) + fatigue;
+          const adv = html.find('[name="edge"][value="advantage"]').is(':checked');
+          const dis = html.find('[name="edge"][value="disadvantage"]').is(':checked');
 
-        const closeAllCustomSelects = () => {
-          html.find('.tirduin-custom-select.is-open').removeClass('is-open');
+          let formulaBase = `Ataque: 1d20 + ${abVal}[${weapon.ability.toUpperCase()}] + ${weapon.proficiency}[PROF] ${extrasAttackString}`;
+          
+          if (adv) formulaBase = `(${formulaBase}) + 1d6`;
+          else if (dis) formulaBase = `(${formulaBase}) - 1d6`;
+
+          html.find('.roll-preview-attack').text(formulaBase);
+
+          // Formamos la fórmula de daño considerando bonificaciones extra y estado de fatiga
+          let damageFormula = `Daño: ${weapon.damageDie}  + ${abVal} ${i18n('TIRDUIN_RPS.Damage.Type.'+weapon.damageType)} ${weapon.damageDie2!== '' ? `+ ${weapon.damageDie2} ${i18n('TIRDUIN_RPS.Damage.Type.'+weapon.damageType2)}` : ''} ${extrasDamageString}`;
+
+          html.find('.roll-preview-damage').text(damageFormula);
         };
-
-        const initializeCustomSelects = (scope) => {
-          scope.find('select').each((_index, element) => {
-            const select = $(element);
-            if (select.data('tirduinCustomSelectReady')) return;
-            select.data('tirduinCustomSelectReady', true);
-
-            const wrapper = $('<div class="tirduin-custom-select"></div>');
-            select.addClass('tirduin-native-select').wrap(wrapper);
-
-            const host = select.parent();
-            const trigger = $('<button type="button" class="tirduin-custom-select-trigger"></button>');
-            const menu = $('<div class="tirduin-custom-select-menu"></div>');
-
-            const syncFromSelect = () => {
-              const selectedValue = String(select.val() ?? '');
-              const selectedOption = select.find('option:selected').first();
-              const label = String(selectedOption.text() || '').trim();
-              trigger.text(label || selectLabel);
-
-              menu.find('.tirduin-custom-select-option').each((_i, optionButton) => {
-                const btn = $(optionButton);
-                btn.toggleClass('is-selected', String(btn.data('value') ?? '') === selectedValue);
-              });
-            };
-
-            select.find('option').each((_optIndex, optionEl) => {
-              const option = $(optionEl);
-              const value = String(option.attr('value') || '');
-              const optionButton = $('<button type="button" class="tirduin-custom-select-option"></button>');
-              optionButton.text(String(option.text() || '').trim());
-              optionButton.attr('data-value', value);
-
-              if (option.prop('disabled')) {
-                optionButton.prop('disabled', true);
-              }
-
-              menu.append(optionButton);
-            });
-
-            host.append(trigger, menu);
-            syncFromSelect();
-
-            trigger.on('click', (event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              const willOpen = !host.hasClass('is-open');
-              closeAllCustomSelects();
-              if (willOpen) host.addClass('is-open');
-            });
-
-            menu.on('click', '.tirduin-custom-select-option', (event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              const button = $(event.currentTarget);
-              const value = String(button.data('value') || '');
-              select.val(value).trigger('change');
-              syncFromSelect();
-              closeAllCustomSelects();
-            });
-
-            select.on('change', () => syncFromSelect());
-            select.on('blur', () => closeAllCustomSelects());
-          });
-        };
-
-        const updatePreviews = () => {
-          const abilityKey = String(html.find('select[name="tirduin-weapon-ability"]').val() || 'vig');
-          const attackBonus = Number(html.find('input[name="tirduin-attack-bonus"]').val()) || 0;
-          const extraDamageEntries = [];
-          html.find('.weapon-roll-damage-bonus-row').each((_index, element) => {
-            const row = $(element);
-            const formula = String(row.find('input[name="tirduin-extra-damage"]')?.val() || '').trim();
-            const damageTypeKey = String(row.find('select[name="tirduin-extra-damage-type"]')?.val() || '').trim();
-            if (!formula) return;
-            extraDamageEntries.push({ formula, damageTypeKey });
-          });
-
-          const abilityValue = Number(actorRollData?.abilities?.[abilityKey]?.value) || 0;
-          const attackFormula = applyRollEdgeToFormula(`1d20 + (${abilityValue}) + (${proficiency}) + (${attackBonus})`, html.find('input[name="tirduin-roll-edge"]:checked').val() || 'none');
-          const damageFormula = `${damageDie} + (${abilityValue})`;
-          const damageFormula2 = damageDie2 || '';
-
-          const attackPreview = html.find('[data-role="weapon-attack-preview"]');
-          const damagePreview = html.find('[data-role="weapon-damage-preview"]');
-          const damagePreview2 = html.find('[data-role="weapon-damage2-preview"]');
-          const extraPreviews = html.find('[data-role="weapon-damage-extra-previews"]');
-
-          attackPreview.text(game.i18n.format('TIRDUIN_RPS.RollDialog.Weapon.AttackPreview', { formula: attackFormula }));
-          damagePreview.text(game.i18n.format('TIRDUIN_RPS.RollDialog.Weapon.DamagePreview', { formula: damageFormula }));
-          if (damageFormula2) {
-            damagePreview2.text(game.i18n.format('TIRDUIN_RPS.RollDialog.Weapon.DamagePreview2', { formula: damageFormula2 }));
-          } else {
-            damagePreview2.text('');
-          }
-
-          extraPreviews.empty();
-          for (const entry of extraDamageEntries) {
-            const formula = entry.formula;
-            const typeKey = entry.damageTypeKey;
-            const typeLabel = typeKey ? ` (${game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[typeKey] || typeKey)})` : '';
-            const previewText = game.i18n.format('TIRDUIN_RPS.RollDialog.Weapon.ExtraDamagePreview', { type: typeLabel, formula });
-            extraPreviews.append(`<p class="weapon-roll-preview">${previewText}</p>`);
-          }
-        };
-
-        const abilitySelect = html.find('select[name="tirduin-weapon-ability"]');
-        const edgeRadios = html.find('input[name="tirduin-roll-edge"]');
-        const attackBonusToggle = html.find('[data-role="attack-bonus-toggle"]');
-        const attackBonusFields = html.find('[data-role="attack-bonus-fields"]');
-        const attackBonusInput = html.find('input[name="tirduin-attack-bonus"]');
-        const addDamageBonusButton = html.find('[data-role="damage-bonus-add"]');
-        const damageBonusesContainer = html.find('[data-role="damage-bonuses"]');
-
-        attackBonusToggle.on('click', () => {
-          const willShow = attackBonusFields.css('display') === 'none';
-          attackBonusFields.css('display', willShow ? 'grid' : 'none');
-          if (!willShow) {
-            attackBonusInput.val(0);
-          }
-          updatePreviews();
-        });
-
-        abilitySelect.on('change', updatePreviews);
-        edgeRadios.on('click', (event) => {
-          const target = event.currentTarget;
-          const wasChecked = target.dataset.wasChecked === 'true';
-          edgeRadios.each((_i, radio) => {
-            radio.dataset.wasChecked = 'false';
-          });
-          if (wasChecked) {
-            target.checked = false;
-          } else {
-            target.checked = true;
-            target.dataset.wasChecked = 'true';
-          }
-          updatePreviews();
-        });
-        attackBonusInput.on('input change', updatePreviews);
-
-        addDamageBonusButton.on('click', (event) => {
-          event.preventDefault();
-          const row = $(
-            `<div class="weapon-roll-damage-bonus-row">
-              <input type="text" name="tirduin-extra-damage" placeholder="${extraDamagePlaceholder}">
-              <select name="tirduin-extra-damage-type">
-                <option value="">${noTypeLabel}</option>
-                ${damageTypeOptions}
-              </select>
-              <button type="button" class="weapon-roll-damage-bonus-remove" title="${removeLabel}">−</button>
-            </div>`
-          );
-          damageBonusesContainer.append(row);
-          initializeCustomSelects(row);
-          updatePreviews();
-        });
-
-        damageBonusesContainer.on('input change', 'input, select', updatePreviews);
-        damageBonusesContainer.on('click', '.weapon-roll-damage-bonus-remove', (event) => {
-          event.preventDefault();
-          $(event.currentTarget).closest('.weapon-roll-damage-bonus-row').remove();
-          updatePreviews();
-        });
-
-        html.on('click', '.tirduin-custom-select', (event) => {
-          event.preventDefault();
-          event.stopPropagation();
-        });
-
-        initializeCustomSelects(html);
-        updatePreviews();
-
-        $(document).on(`click${customSelectDocNamespace}`, (event) => {
-          if (!$(event.target).closest('.tirduin-custom-select').length) {
-            closeAllCustomSelects();
-          }
-        });
+        html.find('select, input').on('change', update);
+        update();
       },
-      close: () => safeResolve(null),
+      close: () => resolve(null)
     }).render(true);
   });
-}
-
-async function rollItemMacro(itemUuid) {
-  const dropData = {
-    type: 'Item',
-    uuid: itemUuid,
-  };
-
-  const item = await Item.fromDropData(dropData);
-  if (!item || !item.parent) {
-    const itemName = item?.name ?? itemUuid;
-    return ui.notifications.warn(
-      `Could not find item ${itemName}. You may need to delete and recreate this macro.`
-    );
-  }
-
-  if (item.type !== 'weapon') {
-    return item.roll();
-  }
-
-  const damageDie = String(item.system?.damageDie || '').trim();
-  if (!damageDie) {
-    return ui.notifications.warn(game.i18n.format('TIRDUIN_RPS.Roll.Warning.WeaponNoDamageDie', { item: item.name }));
-  }
-
-  const damageDie2 = String(item.system?.damageDie2 || '').trim();
-  const damageTypeKey = String(item.system?.damageType || '').trim();
-  const damageTypeKey2 = String(item.system?.damageType2 || '').trim();
-  const isRangedWeapon = String(item.system?.subcategory || '') === 'distancia';
-  const currentProjectiles = Math.max(0, Number(item.system?.projectiles) || 0);
-
-  if (isRangedWeapon && currentProjectiles <= 0) {
-    return ui.notifications.warn(game.i18n.format('TIRDUIN_RPS.Roll.Warning.WeaponNoProjectiles', { item: item.name }));
-  }
-
-  const proficiency = Number(item.system?.proficiency) || 0;
-  const actorRollData = item.actor?.getRollData() || {};
-  const selection = await promptWeaponRollOptions({
-    weaponName: item.name,
-    damageDie,
-    damageDie2,
-    proficiency,
-    actorRollData,
-  });
-  if (!selection) return null;
-
-  const abilityKey = selection.abilityKey;
-  const edgeMode = selection.edgeMode;
-  const attackBonus = selection.attackBonus || 0;
-  const extraDamageEntries = selection.extraDamageEntries || [];
-  const fatigueRollPenalty = item.actor?.type === 'character'
-    ? (Number(item.actor.system?.attributes?.fatigue?.rollPenalty) || 0)
-    : 0;
-  const abilityValue = (Number(item.actor.system?.abilities?.[abilityKey]?.value) || 0) + fatigueRollPenalty;
-
-  const attackBaseFormula = `1d20 + (${abilityValue}) + (${proficiency}) + (${attackBonus})`;
-  const attackFormula = applyRollEdgeToFormula(attackBaseFormula, edgeMode);
-  const damageFormula = `${damageDie} + (${abilityValue})`;
-  const damageFormula2 = damageDie2 || '';
-
-  const attackRoll = new Roll(attackFormula, actorRollData);
-  await attackRoll.evaluate();
-
-  const isCritical = getNaturalD20Result(attackRoll) === 20;
-  const duplicateDiceTermsInFormula = (formula = '') => String(formula).replace(
-    /(\d*)d(\d+)/gi,
-    (_match, count, faces) => `${(Number(count) || 1) * 2}d${faces}`
-  );
-
-  const resolvedDamageFormula = isCritical ? duplicateDiceTermsInFormula(damageFormula) : damageFormula;
-  const resolvedDamageFormula2 = (isCritical && damageFormula2)
-    ? duplicateDiceTermsInFormula(damageFormula2)
-    : damageFormula2;
-
-  const damageRoll = new Roll(resolvedDamageFormula, actorRollData);
-  await damageRoll.evaluate();
-
-  let damageRoll2 = null;
-  if (resolvedDamageFormula2) {
-    damageRoll2 = new Roll(resolvedDamageFormula2, actorRollData);
-    await damageRoll2.evaluate();
-  }
-
-  const extraDamageRolls = [];
-  for (const entry of extraDamageEntries) {
-    const extraRoll = new Roll(entry.formula, actorRollData);
-    await extraRoll.evaluate();
-    extraDamageRolls.push({
-      roll: extraRoll,
-      typeLabel: entry.damageTypeKey
-        ? game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[entry.damageTypeKey] || entry.damageTypeKey)
-        : '',
-    });
-  }
-
-  const targetToken = game.user?.targets?.first();
-  const targetName = targetToken?.name ?? null;
-  const targetAC = targetToken?.actor
-    ? (Number(targetToken.actor.system?.attributes?.armorClass?.value) || null)
-    : null;
-
-  await ChatMessage.create(applyChatRollMode({
-    speaker: ChatMessage.getSpeaker({ actor: item.actor }),
-    content: buildWeaponAttackDamageFlavorHtml({
-      weaponName: item.name,
-      edgeText: getRollEdgeFlavorSuffix(edgeMode),
-      edgeMode,
-      attackRoll,
-      damageRoll,
-      damageTypeLabel: damageTypeKey
-        ? game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[damageTypeKey] || damageTypeKey)
-        : '',
-      damageRoll2,
-      damageTypeLabel2: damageTypeKey2
-        ? game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[damageTypeKey2] || damageTypeKey2)
-        : '',
-      damageRollExtraEntries: extraDamageRolls,
-      targetName,
-      targetAC,
-    }),
-    roll: [attackRoll, damageRoll, ...(damageRoll2 ? [damageRoll2] : []), ...extraDamageRolls.map(e => e.roll)],
-  }));
-
-  if (isRangedWeapon) {
-    const nextProjectiles = Math.max(0, currentProjectiles - 1);
-    await item.update({ 'system.projectiles': nextProjectiles });
-  }
-
-  return { attackRoll, damageRoll, damageRoll2 };
 }

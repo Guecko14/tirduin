@@ -15,7 +15,7 @@ export default class TirduinRPSWeapon extends TirduinRPSItemBase {
       required: true,
       blank: false,
       initial: 'simple',
-      choices: ['simple', 'marcial', 'magica'],
+      choices: ['simple', 'marcial', 'magica', 'extra'],
     });
 
     // Subcategoría de uso: cuerpo a cuerpo o a distancia.
@@ -36,11 +36,25 @@ export default class TirduinRPSWeapon extends TirduinRPSItemBase {
       max: 5,
     });
 
+    schema.proficiencyExtra = new fields.NumberField({
+      required: true,
+      nullable: false,
+      integer: true,
+      initial: 0,
+    });
+
+    schema.ability = new fields.StringField({
+      required: true,
+      blank: false,
+      initial: 'vig',
+      choices: Object.keys(CONFIG.TIRDUIN_RPS.abilities),
+    });
+
     // Dado de daño del arma expresado como cadena (ej. "1d6", "2d8").
     schema.damageDie = new fields.StringField({
       required: true,
       blank: false,
-      initial: '1d6',
+      initial: '',
     });
 
     // Tipo de daño del daño principal.
@@ -64,6 +78,20 @@ export default class TirduinRPSWeapon extends TirduinRPSItemBase {
       initial: '',
     });
 
+    // Segundo dado de daño opcional para armas con doble componente.
+    schema.damageDieExtra = new fields.StringField({
+      required: false,
+      blank: true,
+      initial: '',
+    });
+
+    // Tipo del segundo daño (opcional, ligado a damageDie2).
+    schema.damageTypeExtra = new fields.StringField({
+      required: false,
+      blank: true,
+      initial: '',
+    });
+
     // Alcance del arma en formato libre (ej. "5 ft", "Toque", "20/60").
     schema.range = new fields.StringField({
       required: true,
@@ -80,7 +108,7 @@ export default class TirduinRPSWeapon extends TirduinRPSItemBase {
       min: 0,
     });
 
-    // Garras necesarias para empuñar el arma: "1" (una mano) o "2" (dos manos).
+    // manos necesarias para empuñar el arma: "1" (una mano) o "2" (dos manos).
     schema.grip = new fields.StringField({
       required: true,
       blank: false,

@@ -169,6 +169,13 @@ export function applyChatRollMode(chatData, mode = null) {
     messageData.whisper = [game.user.id];
   }
 
+  // --- NUEVA LÓGICA PARA EL ICONO ---
+  // Si no hay imagen en chatData, intentamos sacarla del "speaker"
+  if (!messageData.img && messageData.speaker) {
+      const actor = game.actors.get(messageData.speaker.actor);
+      if (actor) messageData.img = actor.img; // O actor.prototypeToken.texture.src
+  }
+
   return messageData;
 }
 
@@ -347,30 +354,23 @@ export function buildWeaponAttackDamageFlavorHtml({
   edgeText = '',
   edgeMode = ROLL_EDGE_MODE.NONE,
   attackRoll,
-  damageRoll,
-  damageTypeLabel = '',
-  damageRoll2 = null,
-  damageTypeLabel2 = '',
-  damageRollExtraEntries = [],
+  damageRollEntries = [],
   targetName = null,
   targetAC = null,
 } = {}) {
+ // 1. Título del Ataque
   const attackTitle = buildTypedRollTitle(
     'weapon',
     `${weaponName} ${game.i18n.localize('TIRDUIN_RPS.Roll.Label.AttackSuffix')}${edgeText}`
   );
-  const damageTitle = damageTypeLabel || game.i18n.localize('TIRDUIN_RPS.Roll.Label.Damage');
-  const damageTitle2 = damageTypeLabel2 || game.i18n.localize('TIRDUIN_RPS.Roll.Label.Damage2');
-  const extraEntries = Array.isArray(damageRollExtraEntries) ? damageRollExtraEntries : [];
-
+  
   const naturalAttack = getNaturalD20Result(attackRoll);
   const isCritical = naturalAttack === 20;
-  const isFumble = naturalAttack === 1;
 
+  // 2. Lógica de acierto (Hit/Miss)
   let attackOutcomeText = getD20OutcomeText(attackRoll);
   if (targetName !== null && targetAC !== null) {
     const hit = ((Number(attackRoll.total) || 0) >= Number(targetAC)) || isCritical;
-    console.log(`Comparing attack total ${attackRoll.total} against target AC ${targetAC} => hit: ${hit}`);
     const hitLabel = hit
       ? game.i18n.localize('TIRDUIN_RPS.Roll.Outcome.Hit')
       : game.i18n.localize('TIRDUIN_RPS.Roll.Outcome.Miss');
@@ -379,6 +379,23 @@ export function buildWeaponAttackDamageFlavorHtml({
       .join(' | ');
   }
 
+  // 3. GENERACIÓN DINÁMICA DE DAÑOS (Aquí está la clave)
+  // Usamos .map para que por CADA entrada en el array se cree un bloque de daño
+  const damageHtml = damageRollEntries.map((entry, index) => {
+    return buildRollFlavorHtml({
+      title: entry.typeLabel || game.i18n.localize('TIRDUIN_RPS.Roll.Label.Damage'),
+      roll: entry.roll,
+      // Solo mostramos el badge de crítico en el primer bloque de daño
+      outcomeText: (isCritical && index === 0) 
+        ? `<span class="tirduin-roll-outcome-badge is-critical">${game.i18n.localize('TIRDUIN_RPS.Roll.Outcome.Critical')}</span>` 
+        : '',
+      showDiceBreakdown: true,
+      showBonus: true,
+      type: 'damage' // Opcional: añade una clase CSS para diferenciarlo
+    });
+  }).join(''); // Unimos todos los bloques generados en un solo string de HTML
+
+  // 4. Retorno del Bundle completo
   return `
     <div class="tirduin-roll-bundle">
       ${buildRollFlavorHtml({
@@ -387,27 +404,7 @@ export function buildWeaponAttackDamageFlavorHtml({
         outcomeText: attackOutcomeText,
         edgeMode,
       })}
-      ${buildRollFlavorHtml({
-        title: damageTitle,
-        roll: damageRoll,
-        outcomeText: isCritical ? `<span class="tirduin-roll-outcome-badge is-critical">${game.i18n.localize('TIRDUIN_RPS.Roll.Outcome.Critical')}</span>` : '',
-        showDiceBreakdown: true,
-        showBonus: true,
-      })}
-      ${damageRoll2 ? buildRollFlavorHtml({
-        title: damageTitle2,
-        roll: damageRoll2,
-        showDiceBreakdown: true,
-        showBonus: true,
-      }) : ''}
-      ${extraEntries.map((entry, index) => buildRollFlavorHtml({
-        title: entry?.typeLabel
-          ? `${game.i18n.format('TIRDUIN_RPS.Roll.Label.ExtraDamage', { index: index + 1 })} (${entry.typeLabel})`
-          : game.i18n.format('TIRDUIN_RPS.Roll.Label.ExtraDamage', { index: index + 1 }),
-        roll: entry?.roll,
-        showDiceBreakdown: true,
-        showBonus: true,
-      })).join('')}
+      ${damageHtml} 
     </div>
   `;
 }

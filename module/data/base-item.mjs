@@ -10,17 +10,6 @@ export default class TirduinRPSItemBase extends TirduinRPSDataModel {
 
     schema.description = new fields.StringField({ required: true, blank: true });
 
-    // Generic damage modifiers for object-like items.
-    const buildDamageModifierSchema = () => damageTypeKeys.reduce((obj, key) => {
-      obj[key] = new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 });
-      return obj;
-    }, {});
-
-    schema.damageModifiers = new fields.SchemaField({
-      vulnerability: new fields.SchemaField(buildDamageModifierSchema()),
-      resistance: new fields.SchemaField(buildDamageModifierSchema()),
-    });
-
     return schema;
   }
 
