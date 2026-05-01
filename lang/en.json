@@ -411,7 +411,9 @@
     "Item": {
       "item": "Objeto",
       "feature": "Dote",
-      "spell": "Conjuro"
+      "spell": "Conjuro",
+      "weapon": "Arma",
+      "armor": "Armadura"
     }
   }
 }

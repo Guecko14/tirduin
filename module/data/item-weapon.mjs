@@ -53,7 +53,7 @@ export default class TirduinRPSWeapon extends TirduinRPSItemBase {
     // Dado de daño del arma expresado como cadena (ej. "1d6", "2d8").
     schema.damageDie = new fields.StringField({
       required: true,
-      blank: false,
+      blank: true,
       initial: '',
     });
 
