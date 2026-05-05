@@ -16,6 +16,32 @@
       </div>
     </div>
 
+    <div class="feature-sheet-grid">
+      <div class="feature-field">
+        <label for="system.origin">{{localize
+          "TIRDUIN_RPS.CharacterSheet.Features.Origin"}}</label>
+        <select name="system.origin" class="sheet-skill-select">
+          <option value="class" {{#if (eq system.origin
+            "class")}}selected{{/if}}>{{localize
+            "TIRDUIN_RPS.CharacterSheet.Features.Origins.Class"}}</option>
+          <option value="race" {{#if (eq system.origin
+            "race")}}selected{{/if}}>{{localize
+            "TIRDUIN_RPS.CharacterSheet.Features.Origins.Race"}}</option>
+          <option value="background" {{#if (eq system.origin
+            "background")}}selected{{/if}}>{{localize
+            "TIRDUIN_RPS.CharacterSheet.Features.Origins.Background"}}</option>
+        </select>
+      </div>
+
+      <div class="feature-field feature-field-cost">
+        <label for="system.level">{{localize
+          "TIRDUIN_RPS.CharacterSheet.Features.Level"}}</label>
+        <input name="system.level" type="number" value="{{system.level}}"
+          min="1"
+          data-dtype="Number" />
+      </div>
+    </div>
+
     <div class="special-field special-field-description">
       <label for="system.description">{{localize
         "TIRDUIN_RPS.CharacterSheet.Features.Description"}}</label>

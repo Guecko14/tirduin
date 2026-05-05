@@ -661,3 +661,16 @@
     grid-template-columns: repeat(2, minmax(62px, 1fr));
   }
 }
+
+
+.special-item-sheet .feature-sheet-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+}
+
+.special-item-sheet .feature-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
