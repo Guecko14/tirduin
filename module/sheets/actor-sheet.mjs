@@ -473,7 +473,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     html.on('click', '.loot-item-row', this._onLootItemRoll.bind(this));
 
     // Click en una armadura del NPC: tira VD y aplica desgaste de RA.
-    html.on('click', '.npc-armor-item span', this._onArmorItemClick.bind(this));
+    html.on('click', '.npc-armor-item', this._onArmorItemClick.bind(this));
 
     // Click en un arma del NPC: dialogo de ataque (VIG/AGIL + competencia) y daño.
     html.on('click', '.npc-weapon-item span', this._onWeaponItemClick.bind(this));
@@ -485,7 +485,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     html.on('click', '.weapon-action-toggle', this._onWeaponActionToggle.bind(this));
 
     // Click en filas del tab de Acciones (arma, parar, mágico).
-    html.on('click', '.npc-action-item span', this._onActionItemClick.bind(this));
+    html.on('click', '.npc-action-item', this._onActionItemClick.bind(this));
 
     // -------------------------------------------------------------
     // Everything below here is only needed if the sheet is editable
@@ -1182,12 +1182,12 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
   async _onActionItemClick(event) {
     const clickedControl = event.target.closest('.npc-object-controls');
     if (clickedControl) return;
-
+    
     const row = event.currentTarget;
     const actionKind = row?.dataset?.actionKind;
     const itemId = row?.dataset?.itemId;
+    console.log('Action item click', actionKind);
     if (!actionKind || !itemId) return;
-
     if (actionKind === 'weapon') {
       return this._onWeaponItemClick(event);
     }
