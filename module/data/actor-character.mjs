@@ -266,7 +266,8 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
     };
 
     const abilityKey = this.details?.spellAttribute || 'inst';
-    const spellAbilityValue = (Number(this.abilities?.[abilityKey]?.value) || 0) + fatigueRollPenalty;
+    let spellAbilityValue = (Number(this.abilities?.[abilityKey]?.value) || 0);
+    spellAbilityValue += fatigueRollPenalty;
     const spellProficiency = Math.max(0, Math.min(5, Number(this.spellcasting?.proficiency) || 0));
     const spellAttackExtra = Number(this.spellcasting?.attackExtra) || 0;
     const spellDcExtra = Number(this.spellcasting?.dcExtra) || 0;

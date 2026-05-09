@@ -174,10 +174,6 @@
             value="{{ability.value}}" min="-5" max="5"
             onkeyup="if(value<-5) value=-5; if(value>5) value=5;"
             data-dtype="Number" />
-          <span class="ability-mod rollable"
-            data-roll="1d20+{{ability.rollMod}}"
-            data-label="{{localize (lookup @root.config.abilities key)}}">{{numberFormat
-            ability.rollMod decimals=0 sign=true}}</span>
         </div>
         {{/each}}
       </div>

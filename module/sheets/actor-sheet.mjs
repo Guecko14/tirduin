@@ -51,10 +51,10 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
   /** @override */
   async getData() {
     const isLootContainer = this.actor.type === 'loot'
-      || Boolean(this.actor.getFlag?.('tirduin', 'lootContainer'));
-
+    || Boolean(this.actor.getFlag?.('tirduin', 'lootContainer'));
+    
     // Construye el contexto comun que consumen las plantillas de actor.
-    const context = super.getData();
+    const context = await super.getData();
 
     // Use a safe clone of the actor data for further operations.
     const actorData = this.document.toPlainObject();
@@ -201,9 +201,10 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }));
 
     if (this.actor.type === 'character') {
-
+      
       const abilityKey = context.system?.details?.spellAttribute || 'ment';
-      const abilityValue = Number(context.system?.abilities?.[abilityKey]?.value) || 0;
+      let abilityValue = Number(context.system?.abilities?.[abilityKey]?.value) || 0;
+      abilityValue += fatigueRollPenalty;
       const proficiency = Math.max(0, Math.min(5, Number(context.system?.spellcasting?.proficiency) || 0));
       const attackExtra = Number(context.system?.spellcasting?.attackExtra) || 0;
       const dcExtra = Number(context.system?.spellcasting?.dcExtra) || 0;
@@ -230,6 +231,29 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
         relativeTo: this.actor,
       }
     );
+
+    const vig = Number(context.system?.abilities?.vig?.value ?? this._source.abilities?.vig?.value ?? 0);
+    const agil = Number(context.system?.abilities?.agil?.value ?? this._source.abilities?.agil?.value ?? 0);
+    const inst = Number(context.system?.abilities?.inst?.value ?? this._source.abilities?.inst?.value ?? 0);
+    const ment = Number(context.system?.abilities?.ment?.value ?? this._source.abilities?.ment?.value ?? 0);
+    const pre = Number(context.system?.abilities?.pre?.value ?? this._source.abilities?.pre?.value ?? 0);
+
+    const saves = {
+      fortaleza: {
+        label: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Saves.Fortaleza'),
+        value: (vig * 2) + context.system?.attributes?.fatigue?.rollPenalty,
+      },
+      reflejos: {
+        label: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Saves.Reflejos'),
+        value: (agil + inst) + context.system?.attributes?.fatigue?.rollPenalty,
+      },
+      voluntad: {
+        label: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Saves.Voluntad'),
+        value: (ment + pre) + context.system?.attributes?.fatigue?.rollPenalty,
+      },
+    };
+
+    context.system.saves = saves;
 
     // Prepare active effects
     context.effects = prepareActiveEffectCategories(
@@ -474,6 +498,9 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
 
     // Click en una armadura del NPC: tira VD y aplica desgaste de RA.
     html.on('click', '.npc-armor-item', this._onArmorItemClick.bind(this));
+
+     // Click en una armadura del NPC: reduce ra y quita roto.
+    html.on('contextmenu', '.npc-armor-item', this._onArmorItemRightClick.bind(this));
 
     // Click en un arma del NPC: dialogo de ataque (VIG/AGIL + competencia) y daño.
     html.on('click', '.npc-weapon-item span', this._onWeaponItemClick.bind(this));
@@ -1142,6 +1169,59 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
 
     return roll;
   }
+
+    /**
+   * Handle click on armor rows: roll VD, decrement RA current and auto-desmark broken.
+   * @param {Event} event
+   * @private
+   */
+  async _onArmorItemRightClick(event) {
+
+      // 1. Evita que se abra el menú por defecto del navegador (el de "Guardar imagen como...", etc.)
+    event.preventDefault(); 
+    
+    // 2. Evita que el evento suba a los padres o active otros disparadores de clic
+    event.stopPropagation();
+
+    const clickedControl = event.target.closest('.npc-object-controls, .armor-equip-toggle');
+    if (clickedControl) return;
+
+    const row = event.currentTarget;
+    const itemId = row?.dataset?.itemId;
+    const item = this.actor.items.get(itemId);
+    if (!item || item.type !== 'armor') return;
+
+    if (item.system?.category === 'extra') {
+      return null;
+    }
+
+    const vdFormula = String(item.system?.vd || '').trim();
+    if (!vdFormula) return;
+
+    const raMax = Math.max(0, Number(item.system?.ra) || 0);
+    const raCurrent = Math.min(
+      Math.max(0, Number(item.system?.raCurrent) || 0) - 1,
+      raMax
+    );
+
+    const updateData = {
+      'system.raCurrent': raCurrent,
+    };
+
+    if (raMax > 0 && raCurrent < raMax) {
+      updateData['system.broken'] = false;
+    }
+
+    await item.update(updateData);
+
+    if (item.system?.equipped) {
+      const armorClass = this._calculateArmorClassFromEquippedArmors();
+      await this.actor.update({ 'system.attributes.armorClass.value': armorClass });
+    }
+
+  }
+
+
 
   /**
    * Handle click on weapon rows: choose attribute + edge mode, then roll attack and damage.

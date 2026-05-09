@@ -88,26 +88,7 @@ export default class TirduinRPSNPC extends TirduinRPSActorBase {
       }
     }
 
-    const vig = Number(this.abilities?.vig?.value) ?? 0;
-    const agil = Number(this.abilities?.agil?.value) ?? 0;
-    const inst = Number(this.abilities?.inst?.value) ?? 0;
-    const ment = Number(this.abilities?.ment?.value) ?? 0;
-    const pre = Number(this.abilities?.pre?.value) ?? 0;
-
-    this.saves = {
-      fortaleza: {
-        label: 'Fortaleza',
-        value: (vig * 2),
-      },
-      reflejos: {
-        label: 'Reflejos',
-        value: (agil + inst),
-      },
-      voluntad: {
-        label: 'Voluntad',
-        value: (ment + pre),
-      },
-    };
+    
 
   }
 
