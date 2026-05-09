@@ -14,6 +14,12 @@ export default class TirduinRPSActorBase extends TirduinRPSDataModel {
       max: new fields.NumberField({ ...requiredInteger, initial: 10, min: 0 })
     });
 
+    schema.money = new fields.SchemaField({
+      gold: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+      silver: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+      copper: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
+    });
+
     schema.biography = new fields.StringField({ required: true, blank: true }); // equivalent to passing ({initial: ""}) for StringFields
 
     return schema;

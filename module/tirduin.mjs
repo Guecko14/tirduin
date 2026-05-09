@@ -760,12 +760,12 @@ Hooks.once('ready', function () {
       const rollData = actor?.getRollData?.() || {};
       const baseFormula = options?.formula || CONFIG.Combat?.initiative?.formula || '1d20 + @abilities.agil.mod + @abilities.inst.mod';
 
-      const selection = await promptInitiativeConfirmation({ formula: baseFormula, rollData });
+      const selection = await rollDialog.promptInitiativeConfirmation({ formula: baseFormula, rollData });
       if (!selection) return this;
 
       const edgeMode = selection.edgeMode || 'none';
       const bonus = Number(selection.bonus) || 0;
-      let formula = applyRollEdgeToFormula(baseFormula, edgeMode);
+      let formula = rollDialog.applyRollEdgeToFormula(baseFormula, edgeMode);
       if (bonus !== 0) formula = `(${formula}) + (${bonus})`;
 
       return originalRollInitiative.call(this, ids, {

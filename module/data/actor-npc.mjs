@@ -28,12 +28,6 @@ export default class TirduinRPSNPC extends TirduinRPSActorBase {
       }),
     });
 
-    schema.money = new fields.SchemaField({
-      gold: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
-      silver: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
-      copper: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
-    });
-
     schema.abilities = new fields.SchemaField(Object.keys(CONFIG.TIRDUIN_RPS.abilities).reduce((obj, ability) => {
       obj[ability] = new fields.SchemaField({
         value: new fields.NumberField({ ...requiredInteger, initial: 0 }),
@@ -94,11 +88,11 @@ export default class TirduinRPSNPC extends TirduinRPSActorBase {
       }
     }
 
-    const vig = Number(this.abilities?.vig?.value) || 0;
-    const agil = Number(this.abilities?.agil?.value) || 0;
-    const inst = Number(this.abilities?.inst?.value) || 0;
-    const ment = Number(this.abilities?.ment?.value) || 0;
-    const pre = Number(this.abilities?.pre?.value) || 0;
+    const vig = Number(this.abilities?.vig?.value) ?? 0;
+    const agil = Number(this.abilities?.agil?.value) ?? 0;
+    const inst = Number(this.abilities?.inst?.value) ?? 0;
+    const ment = Number(this.abilities?.ment?.value) ?? 0;
+    const pre = Number(this.abilities?.pre?.value) ?? 0;
 
     this.saves = {
       fortaleza: {

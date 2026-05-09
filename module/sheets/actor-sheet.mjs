@@ -500,14 +500,17 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
 
       const pip = ev.currentTarget;
       const value = Number(pip.dataset.value) || 0;
-      const currentValue = Number(pip.dataset.currentValue) || 0;
       const resourcePath = pip.dataset.resourcePath;
+      const currentValue = foundry.utils.getProperty(this.actor, resourcePath) || 0;
+
       const maxPath = pip.dataset.maxPath;
+
       const maxValue = Number(pip.dataset.maxValue) || 0;
 
       if (!resourcePath) return;
 
       const nextValue = currentValue === value ? Math.max(0, value - 1) : value;
+
       const updateData = {
         [resourcePath]: nextValue,
       };
@@ -1182,7 +1185,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
   async _onActionItemClick(event) {
     const clickedControl = event.target.closest('.npc-object-controls');
     if (clickedControl) return;
-    
+
     const row = event.currentTarget;
     const actionKind = row?.dataset?.actionKind;
     const itemId = row?.dataset?.itemId;

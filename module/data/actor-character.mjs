@@ -69,11 +69,7 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
       }),
     });
 
-    schema.money = new fields.SchemaField({
-      gold: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
-      silver: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
-      copper: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0 }),
-    });
+    
 
     // Iterate over ability names and create a new SchemaField for each.
     schema.abilities = new fields.SchemaField(Object.keys(CONFIG.TIRDUIN_RPS.abilities).reduce((obj, ability) => {
@@ -194,17 +190,17 @@ export default class TirduinRPSCharacter extends TirduinRPSActorBase {
 
     const sourceHasHope = foundry.utils.hasProperty(this._source ?? {}, 'system.hope');
 
-    this.hope.value = Math.max(0, Math.min(6, Number(this.hope?.value) || 2));
+    this.hope.value = Math.max(0, Math.min(6, Number(this.hope?.value) ?? 2));
     this.hope.max = 6;
 
-    this.stress.value = Math.max(0, Math.min(6, Number(this.stress?.value) || 0));
+    this.stress.value = Math.max(0, Math.min(6, Number(this.stress?.value) ?? 0));
     this.stress.max = 6;
 
-    this.luck.value = Math.max(0, Math.min(3, Number(this.luck?.value) || 0));
+    this.luck.value = Math.max(0, Math.min(3, Number(this.luck?.value) ?? 0));
     this.luck.max = 3;
 
     const spellAttrName = this.details?.spellAttribute || 'inst';
-    const spellAbilityValue = (Number(this.abilities?.[spellAttrName]?.value) || 0) + this.attributes.fatigue.rollPenalty;
+    const spellAbilityValue = (Number(this.abilities?.[spellAttrName]?.value) ?? 0) + this.attributes.fatigue.rollPenalty;
     this.spellcasting.spellAbilityValue = spellAbilityValue;
     this.spellcasting.spellAbilityLabel = game.i18n.localize(CONFIG.TIRDUIN_RPS.abilities[spellAttrName]) || spellAttrName;
 

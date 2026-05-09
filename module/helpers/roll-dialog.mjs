@@ -249,9 +249,10 @@ export function getEdgeD6Result(roll) {
 /**
  * Build a compact dice breakdown preserving active die results order.
  * @param {Roll} roll
+ * @param {string} edgeMode
  * @returns {string}
  */
-export function getRollDiceBreakdown(roll) {
+export function getRollDiceBreakdown(roll, edgeMode) {
   if (!roll?.dice?.length) return '';
 
   const values = [];
@@ -261,8 +262,15 @@ export function getRollDiceBreakdown(roll) {
       if (typeof result?.result === 'number') values.push(String(result.result));
     }
   }
+  // Si no hay al menos dos dados, solo devolvemos el valor del primero
+  if (values.length < 2) return values.join('');
 
-  return values.join('+');
+  // Lógica de signos: el d20 siempre es el primero [0], el d6 de borde el segundo [1]
+  const d20 = values[0];
+  const edgeD6 = values[1];
+  const operator = edgeMode === ROLL_EDGE_MODE.DISADVANTAGE ? '-' : '+';
+
+  return `${d20}${operator}${edgeD6}`;
 }
 
 /**
@@ -324,7 +332,7 @@ export function buildRollFlavorHtml({
 
   // Obtenemos el texto de resultado definitivo (ya traducido).
   const resolvedOutcome = outcomeText || (roll ? getD20OutcomeText(roll) : '');
-  const diceBreakdown = showDiceBreakdown && roll ? getRollDiceBreakdown(roll) : '';
+  const diceBreakdown = showDiceBreakdown && roll ? getRollDiceBreakdown(roll, edgeMode) : '';
 
   // Devolvemos el HTML simplificado.
   // Fíjate que hemos añadido ${statusClass} en las clases principales,
@@ -426,7 +434,7 @@ export async function promptInitiativeConfirmation({ formula = '', rollData = {}
 
     const getFormulaWithBonus = (edgeMode, bonus) => {
       const withEdge = applyRollEdgeToFormula(formula, edgeMode);
-      const nBonus = Number(bonus) || 0;
+      const nBonus = Number(bonus) ?? 0;
       return nBonus === 0 ? withEdge : `(${withEdge}) + (${nBonus})`;
     };
 
