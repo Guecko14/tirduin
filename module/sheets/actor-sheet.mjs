@@ -237,22 +237,21 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     const inst = Number(context.system?.abilities?.inst?.value ?? this._source.abilities?.inst?.value ?? 0);
     const ment = Number(context.system?.abilities?.ment?.value ?? this._source.abilities?.ment?.value ?? 0);
     const pre = Number(context.system?.abilities?.pre?.value ?? this._source.abilities?.pre?.value ?? 0);
-
+    
     const saves = {
       fortaleza: {
         label: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Saves.Fortaleza'),
-        value: (vig * 2) + context.system?.attributes?.fatigue?.rollPenalty,
+        value: (vig * 2) + fatigueRollPenalty,
       },
       reflejos: {
         label: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Saves.Reflejos'),
-        value: (agil + inst) + context.system?.attributes?.fatigue?.rollPenalty,
+        value: (agil + inst) + fatigueRollPenalty,
       },
       voluntad: {
         label: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Saves.Voluntad'),
-        value: (ment + pre) + context.system?.attributes?.fatigue?.rollPenalty,
+        value: (ment + pre) + fatigueRollPenalty,
       },
     };
-
     context.system.saves = saves;
 
     // Prepare active effects
