@@ -190,7 +190,7 @@
   flex: 0 0 52px;
 }
 
-.tirduin .character .sheet-skill-select {
+.sheet-skill-select {
   border: 1px solid rgba(255, 255, 255, 0.25);
   color: #fff;
   padding: 0 6px 0 6px;
@@ -207,18 +207,18 @@
   background-repeat: no-repeat;
 }
 
-.tirduin .character .sheet-skill-select:focus {
+.sheet-skill-select:focus {
   outline: none;
   border-color: #9ad;
   box-shadow: 0 0 0 1px rgba(153, 170, 221, 0.35), 0 0 6px rgba(0, 0, 0, 0.45);
 }
 
-.tirduin .character .sheet-skill-select option {
+.sheet-skill-select option {
   background: #161616;
   color: #f2f2f2;
 }
 
-.tirduin .character .sheet-skill-select option:checked {
+.sheet-skill-select option:checked {
   background: #24405f;
   color: #fff;
 }
@@ -779,7 +779,7 @@
   color: #9ad;
 }
 
-.tirduin .character .character-features-empty {
+.tirduin .character-features-empty {
   color: #666;
   font-style: italic;
   font-size: 0.82rem;

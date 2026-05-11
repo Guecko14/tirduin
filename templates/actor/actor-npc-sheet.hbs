@@ -24,7 +24,7 @@
             <div class="npc-stat npc-size-field">
               <label for="system.details.size">{{localize
                 "TIRDUIN_RPS.CharacterSheet.Size"}}</label>
-              <select name="system.details.size">
+              <select name="system.details.size" class="sheet-skill-select">
                 <option value="diminuto" {{#if (eq system.details.size
                   'diminuto')}}selected{{/if}}>{{localize
                   "TIRDUIN_RPS.CharacterSheet.SizeOptions.Diminuto"}}</option>
@@ -76,10 +76,33 @@
           </div>
 
           <div class="npc-stat">
-            <label>Velocidad</label>
-            <input type="number" name="system.attributes.speed.value"
-              value="{{system.attributes.speed.value}}" min="0"
-              onkeyup="if(value<0) value=0" />
+            <label>{{localize "TIRDUIN_RPS.attributes.speed.long"}}</label>
+            <div class="speed-row">
+              <input type="number" name="system.attributes.speed.value"
+                value="{{system.attributes.speed.value}}" min="0"
+                onkeyup="if(value<0) value=0" data-dtype="Number" />
+            </div>
+          </div>
+
+          <div class="npc-stat">
+            <label for="system.attributes.fatigue.value">{{localize
+              "TIRDUIN_RPS.AlteredState.fatigue.label"}}</label>
+            <select name="system.attributes.fatigue.value"
+              class="sheet-skill-select">
+              <option value="0" {{#if (eq system.attributes.fatigue.value
+                0)}}selected{{/if}}>0</option>
+              <option value="1" {{#if (eq system.attributes.fatigue.value
+                1)}}selected{{/if}}>1</option>
+              <option value="2" {{#if (eq system.attributes.fatigue.value
+                2)}}selected{{/if}}>2</option>
+              <option value="3" {{#if (eq system.attributes.fatigue.value
+                3)}}selected{{/if}}>3</option>
+              <option value="4" {{#if (eq system.attributes.fatigue.value
+                4)}}selected{{/if}}>4</option>
+              <option value="5" {{#if (eq system.attributes.fatigue.value
+                5)}}selected{{/if}}>{{localize
+                "TIRDUIN_RPS.CharacterSheet.FatigueDeath"}}</option>
+            </select>
           </div>
 
         </div>
@@ -98,7 +121,7 @@
         <div class="attr-box">
           <label for="system.abilities.{{key}}.value"
             class="resource-label rollable flexlarge align-left"
-            data-roll="d20+{{numberFormat ability.value sign=true}}"
+            data-roll="1d20+{{ability.rollMod}}"
             data-label="{{localize (lookup @root.config.abilities key)}}">{{localize
             (lookup @root.config.abilities key)}}</label>
 
@@ -151,6 +174,7 @@
         <a class="item active" data-tab="actions">Acciones</a>
         <a class="item" data-tab="skills">Habilidades</a>
         <a class="item" data-tab="objects">Objetos</a>
+        <a class="item" data-tab="spells">Conjuros</a>
       </nav>
 
       <!-- TABS CONTENT: cada panel se muestra segun el tab activo -->
@@ -171,6 +195,11 @@
         <!-- OBJETOS TAB: lista objetos genéricos, armas y armaduras del NPC -->
         <div class="tab" data-tab="objects">
           {{> "systems/tirduin/templates/actor/parts/actor-npc-objects.hbs"}}
+        </div>
+
+        <!-- conjuros TAB: lista conjuros NPC -->
+        <div class="tab spells" data-group="primary" data-tab="spells">
+          {{> "systems/tirduin/templates/actor/parts/actor-spells.hbs"}}
         </div>
 
       </div>
