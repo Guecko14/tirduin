@@ -9,17 +9,17 @@
   color: #e6e6e6;
 }
 
-.tirduin .character .sheet-header {
+.tirduin .character .character-header {
   display: flex;
   gap: 10px;
   margin-bottom: 10px;
 }
 
-.tirduin .character .npc-portrait {
+.tirduin .character .character-portrait {
   flex: 0 0 100px;
 }
 
-.tirduin .character .npc-header-stats {
+.tirduin .character .character-header-stats {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -78,10 +78,8 @@
   padding: 6px;
 }
 
-.tirduin .character .character-identity-row .npc-name input,
-.tirduin .character .character-identity-row .character-level-field input,
+.tirduin .character .character-identity-row .character-name-field input,
 .tirduin .character .character-identity-row .character-size-field select {
-  height: 32px;
   box-sizing: border-box;
   margin-bottom: 0;
 }
@@ -108,11 +106,10 @@
   padding: 0 8px;
 }
 
-.tirduin .character .npc-name input {
+.tirduin .character .character-name-field input {
   width: 100%;
-  font-size: 18px;
-  font-weight: bold;
-  background: #111;
+   font-weight: bold;
+
   border: 1px solid #444;
   border-radius: 4px;
   padding: 4px 8px;
@@ -120,23 +117,21 @@
   margin-bottom: 0;
   box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 }
-.tirduin .character .npc-name input:focus {
+.tirduin .character .character-name-field input:focus {
   outline: none;
   border: 1px solid #888;
   box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
 }
 
-.tirduin .character .npc-name {
+.tirduin .character .character-name-field {
   margin-bottom: 6px;
 }
-
-.tirduin .character .npc-main {
+.tirduin .character .character-main {
   display: flex;
   gap: 10px;
   margin-bottom: 10px;
 }
-
-.tirduin .character .npc-stat {
+.tirduin .character .character-stat {
   flex: 1;
   background: #1e1e1e;
   border: 1px solid #444;
@@ -144,22 +139,21 @@
   padding: 6px;
   text-align: center;
 }
-.tirduin .character .npc-stat label {
+
+.tirduin .character .character-stat label {
   display: block;
   font-size: 12px;
   color: #aaa;
   margin-bottom: 2px;
 }
-.tirduin .character .npc-stat input {
-  width: 100%;
-  background: #111;
+.tirduin .character .character-stat input {
+ 
   border: 1px solid #555;
   color: #fff;
   text-align: center;
   border-radius: 4px;
 }
-
-.tirduin .character .npc-stat select {
+.tirduin .character .character-stat select {
   width: 100%;
   background: #111;
   border: 1px solid #555;
@@ -189,49 +183,6 @@
   width: 52px;
   flex: 0 0 52px;
 }
-
-.sheet-skill-select {
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #fff;
-  padding: 0 6px 0 6px;
-  font-size: 0.75rem;
-  box-sizing: border-box;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  color-scheme: dark;
-  background-color: #050505;
-  background-image: linear-gradient(45deg, transparent 50%, #9ad 50%), linear-gradient(135deg, #9ad 50%, transparent 50%);
-  background-position: calc(100% - 14px) calc(50% - 3px), calc(100% - 8px) calc(50% - 3px);
-  background-size: 6px 6px, 6px 6px;
-  background-repeat: no-repeat;
-}
-
-.sheet-skill-select:focus {
-  outline: none;
-  border-color: #9ad;
-  box-shadow: 0 0 0 1px rgba(153, 170, 221, 0.35), 0 0 6px rgba(0, 0, 0, 0.45);
-}
-
-.sheet-skill-select option {
-  background: #161616;
-  color: #f2f2f2;
-}
-
-.sheet-skill-select option:checked {
-  background: #24405f;
-  color: #fff;
-}
-
-.tirduin .character .hp-row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 4px;
-  margin-top: 3px;
-  flex-wrap: nowrap;
-}
-
 .tirduin .character .hp-row input {
   min-width: 0;
 }
@@ -243,8 +194,7 @@
 
 .tirduin .character .hope-section {
   margin-bottom: 10px;
-  padding: 10px;
-  background: #1a1a1a;
+  padding: 6px;
   border: 1px solid #333;
   border-radius: 6px;
 }
@@ -414,7 +364,7 @@
   }
 }
 
-.tirduin .character .npc-attributes {
+.tirduin .character .character-attributes {
   margin-bottom: 10px;
   padding: 6px;
   background: #1a1a1a;
@@ -422,32 +372,11 @@
   border-radius: 6px;
 }
 
-.tirduin .character .attr-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: #151515;
-  border: 1px solid #333;
-  border-radius: 6px;
-  padding: 4px;
-  width: 100%;
-}
-.tirduin .character .attr-box input {
-  width: 40px;
-  text-align: center;
-  background: #111;
-  border: 1px solid #555;
-  color: #fff;
-  border-radius: 4px;
-  margin-bottom: 2px;
-}
-
 .tirduin .character .attr-row {
   display: flex;
   justify-content: space-between;
   gap: 6px;
-}
-.tirduin .character .attr-row span {
+
   font-size: 11px;
   color: #aaa;
 }
@@ -460,154 +389,9 @@
   border-radius: 4px;
 }
 
-/* Skills en la character sheet (usa los mismos partials que el NPC). */
-.tirduin .character .character-skills .skills-list,
-.tirduin .character .npc-skills .skills-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 8px;
-  width: 100%;
-  container-type: inline-size;
-  container-name: skills-list;
-}
-
-.tirduin .character .character-skills .skill-row,
-.tirduin .character .npc-skills .skill-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) max-content minmax(0, 60px);
-  align-items: center;
-  gap: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 6px;
-  padding: 8px;
-  background: rgba(35, 35, 35, 0.6);
-  min-width: 0;
-}
-
-.tirduin .character .character-skills .skill-main,
-.tirduin .character .npc-skills .skill-main {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.tirduin .character .character-skills .skill-name,
-.tirduin .character .npc-skills .skill-name {
-  font-size: 0.84rem;
-  font-weight: 700;
-  color: #fff;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  min-width: 0;
-}
-
-.tirduin .character .character-skills .skill-ability,
-.tirduin .character .npc-skills .skill-ability {
-  font-size: 0.72rem;
-  color: #bbb;
-  font-style: normal;
-}
-
-.tirduin .character .character-skills .skill-total,
-.tirduin .character .npc-skills .skill-total {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #9ad;
-  min-width: 0;
-}
-
-.tirduin .character .character-skills select,
-.tirduin .character .character-skills .skill-extra,
-.tirduin .character .character-skills input[type=number],
-.tirduin .character .npc-skills select,
-.tirduin .character .npc-skills .skill-extra,
-.tirduin .character .npc-skills input[type=number] {
-  width: 100%;
-  height: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 4px;
-  background: #000;
-  color: #fff;
-  padding: 0 6px;
-  font-size: 0.75rem;
-  box-sizing: border-box;
-}
-
-.tirduin .character .character-skills .skill-extra,
-.tirduin .character .npc-skills .skill-extra {
-  width: 56px;
-  max-width: 100%;
-  padding: 0 6px;
-}
-
 .tirduin .character .resource-label {
   font-weight: bold;
 }
-
-/* Items list dentro de character sheet. */
-.tirduin .character .items-header {
-  height: 28px;
-  margin: 2px 0;
-  padding: 0;
-  align-items: center;
-  background: rgba(0, 0, 0, 0.05);
-  border: 2px groove #eeede0;
-  font-weight: bold;
-}
-.tirduin .character .items-header > * {
-  font-size: 14px;
-  text-align: center;
-}
-.tirduin .character .items-header .item-name {
-  font-weight: bold;
-  padding-left: 5px;
-  text-align: left;
-  display: flex;
-}
-
-.tirduin .character .items-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  color: #444;
-}
-.tirduin .character .items-list .item-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.tirduin .character .items-list .item-name {
-  flex: 2;
-  margin: 0;
-  overflow: hidden;
-  font-size: 13px;
-  text-align: left;
-  align-items: center;
-  display: flex;
-}
-.tirduin .character .items-list .item-name h3,
-.tirduin .character .items-list .item-name h4 {
-  margin: 0;
-  white-space: nowrap;
-  overflow-x: hidden;
-}
-.tirduin .character .items-list .item-controls {
-  display: flex;
-  flex: 0 0 100px;
-  justify-content: flex-end;
-}
-.tirduin .character .items-list .item-controls a {
-  font-size: 12px;
-  text-align: center;
-  margin: 0 6px;
-}
-
 /* Dotes en la character sheet. */
 .tirduin .character .character-features {
   padding: 6px 0;
@@ -740,28 +524,11 @@
   min-width: 0;
 }
 
-.tirduin .character .character-feature-item.collapsed-item .character-feature-meta-row {
-  margin: 0;
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 6px;
-  overflow: hidden;
-  min-width: 0;
-}
-
 .tirduin .character .character-feature-item.collapsed-item .character-feature-meta-row .character-feature-chip {
   opacity: 1;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
-}
-
-.tirduin .character .character-feature-item.collapsed-item .character-feature-meta-row .character-feature-chip:not(.character-feature-origin):not(.character-feature-level) {
-  display: none;
-}
-
-.tirduin .character .character-feature-item.collapsed-item .character-feature-description {
-  display: none;
 }
 
 .tirduin .character .character-feature-controls {

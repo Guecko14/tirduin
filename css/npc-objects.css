@@ -393,25 +393,6 @@
   font-size: 0.82rem;
 }
 
-/* Custom select styling to match skills select */
-.weapon-field select {
-  padding: 0 24px 0 6px;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  color-scheme: dark;
-  background-color: #050505;
-  background-image: linear-gradient(45deg, transparent 50%, #9ad 50%), linear-gradient(135deg, #9ad 50%, transparent 50%);
-  background-position: calc(100% - 14px) calc(50% - 3px), calc(100% - 8px) calc(50% - 3px);
-  background-size: 6px 6px, 6px 6px;
-  background-repeat: no-repeat;
-}
-
-.weapon-field select option {
-  background: #161616;
-  color: #f2f2f2;
-}
-
 .weapon-field select option:checked {
   background: #24405f;
   color: #fff;
