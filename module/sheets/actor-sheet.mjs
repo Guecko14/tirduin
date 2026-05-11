@@ -660,7 +660,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     return rawKey;
   }
 
-  _renderSummaryTextWithRollButtons(text = '') {
+  _renderSummaryTextWithRollButtons(text = '', itemName = '', itemType = '') {
     const source = String(text || '');
     if (!source.trim()) return '';
 
@@ -688,7 +688,10 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
         const safeButtonLabel = this._escapeHtml(buttonLabel);
         const safeFormulaLabel = this._escapeHtml(formulaLabel);
         const safeDamageLabel = this._escapeHtml(damageLabel);
-        html += `<button type="button" class="tirduin-summary-roll" data-roll-formula="${safeFormula}" data-roll-label="${safeFormulaLabel}" data-roll-damage="${safeDamageLabel}" data-actor-id="${actorId}" title="${rollLabel}: ${safeButtonLabel}"><i class="fas fa-dice-d20"></i> ${safeButtonLabel}</button>`;
+        const safeItemName = this._escapeHtml(itemName);
+        const safeItemType = this._escapeHtml(itemType);
+
+        html += `<button type="button" class="tirduin-summary-roll" data-roll-formula="${safeFormula}" data-roll-label="${safeFormulaLabel}" data-roll-damage="${safeDamageLabel}" data-actor-id="${actorId}" data-item-name="${safeItemName}" data-item-type="${safeItemType}" title="${rollLabel}: ${safeButtonLabel}"><i class="fas fa-dice-d20"></i> ${safeButtonLabel}</button>`;
       } else {
         html += this._escapeHtml(match[0]);
       }
@@ -709,7 +712,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
         ? game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Features.Origins.Background')
         : game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Features.Origins.Class');
     const level = Number(item.system?.level) || 1;
-    const description = this._renderSummaryTextWithRollButtons(item.system?.description || '');
+    const description = this._renderSummaryTextWithRollButtons(item.system?.description || '', item.name, item.type);
 
     return `
       <div class="tirduin-item-summary-grid">
@@ -746,7 +749,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       ? `${verbal ? game.i18n.localize('TIRDUIN_RPS.Item.Spell.Abbr.Verbal') : ''}${verbal && somatic ? ' / ' : ''}${somatic ? game.i18n.localize('TIRDUIN_RPS.Item.Spell.Abbr.Somatic') : ''}`
       : game.i18n.localize('TIRDUIN_RPS.Item.Spell.None');
     const cost = String(item.system?.costValue || '0');
-    const description = this._renderSummaryTextWithRollButtons(item.system?.description || '');
+    const description = this._renderSummaryTextWithRollButtons(item.system?.description || '', item.name, item.type);
 
     return `
       <div class="tirduin-item-summary-grid">

@@ -346,6 +346,12 @@
    CHAT ROLL FLAVOR CARD
 ================================================================ */
 
+/* Ocultamos el desglose nativo de Foundry para evitar que el mensaje salga "2 veces" */
+.chat-message:has(.tirduin-roll-flavor) .dice-roll,
+.chat-message:has(.tirduin-roll-bundle) .dice-roll {
+  display: none;
+}
+
 .chat-message:has(.tirduin-roll-bundle) .message-content {
   background: linear-gradient(180deg, rgba(30, 24, 16, 0.88) 0%, rgba(19, 15, 10, 0.92) 100%) !important;
   border: 1px solid #5d4a2b;
@@ -396,6 +402,14 @@
   letter-spacing: 0.01em;
   margin-bottom: 4px;
   text-align: center;
+}
+
+/* Estilo para el texto de daño adicional en tiradas inline */
+.chat-message .tirduin-roll-damage-string {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #666666; /* Un color que contraste pero no sea el principal */
+  margin-bottom: 4px;
 }
 
 /* Desglose de dados (p.ej: [6]+[2]) */
