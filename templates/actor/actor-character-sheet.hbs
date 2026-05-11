@@ -2,22 +2,22 @@
 
   <section class="sheet-body character">
 
-    <header class="npc-header">
-      <div class="npc-portrait">
+    <header class="sheet-header character-header">
+      <div class="character-portrait">
         <img class="profile-img" src="{{actor.img}}" data-edit="img"
           title="{{actor.name}}" height="100" width="100" />
       </div>
 
-      <div class="npc-header-stats">
+      <div class="character-header-stats">
         <div class="character-identity-row">
-          <div class="npc-stat character-name-field">
+          <div class="character-stat character-name-field">
             <label for="name">{{localize
               "TIRDUIN_RPS.CharacterSheet.Name"}}</label>
             <input name="name" type="text" value="{{actor.name}}"
               placeholder="{{localize "TIRDUIN_RPS.CharacterSheet.Name"}}" />
           </div>
 
-          <div class="npc-stat character-level-field">
+          <div class="character-stat character-level-field">
             <label for="system.attributes.level.value">{{localize
               "TIRDUIN_RPS.attributes.level.long"}}</label>
             <input type="number" name="system.attributes.level.value"
@@ -26,7 +26,7 @@
               data-dtype="Number" />
           </div>
 
-          <div class="npc-stat character-size-field">
+          <div class="character-stat character-size-field">
             <label for="system.details.size">{{localize
               "TIRDUIN_RPS.CharacterSheet.Size"}}</label>
             <select name="system.details.size" class="sheet-skill-select">
@@ -59,14 +59,14 @@
         </div>
 
         <div class="character-meta-row">
-          <div class="character-meta-field npc-stat">
+          <div class="character-meta-field character-stat">
             <label for="system.details.race">{{localize
               "TIRDUIN_RPS.CharacterSheet.Race"}}</label>
             <input type="text" name="system.details.race"
               value="{{system.details.race}}"
               placeholder="{{localize "TIRDUIN_RPS.CharacterSheet.Race"}}" />
           </div>
-          <div class="character-meta-field npc-stat">
+          <div class="character-meta-field character-stat">
             <label for="system.details.spellAttribute">{{localize
               "TIRDUIN_RPS.CharacterSheet.SpellAttribute"}}</label>
             <select name="system.details.spellAttribute"
@@ -82,7 +82,7 @@
                 "TIRDUIN_RPS.CharacterSheet.SpellAttributeOptions.Pre"}}</option>
             </select>
           </div>
-          <div class="character-meta-field npc-stat">
+          <div class="character-meta-field character-stat">
             <label for="system.details.background">{{localize
               "TIRDUIN_RPS.CharacterSheet.Background"}}</label>
             <input type="text" name="system.details.background"
@@ -91,8 +91,8 @@
           </div>
         </div>
 
-        <div class="npc-main">
-          <div class="npc-stat">
+        <div class="character-main">
+          <div class="character-stat">
             <label for="system.health.value">{{localize
               "TIRDUIN_RPS.CharacterSheet.HitPoints"}}</label>
             <div class="hp-row">
@@ -112,7 +112,7 @@
             </div>
           </div>
 
-          <div class="npc-stat">
+          <div class="character-stat">
             <label for="system.attributes.armorClass.value">{{localize
               "TIRDUIN_RPS.attributes.armorClass.long"}}</label>
             <input type="number" name="system.attributes.armorClass.value"
@@ -120,7 +120,7 @@
               onkeyup="if(value<0) value=0" data-dtype="Number" />
           </div>
 
-          <div class="npc-stat">
+          <div class="character-stat">
             <label for="system.attributes.speed.value">{{localize
               "TIRDUIN_RPS.attributes.speed.long"}}</label>
             <div class="speed-row">
@@ -136,7 +136,7 @@
             </div>
           </div>
 
-          <div class="npc-stat">
+          <div class="character-stat">
             <label for="system.attributes.fatigue.value">{{localize
               "TIRDUIN_RPS.AlteredState.fatigue.label"}}</label>
             <select name="system.attributes.fatigue.value"
@@ -160,7 +160,7 @@
       </div>
     </header>
 
-    <div class="npc-attributes">
+    <div class="character-attributes">
       <h2>{{localize "TIRDUIN_RPS.CharacterSheet.Abilities"}}</h2>
       <div class="attr-row">
         {{#each system.abilities as |ability key|}}
@@ -174,10 +174,6 @@
             value="{{ability.value}}" min="-5" max="5"
             onkeyup="if(value<-5) value=-5; if(value>5) value=5;"
             data-dtype="Number" />
-          <span class="ability-mod rollable"
-            data-roll="1d20+{{ability.rollMod}}"
-            data-label="{{localize (lookup @root.config.abilities key)}}">{{numberFormat
-            ability.rollMod decimals=0 sign=true}}</span>
         </div>
         {{/each}}
       </div>
@@ -214,7 +210,7 @@
     </div>
 
     <div class="resource-pips-row hope-section">
-      <div class="npc-stat resource-stat">
+      <div class="character-stat resource-stat">
         <label>{{localize "TIRDUIN_RPS.CharacterSheet.Resources.Hope"}}</label>
         <div class="resource-pips resource-pips--hope"
           aria-label="{{localize "TIRDUIN_RPS.CharacterSheet.Resources.HopeCurrent"}}">
@@ -233,7 +229,7 @@
         </div>
       </div>
 
-      <div class="npc-stat resource-stat">
+      <div class="character-stat resource-stat">
         <label>{{localize
           "TIRDUIN_RPS.CharacterSheet.Resources.Stress"}}</label>
         <div class="resource-pips resource-pips--stress"
@@ -253,7 +249,7 @@
         </div>
       </div>
 
-      <div class="npc-stat resource-stat">
+      <div class="character-stat resource-stat">
         <label>{{localize "TIRDUIN_RPS.CharacterSheet.Resources.Luck"}}</label>
         <div class="resource-pips"
           aria-label="{{localize "TIRDUIN_RPS.CharacterSheet.Resources.LuckCurrent"}}">
@@ -334,7 +330,7 @@
 
       <div class="tabs-content">
         <div class="tab skills active" data-group="primary" data-tab="skills">
-          <div class="character-skills npc-skills">
+          <div class="character-skills">
             {{> "systems/tirduin/templates/actor/parts/actor-skills.hbs"}}
           </div>
         </div>

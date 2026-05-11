@@ -5,6 +5,43 @@ export const ROLL_EDGE_MODE = Object.freeze({
 });
 
 /**
+ * Función unificada para ejecutar una tirada d20 completa.
+ * Orquesta el diálogo, la evaluación y el envío al chat usando la lógica existente.
+ */
+export async function executeD20Roll({
+  formula,
+  actor,
+  title,
+  type = 'ability',
+  rollData = null
+} = {}) {
+  // 1. Confirmación de tirada (Ventaja/Desventaja/Borde)
+  const edgeMode = await promptRollConfirmation({
+    formula,
+    rollData: rollData ?? actor.getRollData()
+  });
+  if (edgeMode === null) return null;
+
+  // 2. Preparar y evaluar la tirada
+  const finalFormula = applyRollEdgeToFormula(formula, edgeMode);
+  const roll = new Roll(finalFormula, rollData ?? actor.getRollData());
+  await roll.evaluate();
+
+  // 3. Construir el contenido visual (Flavor)
+  const flavor = buildRollFlavorHtml({ title, roll, edgeMode, type });
+
+  // 4. Preparar datos del mensaje (incluye lógica de iconos)
+  const chatData = applyChatRollMode({
+    speaker: ChatMessage.getSpeaker({ actor }),
+    flavor,
+    roll,
+    content: flavor, // Suprime la tirada básica de Foundry
+  });
+
+  return roll.toMessage(chatData);
+}
+
+/**
  * Build a resolved formula preview for dialog summary using available roll data.
  * @param {string} formula
  * @param {object} rollData
@@ -20,8 +57,9 @@ export function getRollFormulaPreview(
   if (!adjustedFormula) return '';
 
   try {
-    // Foundry normalizes and resolves @data paths when instantiating Roll.
-    return new Roll(adjustedFormula, rollData).formula;
+    // Resolvemos la fórmula y eliminamos las etiquetas de sabor [texto]
+    const r = new Roll(adjustedFormula, rollData);
+    return r.formula.replace(/\[[^\]]*\]/g, '').trim();
   } catch (_error) {
     // Fall back to the adjusted formula if resolution fails for any reason.
     return adjustedFormula;
@@ -163,17 +201,25 @@ export function applyChatRollMode(chatData, mode = null) {
   if (['gmroll', 'private', 'gm', 'whisper'].includes(normalizedMode)) {
     messageData.whisper = gmRecipients;
   } else if (['blindroll', 'blind'].includes(normalizedMode)) {
-    messageData.whisper = gmRecipients;
     messageData.blind = true;
+    messageData.whisper = gmRecipients;
   } else if (['selfroll', 'self'].includes(normalizedMode)) {
     messageData.whisper = [game.user.id];
   }
 
-  // --- NUEVA LÓGICA PARA EL ICONO ---
-  // Si no hay imagen en chatData, intentamos sacarla del "speaker"
+  // --- LÓGICA DE ICONO CENTRALIZADA ---
+  // Si el mensaje tiene un speaker pero no tiene imagen, la inyectamos automáticamente.
   if (!messageData.img && messageData.speaker) {
-    const actor = game.actors.get(messageData.speaker.actor);
-    if (actor) messageData.img = actor.img; // O actor.prototypeToken.texture.src
+    const actor = ChatMessage.getSpeakerActor(messageData.speaker);
+    if (actor) messageData.img = actor.img; // Aquí puedes usar actor.prototypeToken.texture.src si prefieres el token.
+  }
+
+  // EVITAR DUPLICIDAD: 
+  // Movemos la tarjeta a 'content' y limpiamos 'flavor' para que no aparezca 
+  // repetida en el encabezado del mensaje.
+  if (messageData.flavor && !messageData.content) {
+    messageData.content = messageData.flavor;
+    messageData.flavor = "";
   }
 
   return messageData;
@@ -249,20 +295,32 @@ export function getEdgeD6Result(roll) {
 /**
  * Build a compact dice breakdown preserving active die results order.
  * @param {Roll} roll
+ * @param {string} edgeMode
  * @returns {string}
  */
-export function getRollDiceBreakdown(roll) {
+export function getRollDiceBreakdown(roll, edgeMode, rollType = '') {
   if (!roll?.dice?.length) return '';
 
   const values = [];
   for (const die of roll.dice) {
+    const icon = `<i class="fa-light fa-dice-d${die.faces}"></i>`;
     const activeResults = die?.results?.filter((result) => result?.active !== false) || [];
     for (const result of activeResults) {
-      if (typeof result?.result === 'number') values.push(String(result.result));
+      if (typeof result?.result === 'number') values.push(`${icon}${result.result}`);
     }
   }
-
-  return values.join('+');
+  // Si no hay al menos dos dados, solo devolvemos el valor del primero
+  // Para tiradas de daño, mostramos todos los dados.
+  if (rollType === 'damage') {
+    return values.join(' + ');
+  } else {
+    // Lógica original para d20 + d6 de borde
+    if (values.length < 2) return values.join('');
+    const d20 = values[0];
+    const edgeD6 = values[1];
+    const operator = edgeMode === ROLL_EDGE_MODE.DISADVANTAGE ? '-' : '+';
+    return `${d20}${operator}${edgeD6}`;
+  }
 }
 
 /**
@@ -280,6 +338,7 @@ export function buildRollFlavorHtml({
   showDiceBreakdown = true,
   showBonus = false,
   type = '',
+  damageString = '', // Nuevo parámetro para el texto de daño adicional
 } = {}) {
   // Limpieza de seguridad del título.
   const safeTitle = String(title)
@@ -311,8 +370,9 @@ export function buildRollFlavorHtml({
   const diceSum = diceValues.reduce((sum, value) => sum + value, 0);
   const bonus = (natural !== null && total !== null)
     ? (total - natural - edgeSigned)
-    : (total !== null && diceValues.length ? (total - diceSum) : null);
-  const shouldShowBonus = bonus !== null && (natural !== null || (showBonus && bonus !== 0));
+    : (total !== null ? (total - diceSum) : null);
+
+  const shouldShowBonus = bonus !== null && (showBonus || natural !== null) && bonus !== 0;
   const bonusLabel = bonus === null
     ? ''
     : `${bonus >= 0 ? '+' : ''}${bonus}`;
@@ -324,7 +384,7 @@ export function buildRollFlavorHtml({
 
   // Obtenemos el texto de resultado definitivo (ya traducido).
   const resolvedOutcome = outcomeText || (roll ? getD20OutcomeText(roll) : '');
-  const diceBreakdown = showDiceBreakdown && roll ? getRollDiceBreakdown(roll) : '';
+  const diceBreakdown = showDiceBreakdown && roll ? getRollDiceBreakdown(roll, edgeMode, type) : '';
 
   // Devolvemos el HTML simplificado.
   // Fíjate que hemos añadido ${statusClass} en las clases principales,
@@ -332,7 +392,8 @@ export function buildRollFlavorHtml({
     <div class="tirduin-roll-flavor ${type} ${statusClass}">
       ${safeTitle ? `<div class="tirduin-roll-title">${safeTitle}</div>` : ''}
       
-      ${diceBreakdown ? `<div class="tirduin-roll-breakdown"><i class="fa-sharp fa-thin fa-dice-d20"></i>${diceBreakdown}</div>` : ''}
+      ${damageString ? `<div class="tirduin-roll-damage-string">${damageString}</div>` : ''}
+      ${diceBreakdown ? `<div class="tirduin-roll-breakdown">${diceBreakdown}</div>` : ''}
       ${total !== null ? `
       <div class="tirduin-roll-metrics">
         ${shouldShowBonus ? `<div class="tirduin-roll-bonus">${game.i18n.format('TIRDUIN_RPS.Roll.Metric.Bonus', { value: bonusLabel })}</div>` : ''}
@@ -387,10 +448,10 @@ export function buildWeaponAttackDamageFlavorHtml({
       roll: entry.roll,
       // Solo mostramos el badge de crítico en el primer bloque de daño
       outcomeText: (isCritical && index === 0)
-        ? `<span class="tirduin-roll-outcome-badge is-critical">${game.i18n.localize('TIRDUIN_RPS.Roll.Outcome.Critical')}</span>`
+        ? `<span class="tirduin-roll-outcome-badge is-critical">${game.i18n.localize('TIRDUIN_RPS.Roll.Outcome.Critical')}</span>` // Mantener el badge de crítico
         : '',
       showDiceBreakdown: true,
-      showBonus: true,
+      showBonus: true, // Mostrar bonificador (valores fijos) en tiradas de daño
       type: 'damage' // Opcional: añade una clase CSS para diferenciarlo
     });
   }).join(''); // Unimos todos los bloques generados en un solo string de HTML
@@ -426,7 +487,7 @@ export async function promptInitiativeConfirmation({ formula = '', rollData = {}
 
     const getFormulaWithBonus = (edgeMode, bonus) => {
       const withEdge = applyRollEdgeToFormula(formula, edgeMode);
-      const nBonus = Number(bonus) || 0;
+      const nBonus = Number(bonus) ?? 0;
       return nBonus === 0 ? withEdge : `(${withEdge}) + (${nBonus})`;
     };
 

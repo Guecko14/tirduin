@@ -18,11 +18,24 @@
   justify-content: flex-start;
   margin-bottom: 10px;
 }
+
 .tirduin .sheet-header .profile-img {
   flex: 0 0 100px;
+  width: 100px;
   height: 100px;
-  margin-right: 10px;
+  object-fit: cover;
+  border: 2px solid #444;
+  border-radius: 6px;
+  background: #111;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
+
+.tirduin .sheet-header .profile-img:hover {
+  border-color: #888;
+  box-shadow: 0 0 6px #000;
+}
+
 .tirduin .sheet-header .header-fields {
   flex: 1;
 }
@@ -78,7 +91,8 @@
 ================================================================ */
 
 .tirduin .skills-sheet .skills-list,
-.tirduin .npc-skills .skills-list {
+.tirduin .npc-skills .skills-list,
+.tirduin .character-skills .skills-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
@@ -88,8 +102,8 @@
   container-name: skills-list;
 }
 
-.tirduin .skills-sheet .skill-row,
-.tirduin .npc-skills .skill-row {
+.tirduin .skill-row,
+.tirduin .skills-sheet .skill-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) max-content minmax(0, 60px);
   align-items: center;
@@ -102,7 +116,8 @@
 }
 
 .tirduin .skills-sheet .skill-main,
-.tirduin .npc-skills .skill-main {
+.tirduin .npc-skills .skill-main,
+.tirduin .character-skills .skill-main {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -111,7 +126,8 @@
 }
 
 .tirduin .skills-sheet .skill-name,
-.tirduin .npc-skills .skill-name {
+.tirduin .npc-skills .skill-name,
+.tirduin .character-skills .skill-name {
   font-size: 0.84rem;
   font-weight: 700;
   color: #fff;
@@ -122,24 +138,24 @@
 }
 
 .tirduin .skills-sheet .skill-ability,
-.tirduin .npc-skills .skill-ability {
+.tirduin .npc-skills .skill-ability,
+.tirduin .character-skills .skill-ability {
   font-size: 0.72rem;
   color: #bbb;
   font-style: normal;
 }
 
 .tirduin .skills-sheet .skill-total,
-.tirduin .npc-skills .skill-total {
+.tirduin .npc-skills .skill-total,
+.tirduin .character-skills .skill-total {
   font-size: 0.75rem;
   font-weight: 700;
   color: #9ad;
   min-width: 0;
 }
 
-.tirduin .skills-sheet .skill-extra,
-.tirduin .skills-sheet input[type=number],
-.tirduin .npc-skills .skill-extra,
-.tirduin .npc-skills input[type=number] {
+.tirduin input[type=number],
+.tirduin .skill-extra {
   width: 100%;
   height: 30px;
   border: 1px solid rgba(255, 255, 255, 0.25);
@@ -151,10 +167,11 @@
   box-sizing: border-box;
 }
 
-/* Select compartido para skills (categoría/dado). */
-.tirduin .skills-sheet select,
-.tirduin .npc-skills select {
-  width: auto;
+/* ================================================================
+   UNIVERSAL SELECT STYLING
+   Asegura que todos los dropdowns del sistema tengan el mismo look.
+================================================================ */
+.tirduin select {
   height: 30px;
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 4px;
@@ -173,27 +190,26 @@
   background-repeat: no-repeat;
 }
 
-.tirduin .skills-sheet select:focus,
-.tirduin .npc-skills select:focus {
+.tirduin select:focus {
   outline: none;
   border-color: #9ad;
   box-shadow: 0 0 0 1px rgba(153, 170, 221, 0.35), 0 0 6px rgba(0, 0, 0, 0.45);
 }
-
-.tirduin .skills-sheet select option,
-.tirduin .npc-skills select option {
+.tirduin select option {
   background: #161616;
   color: #f2f2f2;
 }
 
 .tirduin .skills-sheet select option:checked,
-.tirduin .npc-skills select option:checked {
+.tirduin .npc-skills select option:checked,
+.tirduin .character-skills select option:checked {
   background: #24405f;
   color: #fff;
 }
 
 .tirduin .skills-sheet .skill-extra,
-.tirduin .npc-skills .skill-extra {
+.tirduin .npc-skills .skill-extra,
+.tirduin .character-skills .skill-extra {
   max-width: 50%;
   width: 56px;
   padding: 0 6px;
@@ -399,4 +415,87 @@
 }
 .tirduin .effects .item .effect-controls {
   border: none;
+}
+
+/* ================================================================
+   UTILITY: COLLAPSIBLE ITEMS
+   Lógica compartida para dotes, conjuros y habilidades especiales.
+================================================================ */
+
+.tirduin .collapsed-item .item-description,
+.tirduin .collapsed-item .character-feature-description,
+.tirduin .collapsed-item .character-spell-description,
+.tirduin .collapsed-item .special-desc {
+  display: none !important;
+}
+
+.tirduin .collapsed-item .character-feature-meta-row,
+.tirduin .collapsed-item .character-spell-meta-row {
+  margin: 0;
+  flex-wrap: nowrap;
+}
+
+/* ================================================================
+   SHARED COMPONENT STYLES
+   Layouts comunes para Personajes y NPCs.
+================================================================ */
+
+.tirduin .hp-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  margin-top: 3px;
+  flex-wrap: nowrap;
+}
+
+.tirduin .npc-stat,
+.tirduin .character-stat {
+  flex: 1;
+  background: #1e1e1e;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 6px;
+  text-align: center;
+}
+
+.tirduin .character-stat label,
+.tirduin .npc-stat label {
+  display: block;
+  font-size: 12px;
+  color: #aaa;
+  margin-bottom: 2px;
+}
+
+.tirduin .character-stat input,
+.tirduin .character-stat select,
+.tirduin .npc-stat input,
+.tirduin .npc-stat select {
+  width: 100%;
+  background: #111;
+  border: 1px solid #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.tirduin .attr-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #151515;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 4px;
+  width: 100%;
+}
+
+.tirduin .attr-box input {
+  width: 40px;
+  text-align: center;
+  background: #111;
+  border: 1px solid #555;
+  color: #fff;
+  border-radius: 4px;
+  margin-bottom: 2px;
 }

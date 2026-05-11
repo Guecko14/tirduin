@@ -760,12 +760,12 @@ Hooks.once('ready', function () {
       const rollData = actor?.getRollData?.() || {};
       const baseFormula = options?.formula || CONFIG.Combat?.initiative?.formula || '1d20 + @abilities.agil.mod + @abilities.inst.mod';
 
-      const selection = await promptInitiativeConfirmation({ formula: baseFormula, rollData });
+      const selection = await rollDialog.promptInitiativeConfirmation({ formula: baseFormula, rollData });
       if (!selection) return this;
 
       const edgeMode = selection.edgeMode || 'none';
       const bonus = Number(selection.bonus) || 0;
-      let formula = applyRollEdgeToFormula(baseFormula, edgeMode);
+      let formula = rollDialog.applyRollEdgeToFormula(baseFormula, edgeMode);
       if (bonus !== 0) formula = `(${formula}) + (${bonus})`;
 
       return originalRollInitiative.call(this, ids, {
@@ -787,14 +787,29 @@ Hooks.once('ready', function () {
     if (!formula) return;
     const rollLabel = String(button.dataset.rollLabel || formula).trim();
     const rollDamage = String(button.dataset.rollDamage || '').trim();
+    const itemName = String(button.dataset.itemName || '').trim();
+    const itemType = String(button.dataset.itemType || 'feature').trim();
 
     const actorId = String(button.dataset.actorId || '').trim();
     const actor = actorId ? game.actors?.get(actorId) : null;
     const rollData = actor?.getRollData?.() || {};
 
+    // 1. Decidir si mostramos el diálogo: Solo si es d20 y no tiene daño asociado
+    const isD20 = /d20/i.test(formula);
+    const hasDamage = !!rollDamage;
+    let edgeMode = rollDialog.ROLL_EDGE_MODE.NONE;
+
+    if (isD20 && !hasDamage) {
+      edgeMode = await rollDialog.promptRollConfirmation({ formula, rollData });
+      if (edgeMode === null) return;
+    }
+
+    // 2. Preparar fórmula
+    const finalFormula = rollDialog.applyRollEdgeToFormula(formula, edgeMode);
+
     let roll;
     try {
-      roll = new Roll(formula, rollData);
+      roll = new Roll(finalFormula, rollData);
       await roll.evaluate();
     } catch (_error) {
       ui.notifications?.warn(game.i18n.localize('TIRDUIN_RPS.Chat.InvalidFormula'));
@@ -812,23 +827,46 @@ Hooks.once('ready', function () {
       }
     }
 
-    await roll.toMessage({
+    // Adaptamos para usar applyChatRollMode y que aparezca la foto
+    const chatData = rollDialog.applyChatRollMode({
       speaker: ChatMessage.getSpeaker(actor ? { actor } : {}),
-      flavor: rollDamage
-        ? game.i18n.format('TIRDUIN_RPS.Chat.InlineRollFlavorWithDamage', {
-          formula: rollLabel,
-          damage: rollDamage,
-        })
-        : game.i18n.format('TIRDUIN_RPS.Chat.InlineRollFlavor', { formula: rollLabel }),
-    }, {
-      rollMode: messageMode,
-    });
+      flavor: rollDialog.buildRollFlavorHtml({
+        // Usamos el nombre del objeto para el título si está disponible
+        title: itemName
+          ? rollDialog.buildTypedRollTitle(itemType, itemName)
+          : (rollLabel === formula)
+            ? roll.formula.replace(/1?d20\s*[\+\-]?\s*/i, '').trim() || rollLabel
+            : rollLabel,
+        roll: roll,
+        edgeMode: edgeMode,
+        damageString: rollDamage, // Pasamos el texto de daño adicional
+        type: 'inline', // Un tipo para posibles estilos específicos de tiradas inline
+        showBonus: true, // Mostrar bonificadores fijos (modificadores de atributo, etc)
+      }),
+      rolls: [roll] // Pasamos el objeto roll dentro del array para que Foundry lo registre
+    }, messageMode);
+
+    // Usamos ChatMessage.create directamente con los datos procesados por applyChatRollMode
+    // para tener control total sobre el HTML y evitar que Foundry añada su propia tabla.
+    await ChatMessage.create(chatData);
   };
 
   Hooks.on('renderChatMessageHTML', (_message, element) => {
     element.querySelectorAll('.tirduin-summary-roll').forEach((button) => {
       button.addEventListener('click', handleInlineSummaryRollClick);
     });
+  });
+
+  // --- HOOK GLOBAL PARA LA FOTO ---
+  // Esto captura CUALQUIER mensaje (incluyendo iniciativa o tiradas de otros módulos)
+  // y le pone la foto si el speaker es un actor de Tirduin.
+  Hooks.on('preCreateChatMessage', (message, data, options, userId) => {
+    if (data.img) return;
+    const speaker = data.speaker;
+    if (speaker?.actor) {
+      const actor = game.actors.get(speaker.actor);
+      if (actor) message.updateSource({ img: actor.img });
+    }
   });
 });
 
@@ -928,55 +966,67 @@ export async function rollWeaponAttack(item) {
   const attackRoll = new Roll(attackFormula, rollData);
   await attackRoll.evaluate();
 
-  const isCritical = rollDialog.getNaturalD20Result(attackRoll) === 20;
-  const dDice = (f) => String(f).replace(/(\d*)d(\d+)/gi, (m, c, faces) => `${(Number(c) || 1) * 2}d${faces}`);
+  const naturalAttack = rollDialog.getNaturalD20Result(attackRoll);
+  const isCritical = naturalAttack === 20;
+  const isFumble = naturalAttack === 1;
 
-  // Daños agrupados por tipo usando Map para mantener orden y flexibilidad
-  const damageMap = new Map();
-
-  // 1. Añadir daño base del arma
-  const baseKey = weaponData.damageType;
-  const baseFormulaAttack = `${weaponData.damageDie} + ${abilityValue}`;
-  damageMap.set(baseKey, [baseFormulaAttack]);
-
-  // 2. Añadir segundo daño del arma (si existe)
-  if (weaponData.damageDie2) {
-    const type2 = weaponData.damageType2 || baseKey;
-    // IMPORTANTE: Si el tipo no existe en el mapa, lo creamos antes de hacer el push
-    if (!damageMap.has(type2)) damageMap.set(type2, []);
-    damageMap.get(type2).push(weaponData.damageDie2);
-  }
-
-  // 3. Agrupar daños de los extras por tipo
-  for (const extra of extrasList) {
-
-    const type = extra.damagetype || weaponData.damageType;
-    const formula = extra.damage;
-
-    if (!damageMap.has(type)) damageMap.set(type, []);
-    damageMap.get(type).push(formula);
-  }
-
-  // 4. Evaluar las tiradas agrupadas (esto se mantiene igual)
   const damageRolls = [];
-  for (const [type, components] of damageMap) {
-    let finalFormula;
 
-    if (isCritical) {
-      const diceParts = components.filter(c => c.includes('d'));
-      const flatParts = components.filter(c => !c.includes('d'));
-      const doubledDice = diceParts.length > 0 ? dDice(diceParts.join(' + ')) : "";
-      const flatBonus = flatParts.length > 0 ? flatParts.join(' + ') : "";
-      finalFormula = [doubledDice, flatBonus].filter(Boolean).join(' + ');
-    } else {
-      finalFormula = components.join(' + ');
+  // Solo evaluamos el daño si NO es una pifia (1 natural)
+  if (!isFumble) {
+    const dDice = (f) => String(f).replace(/(\d*)d(\d+)/gi, (m, c, faces) => `${(Number(c) || 1) * 2}d${faces}`);
+
+    // Daños agrupados por tipo usando Map para mantener orden y flexibilidad
+    const damageMap = new Map();
+
+    // 1. Añadir componentes base del arma (dados y bonificadores de atributo)
+    const baseKey = weaponData.damageType;
+    const baseComponents = [];
+    // Usamos el dado de daño si existe
+    if (weaponData.damageDie) baseComponents.push(String(weaponData.damageDie));
+    if (abilityValue !== 0) baseComponents.push(String(abilityValue));
+    damageMap.set(baseKey, baseComponents);
+
+    // 2. Añadir segundo daño del arma (si existe)
+    if (weaponData.damageDie2) {
+      const type2 = weaponData.damageType2 || baseKey;
+      if (!damageMap.has(type2)) damageMap.set(type2, []);
+      damageMap.get(type2).push(weaponData.damageDie2);
     }
 
-    const roll = await new Roll(finalFormula, rollData).evaluate();
-    damageRolls.push({
-      roll,
-      typeLabel: game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[type] || type)
-    });
+    // 3. Agrupar daños de los extras por tipo
+    for (const extra of extrasList) {
+      const type = extra.damagetype || weaponData.damageType;
+      const formula = extra.damage;
+
+      if (!damageMap.has(type)) damageMap.set(type, []);
+      damageMap.get(type).push(formula);
+    }
+
+    // 4. Evaluar las tiradas agrupadas
+    for (const [type, components] of damageMap) {
+      let finalFormula;
+
+      if (isCritical) {
+        // Separamos los dados de los bonos fijos de forma insensible a mayúsculas (/d/i)
+        const diceParts = components.filter(c => /d/i.test(c));
+        const flatParts = components.filter(c => !/d/i.test(c));
+
+        // Duplicamos solo la cantidad de dados (ej: 1d4 -> 2d4)
+        const doubledDice = diceParts.length > 0 ? dDice(diceParts.join(' + ')) : "";
+        const flatBonus = flatParts.join(' + ');
+
+        finalFormula = [doubledDice, flatBonus].filter(Boolean).join(' + ');
+      } else {
+        finalFormula = components.join(' + ');
+      }
+
+      const roll = await new Roll(finalFormula, rollData).evaluate();
+      damageRolls.push({
+        roll,
+        typeLabel: game.i18n.localize(CONFIG.TIRDUIN_RPS.damageTypes[type] || type)
+      });
+    }
   }
 
   // 5. Generar mensaje de chat usando roll-dialog.mjs
@@ -1065,7 +1115,7 @@ async function promptWeaponRollOptions({ actor, weapon, extrasList }) {
           const adv = html.find('[name="edge"][value="advantage"]').is(':checked');
           const dis = html.find('[name="edge"][value="disadvantage"]').is(':checked');
 
-          let formulaBase = `Ataque: 1d20 + ${abVal}[${weapon.ability.toUpperCase()}] + ${weapon.proficiency}[PROF] ${extrasAttackString}`;
+          let formulaBase = `Ataque: 1d20 + ${abVal} + ${weapon.proficiency} ${extrasAttackString}`;
 
           if (adv) formulaBase = `(${formulaBase}) + 1d6`;
           else if (dis) formulaBase = `(${formulaBase}) - 1d6`;
@@ -1073,7 +1123,7 @@ async function promptWeaponRollOptions({ actor, weapon, extrasList }) {
           html.find('.roll-preview-attack').text(formulaBase);
 
           // Formamos la fórmula de daño considerando bonificaciones extra y estado de fatiga
-          let damageFormula = `Daño: ${weapon.damageDie}  + ${abVal} ${i18n('TIRDUIN_RPS.Damage.Type.' + weapon.damageType)} ${weapon.damageDie2 !== '' ? `+ ${weapon.damageDie2} ${i18n('TIRDUIN_RPS.Damage.Type.' + weapon.damageType2)}` : ''} ${extrasDamageString}`;
+          let damageFormula = `Daño: ${weapon.damageDie}  + ${abVal} ${weapon.damageDie2 !== '' ? `+ ${weapon.damageDie2}` : ''} ${extrasDamageString}`;
 
           html.find('.roll-preview-damage').text(damageFormula);
         };

@@ -54,7 +54,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       || Boolean(this.actor.getFlag?.('tirduin', 'lootContainer'));
 
     // Construye el contexto comun que consumen las plantillas de actor.
-    const context = super.getData();
+    const context = await super.getData();
 
     // Use a safe clone of the actor data for further operations.
     const actorData = this.document.toPlainObject();
@@ -119,104 +119,6 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       context.lootItems = lootItems;
     }
 
-    // Normaliza las skills para que NPC y Character puedan usar el mismo partial.
-    const skills = context.system?.skills || {};
-    const npcSkillKeys = [
-      'atletismo', 'sigilo', 'juegoManos', 'acrobacias',
-      'tratoAnimales', 'percepcion', 'perspicacia', 'supervivencia',
-      'persuasion', 'enganar', 'interpretacion', 'intimidacion'
-    ];
-
-    const abilityMapping = {
-      atletismo: 'VIG',
-      sigilo: 'AGIL',
-      juegoManos: 'AGIL',
-      acrobacias: 'AGIL',
-      investigacion: 'MENT',
-      artesania: 'MENT',
-      historia: 'MENT',
-      religion: 'MENT',
-      aether: 'MENT',
-      naturaleza: 'MENT',
-      medicina: 'MENT',
-      tratoAnimales: 'INST',
-      percepcion: 'INST',
-      perspicacia: 'INST',
-      supervivencia: 'INST',
-      persuasion: 'PRE',
-      enganar: 'PRE',
-      interpretacion: 'PRE',
-      intimidacion: 'PRE'
-    };
-
-    const skillKeys = this.actor.type === 'npc'
-      ? npcSkillKeys
-      : Object.keys(CONFIG.TIRDUIN_RPS.skills || {});
-    const fatigueLevel = Math.max(0, Math.min(5, Number(this.actor.system?.attributes?.fatigue?.value) || 0));
-    const fallbackFatiguePenalty = {
-      0: 0,
-      1: -2,
-      2: -3,
-      3: -4,
-      4: -5,
-      5: -5,
-    }[fatigueLevel] ?? 0;
-    const fatigueRollPenalty = this.actor.type === 'character'
-      ? (Number(this.actor.system?.attributes?.fatigue?.rollPenalty) || fallbackFatiguePenalty)
-      : 0;
-
-    context.fatigueRollPenalty = fatigueRollPenalty;
-    if (this.actor.type === 'character') {
-      for (const [abilityKey, abilityData] of Object.entries(context.system?.abilities || {})) {
-        abilityData.rollMod = (Number(abilityData?.value) || 0) + fatigueRollPenalty;
-      }
-    }
-
-    context.system.skillList = skillKeys
-      .filter((key) => Object.prototype.hasOwnProperty.call(skills, key))
-      .map((key) => {
-        const skill = skills[key] || {};
-        const rank = Number(skill.rank) || 0;
-        const bonus = Number(skill.bonus) || 0;
-        const abilityKey = abilityMapping[key] || '-';
-        const abilityVal = Number(this.actor.system?.abilities?.[abilityKey.toLowerCase()]?.value) || 0;
-
-        const configuredLabelKey = CONFIG.TIRDUIN_RPS.skills?.[key];
-        const configuredLabel = configuredLabelKey ? game.i18n.localize(configuredLabelKey) : key;
-        const rawLabel = skill.label || configuredLabel;
-        const label = String(rawLabel).startsWith('TIRDUIN_RPS.')
-          ? game.i18n.localize(rawLabel)
-          : rawLabel;
-        const labelShort = label.length > 18 ? `${label.slice(0, 15)}…` : label;
-        return {
-          key,
-          label,
-          labelShort,
-          ability: abilityKey,
-          rank,
-          bonus,
-          total: abilityVal + rank + bonus + fatigueRollPenalty
-        };
-      })
-      .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }));
-
-    if (this.actor.type === 'character') {
-
-      const abilityKey = context.system?.details?.spellAttribute || 'ment';
-      const abilityValue = Number(context.system?.abilities?.[abilityKey]?.value) || 0;
-      const proficiency = Math.max(0, Math.min(5, Number(context.system?.spellcasting?.proficiency) || 0));
-      const attackExtra = Number(context.system?.spellcasting?.attackExtra) || 0;
-      const dcExtra = Number(context.system?.spellcasting?.dcExtra) || 0;
-      const level = Number(context.system?.attributes?.level?.value) || 1;
-
-      context.system.spellcasting = context.system.spellcasting || {};
-      context.system.spellcasting.attackBonusComputed = proficiency + abilityValue + attackExtra;
-      context.system.spellcasting.dcComputed = 10 + abilityValue + level + dcExtra;
-      context.system.spellcasting.attackAbility = abilityKey;
-      context.system.spellcasting.attackAbilityLabel = game.i18n.localize(CONFIG.TIRDUIN_RPS.abilities[abilityKey]) || abilityKey;
-    }
-
-    // Enriquecer la biografia permite reutilizar el editor rico en la sheet.
     context.enrichedBiography = await foundry.applications.ux.TextEditor.implementation.enrichHTML(
       this.actor.system.biography,
       {
@@ -230,6 +132,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
         relativeTo: this.actor,
       }
     );
+
 
     // Prepare active effects
     context.effects = prepareActiveEffectCategories(
@@ -475,6 +378,9 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     // Click en una armadura del NPC: tira VD y aplica desgaste de RA.
     html.on('click', '.npc-armor-item', this._onArmorItemClick.bind(this));
 
+    // Click en una armadura del NPC: reduce ra y quita roto.
+    html.on('contextmenu', '.npc-armor-item', this._onArmorItemRightClick.bind(this));
+
     // Click en un arma del NPC: dialogo de ataque (VIG/AGIL + competencia) y daño.
     html.on('click', '.npc-weapon-item span', this._onWeaponItemClick.bind(this));
 
@@ -500,14 +406,17 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
 
       const pip = ev.currentTarget;
       const value = Number(pip.dataset.value) || 0;
-      const currentValue = Number(pip.dataset.currentValue) || 0;
       const resourcePath = pip.dataset.resourcePath;
+      const currentValue = foundry.utils.getProperty(this.actor, resourcePath) || 0;
+
       const maxPath = pip.dataset.maxPath;
+
       const maxValue = Number(pip.dataset.maxValue) || 0;
 
       if (!resourcePath) return;
 
       const nextValue = currentValue === value ? Math.max(0, value - 1) : value;
+
       const updateData = {
         [resourcePath]: nextValue,
       };
@@ -751,7 +660,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     return rawKey;
   }
 
-  _renderSummaryTextWithRollButtons(text = '') {
+  _renderSummaryTextWithRollButtons(text = '', itemName = '', itemType = '') {
     const source = String(text || '');
     if (!source.trim()) return '';
 
@@ -779,7 +688,10 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
         const safeButtonLabel = this._escapeHtml(buttonLabel);
         const safeFormulaLabel = this._escapeHtml(formulaLabel);
         const safeDamageLabel = this._escapeHtml(damageLabel);
-        html += `<button type="button" class="tirduin-summary-roll" data-roll-formula="${safeFormula}" data-roll-label="${safeFormulaLabel}" data-roll-damage="${safeDamageLabel}" data-actor-id="${actorId}" title="${rollLabel}: ${safeButtonLabel}"><i class="fas fa-dice-d20"></i> ${safeButtonLabel}</button>`;
+        const safeItemName = this._escapeHtml(itemName);
+        const safeItemType = this._escapeHtml(itemType);
+
+        html += `<button type="button" class="tirduin-summary-roll" data-roll-formula="${safeFormula}" data-roll-label="${safeFormulaLabel}" data-roll-damage="${safeDamageLabel}" data-actor-id="${actorId}" data-item-name="${safeItemName}" data-item-type="${safeItemType}" title="${rollLabel}: ${safeButtonLabel}"><i class="fas fa-dice-d20"></i> ${safeButtonLabel}</button>`;
       } else {
         html += this._escapeHtml(match[0]);
       }
@@ -800,7 +712,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
         ? game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Features.Origins.Background')
         : game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Features.Origins.Class');
     const level = Number(item.system?.level) || 1;
-    const description = this._renderSummaryTextWithRollButtons(item.system?.description || '');
+    const description = this._renderSummaryTextWithRollButtons(item.system?.description || '', item.name, item.type);
 
     return `
       <div class="tirduin-item-summary-grid">
@@ -837,7 +749,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       ? `${verbal ? game.i18n.localize('TIRDUIN_RPS.Item.Spell.Abbr.Verbal') : ''}${verbal && somatic ? ' / ' : ''}${somatic ? game.i18n.localize('TIRDUIN_RPS.Item.Spell.Abbr.Somatic') : ''}`
       : game.i18n.localize('TIRDUIN_RPS.Item.Spell.None');
     const cost = String(item.system?.costValue || '0');
-    const description = this._renderSummaryTextWithRollButtons(item.system?.description || '');
+    const description = this._renderSummaryTextWithRollButtons(item.system?.description || '', item.name, item.type);
 
     return `
       <div class="tirduin-item-summary-grid">
@@ -1141,6 +1053,59 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
   }
 
   /**
+ * Handle click on armor rows: roll VD, decrement RA current and auto-desmark broken.
+ * @param {Event} event
+ * @private
+ */
+  async _onArmorItemRightClick(event) {
+
+    // 1. Evita que se abra el menú por defecto del navegador (el de "Guardar imagen como...", etc.)
+    event.preventDefault();
+
+    // 2. Evita que el evento suba a los padres o active otros disparadores de clic
+    event.stopPropagation();
+
+    const clickedControl = event.target.closest('.npc-object-controls, .armor-equip-toggle');
+    if (clickedControl) return;
+
+    const row = event.currentTarget;
+    const itemId = row?.dataset?.itemId;
+    const item = this.actor.items.get(itemId);
+    if (!item || item.type !== 'armor') return;
+
+    if (item.system?.category === 'extra') {
+      return null;
+    }
+
+    const vdFormula = String(item.system?.vd || '').trim();
+    if (!vdFormula) return;
+
+    const raMax = Math.max(0, Number(item.system?.ra) || 0);
+    const raCurrent = Math.min(
+      Math.max(0, Number(item.system?.raCurrent) || 0) - 1,
+      raMax
+    );
+
+    const updateData = {
+      'system.raCurrent': raCurrent,
+    };
+
+    if (raMax > 0 && raCurrent < raMax) {
+      updateData['system.broken'] = false;
+    }
+
+    await item.update(updateData);
+
+    if (item.system?.equipped) {
+      const armorClass = this._calculateArmorClassFromEquippedArmors();
+      await this.actor.update({ 'system.attributes.armorClass.value': armorClass });
+    }
+
+  }
+
+
+
+  /**
    * Handle click on weapon rows: choose attribute + edge mode, then roll attack and damage.
    * @param {Event} event
    * @private
@@ -1182,7 +1147,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
   async _onActionItemClick(event) {
     const clickedControl = event.target.closest('.npc-object-controls');
     if (clickedControl) return;
-    
+
     const row = event.currentTarget;
     const actionKind = row?.dataset?.actionKind;
     const itemId = row?.dataset?.itemId;
