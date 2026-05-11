@@ -13,19 +13,29 @@ export default class TirduinBaseActorSheet extends ActorSheet {
 
         // Toggle de colapsables (Dotes, Conjuros y Especiales)
         html.find('.character-feature-title-row, .special-item-main, .character-spell-title-row').click(ev => {
-            const li = $(ev.currentTarget).parents(".item, .special-item, .character-feature-item, .character-spell-item");
-            const item = this.actor.items.get(li.data("itemId"));
-            item.update({ "flags.tirduin.collapsed": !item.flags.tirduin?.collapsed });
+            const item = this._getItemFromEvent(ev);
+            if (item) item.update({ "flags.tirduin.collapsed": !item.flags.tirduin?.collapsed });
         });
+    }
+
+    /**
+     * Método auxiliar para obtener un Item desde un evento del DOM.
+     * Centraliza los selectores de los elementos de lista.
+     * @param {Event} event 
+     * @returns {Item|null}
+     * @private
+     */
+    _getItemFromEvent(event) {
+        const li = $(event.currentTarget).parents(".item, .npc-object-item, .character-feature-item, .character-spell-item, .special-item");
+        return this.actor.items.get(li.data("itemId")) || null;
     }
 
     _onItemCreate(event) {
         event.preventDefault();
         const header = event.currentTarget;
-        const type = header.dataset.type;
         const itemData = {
-            name: `Nuevo ${type}`,
-            type: type,
+            name: `Nuevo ${header.dataset.type}`,
+            type: header.dataset.type,
             system: header.dataset.category ? { category: header.dataset.category } : {}
         };
         return this.actor.createEmbeddedDocuments("Item", [itemData]);
@@ -33,15 +43,13 @@ export default class TirduinBaseActorSheet extends ActorSheet {
 
     _onItemEdit(event) {
         event.preventDefault();
-        const li = $(event.currentTarget).parents(".item, .npc-object-item, .character-feature-item, .character-spell-item, .special-item");
-        const item = this.actor.items.get(li.data("itemId"));
-        return item.sheet.render(true);
+        const item = this._getItemFromEvent(event);
+        return item?.sheet.render(true);
     }
 
     _onItemDelete(event) {
         event.preventDefault();
-        const li = $(event.currentTarget).parents(".item, .npc-object-item, .character-feature-item, .character-spell-item, .special-item");
-        const item = this.actor.items.get(li.data("itemId"));
-        return item.delete();
+        const item = this._getItemFromEvent(event);
+        return item?.delete();
     }
 }

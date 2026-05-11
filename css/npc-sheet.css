@@ -23,21 +23,6 @@
   flex: 0 0 100px;
 }
 
-.tirduin .profile-img {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  border: 2px solid #444;
-  border-radius: 6px;
-  background: #111;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.tirduin .profile-img:hover {
-  border-color: #888;
-  box-shadow: 0 0 6px #000;
-}
-
 .tirduin .npc-header-stats {
   flex: 1;
   display: flex;
@@ -126,39 +111,6 @@
   display: flex;
   gap: 10px;
   margin-bottom: 10px;
-}
-
-.tirduin .npc-stat {
-  flex: 1;
-  background: #1e1e1e;
-  border: 1px solid #444;
-  border-radius: 6px;
-  padding: 6px;
-  text-align: center;
-}
-.tirduin .npc-stat label {
-  display: block;
-  font-size: 12px;
-  color: #aaa;
-  margin-bottom: 2px;
-}
-.tirduin .npc-stat input {
-  width: 100%;
-  background: #111;
-  border: 1px solid #555;
-  color: #fff;
-  text-align: center;
-  border-radius: 4px;
-}
-
-.tirduin .npc-stat select {
-  width: 100%;
-  background: #111;
-  border: 1px solid #555;
-  color: #fff;
-  text-align: center;
-  border-radius: 4px;
-  height: 30px;
 }
 
 .tirduin .hp-row {

@@ -125,27 +125,5 @@
         placeholder="Describe el objeto">{{system.description}}</textarea>
     </div>
 
-    {{!-- Bloque completo de formula: componentes + resultado final. --}}
-    <div class="item-panel item-formula-panel">
-      <label>Formula</label>
-      <div class="item-grid item-grid-roll">
-        <div>
-          <label for="system.roll.diceNum">Dados</label>
-          <input type="number" name="system.roll.diceNum"
-            value="{{system.roll.diceNum}}" min="1" data-dtype="Number" />
-        </div>
-        <div>
-          <label for="system.roll.diceSize">Tamano dado</label>
-          <input type="text" name="system.roll.diceSize"
-            value="{{system.roll.diceSize}}" data-dtype="String" />
-        </div>
-        <div>
-          <label for="system.roll.diceBonus">Modificador</label>
-          <input type="text" name="system.roll.diceBonus"
-            value="{{system.roll.diceBonus}}" data-dtype="String" />
-        </div>
-      </div>
-      <p class="item-formula-preview">{{system.formula}}</p>
-    </div>
   </section>
 </form>
