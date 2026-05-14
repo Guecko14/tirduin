@@ -42,7 +42,7 @@ export default class TirduinRPSFeature extends TirduinRPSItemBase {
 			choices: ['fortaleza', 'reflejos', 'voluntad'],
 		});
 
-		schema.dc = new fields.NumberField({
+		schema.cd = new fields.NumberField({
 			required: false,
 			nullable: false,
 			integer: true,

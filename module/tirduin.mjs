@@ -843,7 +843,8 @@ Hooks.once('ready', function () {
         type: 'inline', // Un tipo para posibles estilos específicos de tiradas inline
         showBonus: true, // Mostrar bonificadores fijos (modificadores de atributo, etc)
       }),
-      rolls: [roll] // Pasamos el objeto roll dentro del array para que Foundry lo registre
+      rolls: [roll],
+      img: actor.img // Pasamos el objeto roll dentro del array para que Foundry lo registre
     }, messageMode);
 
     // Usamos ChatMessage.create directamente con los datos procesados por applyChatRollMode
@@ -857,17 +858,7 @@ Hooks.once('ready', function () {
     });
   });
 
-  // --- HOOK GLOBAL PARA LA FOTO ---
-  // Esto captura CUALQUIER mensaje (incluyendo iniciativa o tiradas de otros módulos)
-  // y le pone la foto si el speaker es un actor de Tirduin.
-  Hooks.on('preCreateChatMessage', (message, data, options, userId) => {
-    if (data.img) return;
-    const speaker = data.speaker;
-    if (speaker?.actor) {
-      const actor = game.actors.get(speaker.actor);
-      if (actor) message.updateSource({ img: actor.img });
-    }
-  });
+  
 });
 
 /* -------------------------------------------- */

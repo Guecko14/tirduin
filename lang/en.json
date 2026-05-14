@@ -206,7 +206,7 @@
         "AttackBonus": "Bonif. Atac. Conjuros",
         "AttackExtra": "Extra Bonif. Atac.",
         "SpellDC": "CD de Conjuros",
-        "DCExtra": "Extra CD"
+        "CDExtra": "Extra CD"
       },
       "Features": {
         "Name": "Nombre",
