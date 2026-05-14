@@ -389,8 +389,14 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 4px;
   color: #fff;
-  padding: 4px 6px;
   font-size: 0.82rem;
+}
+
+/* Ajuste para que los inputs de daño y peso coincidan en altura con los selects */
+.weapon-field input {
+  height: 30px;
+  padding: 0 8px;
+  box-sizing: border-box;
 }
 
 .weapon-field select option:checked {
@@ -561,7 +567,6 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 4px;
   color: #fff;
-  padding: 4px 6px;
   font-size: 0.82rem;
 }
 

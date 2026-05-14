@@ -578,10 +578,10 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     const spellcastingLabels = {
       spellAbilityValue: spellAbilityLabel,
       attackBonus: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Spells.AttackBonus'),
-      dc: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Spells.SpellDC'),
+      cd: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Spells.SpellCD'),
       proficiency: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Spells.Proficiency'),
       attackExtra: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Spells.AttackExtra'),
-      dcExtra: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Spells.DCExtra'),
+      cdExtra: game.i18n.localize('TIRDUIN_RPS.CharacterSheet.Spells.CDExtra'),
     };
 
     return source
@@ -1180,7 +1180,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     }
 
     const fatigueDcPenalty = Number(this.actor.system?.attributes?.fatigue?.dcPenalty) || 0;
-    const dc = Math.max(1, (Number(magic.system?.dc) || 1) + fatigueDcPenalty);
+    const cd = Math.max(1, (Number(magic.system?.cd) || 1) + fatigueDcPenalty);
     const saveType = String(magic.system?.saveType || 'fortaleza');
     const onSaveSuccess = String(magic.system?.onSaveSuccess || 'half');
     const saveLabelMap = {
@@ -1200,7 +1200,7 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       const damageCard = buildRollFlavorHtml({
         title: buildTypedRollTitle('spell', `${magic.name} Daño`),
         roll: damageRoll,
-        outcomeText: `CD ${dc} (${saveLabel})`,
+        outcomeText: `CD ${cd} (${saveLabel})`,
         showDiceBreakdown: true,
         showBonus: true,
       });
@@ -1217,10 +1217,10 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
     const saveRoll = new Roll(`1d20 + (${targetSaveBonus})`, targetToken.actor.getRollData?.() || {});
     await saveRoll.evaluate();
 
-    const success = (Number(saveRoll.total) || 0) >= dc;
+    const success = (Number(saveRoll.total) || 0) >= cd;
     const resultText = success
-      ? `${targetToken.name} supera ${saveLabel} (CD ${dc}).`
-      : `${targetToken.name} falla ${saveLabel} (CD ${dc}).`;
+      ? `${targetToken.name} supera ${saveLabel} (CD ${cd}).`
+      : `${targetToken.name} falla ${saveLabel} (CD ${cd}).`;
     const rolledDamageTotal = Number(damageRoll.total) || 0;
     const appliedDamageTotal = !success
       ? rolledDamageTotal

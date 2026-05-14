@@ -55,7 +55,6 @@ export function getRollFormulaPreview(
 ) {
   const adjustedFormula = applyRollEdgeToFormula(formula, edgeMode);
   if (!adjustedFormula) return '';
-
   try {
     // Resolvemos la fórmula y eliminamos las etiquetas de sabor [texto]
     const r = new Roll(adjustedFormula, rollData);

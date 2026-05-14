@@ -53,10 +53,11 @@ export default class TirduinRPSActorBase extends TirduinRPSDataModel {
       secondaryDomain: new fields.StringField({ required: false, nullable: false, blank: true, initial: '', choices: ['', ...spellDomains] }),
       domainBenefit: new fields.StringField({ required: true, nullable: false, blank: true, initial: '' }),
       proficiency: new fields.NumberField({ ...requiredInteger, initial: 0, min: 0, max: 5 }),
-      attackExtra: new fields.NumberField({ ...requiredInteger, initial: 0 }),
-      dcExtra: new fields.NumberField({ ...requiredInteger, initial: 0 }),
       spellAbilityValue: new fields.NumberField({ ...requiredInteger, initial: 0 }),
-      attackBonus: new fields.NumberField({ ...requiredInteger, initial: 0 })
+      attackBonus: new fields.NumberField({ ...requiredInteger, initial: 0 }),
+      attackExtra: new fields.NumberField({ ...requiredInteger, initial: 0 }),
+      cdComputed: new fields.NumberField({ ...requiredInteger, initial: 0 }),
+      cdExtra: new fields.NumberField({ ...requiredInteger, initial: 0 }),
     });
 
     schema.money = new fields.SchemaField({
@@ -154,8 +155,8 @@ export default class TirduinRPSActorBase extends TirduinRPSDataModel {
     this.spellcasting.spellAbilityValue = spellAbilityValue;
     this.spellcasting.spellAbilityLabel = game.i18n.localize(CONFIG.TIRDUIN_RPS.abilities[spellAttrName]) || spellAttrName;
     this.spellcasting.attackAbility = spellAttrName;
-    this.spellcasting.attackBonusComputed = (Number(this.spellcasting.proficiency) || 0) + spellAbilityValue + (Number(this.spellcasting.attackExtra) || 0);
-    this.spellcasting.dcComputed = 10 + spellAbilityValue + (Number(this.attributes.level.value) || 1) + (Number(this.spellcasting.dcExtra) || 0);
+    this.spellcasting.attackBonus = (Number(this.spellcasting.proficiency) || 0) + spellAbilityValue + (Number(this.spellcasting.attackExtra) || 0);
+    this.spellcasting.cdComputed = 10 + spellAbilityValue + (Number(this.attributes.level.value) || 1) + (Number(this.spellcasting.cdExtra) || 0);
 
     // Lógica de Velocidad unificada:
     // Para personajes se deriva de la agilidad, para otros tipos se usa el valor base del _source.
