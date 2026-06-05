@@ -22,24 +22,20 @@
                 placeholder="Nombre" />
             </div>
             <div class="npc-stat npc-spell-attr">
-              <label>{{localize
+              <label for="system.details.spellAttribute">{{localize
                 "TIRDUIN_RPS.CharacterSheet.SpellAttribute"}}</label>
-              <select name="system.attributes.spellAttribute">
-                <option value>{{localize
-                  "TIRDUIN_RPS.Item.Spell.None"}}</option>
-                <option value="Ment" {{#if (eq system.attributes.spellAttribute
-                  'Ment')}}selected{{/if}}>
-                  {{localize
-                  "TIRDUIN_RPS.CharacterSheet.SpellAttributeOptions.Ment"}}</option>
-                <option value="Inst" {{#if (eq system.attributes.spellAttribute
-                  'Inst')}}selected{{/if}}>
-                  {{localize
-                  "TIRDUIN_RPS.CharacterSheet.SpellAttributeOptions.Inst"}}</option>
-                <option value="Pre" {{#if (eq system.attributes.spellAttribute
-                  'Pre')}}selected{{/if}}>
-                  {{localize
-                  "TIRDUIN_RPS.CharacterSheet.SpellAttributeOptions.Pre"}}</option>
-              </select>
+              <select name="system.details.spellAttribute"
+              class="sheet-skill-select">
+              <option value="ment" {{#if (eq system.details.spellAttribute
+                'ment')}}selected{{/if}}>{{localize
+                "TIRDUIN_RPS.CharacterSheet.SpellAttributeOptions.Ment"}}</option>
+              <option value="inst" {{#if (eq system.details.spellAttribute
+                'inst')}}selected{{/if}}>{{localize
+                "TIRDUIN_RPS.CharacterSheet.SpellAttributeOptions.Inst"}}</option>
+              <option value="pre" {{#if (eq system.details.spellAttribute
+                'pre')}}selected{{/if}}>{{localize
+                "TIRDUIN_RPS.CharacterSheet.SpellAttributeOptions.Pre"}}</option>
+            </select>
             </div>
             <div class="npc-stat npc-size-field">
               <label for="system.details.size">{{localize
