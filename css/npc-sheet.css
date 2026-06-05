@@ -62,7 +62,7 @@
 
 .tirduin .npc-identity-fields {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 150px;
+  grid-template-columns: minmax(0, 1fr) 140px 150px;
   align-items: stretch;
   gap: 8px;
 }

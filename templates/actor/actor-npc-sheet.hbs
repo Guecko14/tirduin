@@ -21,6 +21,26 @@
               <input name="name" type="text" value="{{actor.name}}"
                 placeholder="Nombre" />
             </div>
+            <div class="npc-stat npc-spell-attr">
+              <label>{{localize
+                "TIRDUIN_RPS.CharacterSheet.SpellAttribute"}}</label>
+              <select name="system.attributes.spellAttribute">
+                <option value>{{localize
+                  "TIRDUIN_RPS.Item.Spell.None"}}</option>
+                <option value="Ment" {{#if (eq system.attributes.spellAttribute
+                  'Ment')}}selected{{/if}}>
+                  {{localize
+                  "TIRDUIN_RPS.CharacterSheet.SpellAttributeOptions.Ment"}}</option>
+                <option value="Inst" {{#if (eq system.attributes.spellAttribute
+                  'Inst')}}selected{{/if}}>
+                  {{localize
+                  "TIRDUIN_RPS.CharacterSheet.SpellAttributeOptions.Inst"}}</option>
+                <option value="Pre" {{#if (eq system.attributes.spellAttribute
+                  'Pre')}}selected{{/if}}>
+                  {{localize
+                  "TIRDUIN_RPS.CharacterSheet.SpellAttributeOptions.Pre"}}</option>
+              </select>
+            </div>
             <div class="npc-stat npc-size-field">
               <label for="system.details.size">{{localize
                 "TIRDUIN_RPS.CharacterSheet.Size"}}</label>
