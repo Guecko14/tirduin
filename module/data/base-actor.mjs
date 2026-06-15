@@ -45,6 +45,18 @@ export default class TirduinRPSActorBase extends TirduinRPSDataModel {
         initial: 'ment',
         choices: ['ment', 'inst', 'pre']
       }),
+      race: new fields.StringField({
+        required: false,
+        nullable: false,
+        blank: true,
+        initial: ''
+      }),
+      background: new fields.StringField({
+        required: false,
+        nullable: false,
+        blank: true,
+        initial: ''
+      }),
     });
 
     const spellDomains = Object.keys(CONFIG.TIRDUIN_RPS.spellDomains || {});

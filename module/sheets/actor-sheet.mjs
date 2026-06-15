@@ -266,7 +266,11 @@ export class TirduinRPSActorSheet extends BaseActorSheet {
       else if (i.type === 'armor') {
         npcArmors.push(i);
         const quantity = Number(i.system?.quantity) || 1;
-        currentSlots += (Number(i.system?.weight) || 0) * quantity;
+        const isEquipped = Boolean(i.system?.equipped);
+        const isExemptArmor = isEquipped && !['escudo', 'extra'].includes(i.system?.category);
+        if (!isExemptArmor) {
+          currentSlots += (Number(i.system?.weight) || 0) * quantity;
+        }
       }
       // Conjuros agrupados por nivel para el partial de spells.
       else if (i.type === 'spell') {

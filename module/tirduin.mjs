@@ -858,7 +858,7 @@ Hooks.once('ready', function () {
     });
   });
 
-  
+
 });
 
 /* -------------------------------------------- */
@@ -987,15 +987,18 @@ export async function rollWeaponAttack(item) {
 
     // 3. Agrupar daños de los extras por tipo
     for (const extra of extrasList) {
-      const type = extra.damagetype || weaponData.damageType;
-      const formula = extra.damage;
+      const formula = String(extra.damage || '').trim();
+      if (!formula) continue;
 
+      const type = extra.damagetype || weaponData.damageType;
       if (!damageMap.has(type)) damageMap.set(type, []);
       damageMap.get(type).push(formula);
     }
 
     // 4. Evaluar las tiradas agrupadas
     for (const [type, components] of damageMap) {
+      if (!components.length) continue;
+
       let finalFormula;
 
       if (isCritical) {
@@ -1011,6 +1014,8 @@ export async function rollWeaponAttack(item) {
       } else {
         finalFormula = components.join(' + ');
       }
+
+      if (!String(finalFormula).trim()) continue;
 
       const roll = await new Roll(finalFormula, rollData).evaluate();
       damageRolls.push({
